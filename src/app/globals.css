@@ -1,122 +1,89 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* 
+  These @-rules are part of Tailwind CSS v4's modern features.
+  If your VS Code shows warnings here, ensure the official
+  "Tailwind CSS IntelliSense" extension by Tailwind Labs is installed and up-to-date.
+*/
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-}
-
-:root {
+@theme {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  
+  /* Light Mode Palette is defined as the root/default theme */
+  --background: oklch(0.982 0.012 229.61); /* #f2faff */
+  --foreground: oklch(0.531 0.093 205.28); /* #0c818f */
+  --muted: oklch(0.951 0.021 229.09);
+  --muted-foreground: oklch(0.638 0.081 205.86);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.531 0.093 205.28);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.531 0.093 205.28);
+  --border: oklch(0.916 0.033 216.94);
+  --input: oklch(0.916 0.033 216.94);
+  --primary: oklch(0.649 0.111 198.13); /* #0ba7aa */
+  --primary-foreground: oklch(0.982 0.012 229.61);
+  --secondary: oklch(0.77 0.094 199.98); /* #48c6c8 */
+  --secondary-foreground: oklch(0.531 0.093 205.28);
+  --accent: oklch(0.88 0.147 85.24); /* #ffd479 */
+  --accent-foreground: oklch(0.385 0.133 80.38);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --ring: oklch(0.649 0.111 198.13);
 }
 
+/* 
+  Dark Mode Palette is defined in a separate .dark block, OUTSIDE of @theme.
+  This is the correct syntax for Tailwind CSS v4.
+*/
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.242 0.041 199.3); /* #06292b */
+  --foreground: oklch(0.95 0.033 199.89); /* #c6f3f4 */
+  --muted: oklch(0.285 0.049 199.64);
+  --muted-foreground: oklch(0.758 0.044 199.9);
+  --popover: oklch(0.187 0.034 199.1);
+  --popover-foreground: oklch(0.95 0.033 199.89);
+  --card: oklch(0.285 0.049 199.64);
+  --card-foreground: oklch(0.95 0.033 199.89);
+  --border: oklch(0.531 0.093 205.28);
+  --input: oklch(0.531 0.093 205.28);
+  --primary: oklch(0.649 0.111 198.13); /* #0ba7aa */
+  --primary-foreground: oklch(0.242 0.041 199.3);
+  --secondary: oklch(0.531 0.093 205.28); /* #0c818f */
+  --secondary-foreground: oklch(0.95 0.033 199.89);
+  --accent: oklch(0.801 0.122 195.14); /* #2ecfc7 */
+  --accent-foreground: oklch(0.198 0.046 195.03);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --ring: oklch(0.649 0.111 198.13);
+}
+
+@utility background {
+  background-color: var(--background);
+}
+
+@utility foreground {
+  color: var(--foreground);
+}
+
+@utility border {
+  border-color: var(--border);
+}
+
+@utility ring {
+  outline-color: var(--ring);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply background foreground;
+    font-family: 'Cairo', sans-serif;
+  }
+  @keyframes scroll {
+    to {
+      transform: translate(calc(-50% - 0.5rem));
+    }
   }
 }
