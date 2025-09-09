@@ -74,9 +74,6 @@
 }
 
 @layer base {
-  * {
-    @apply border;
-  }
   body {
     @apply background foreground;
     font-family: 'Cairo', sans-serif;

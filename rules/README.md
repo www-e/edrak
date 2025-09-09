@@ -75,16 +75,6 @@ Comprehensive guidelines for working effectively with AI development tools and m
 - Quality control and testing requirements
 - Error handling and problem resolution
 
-### 🧪 [Testing & Quality Assurance](./testing-qa-rules.md)
-Complete testing strategies, from unit tests to end-to-end testing, including modern AI-enhanced testing techniques.
-
-**Key Areas:**
-- Testing pyramid and TDD approach
-- Modern testing techniques and AI enhancement
-- Component and UI testing strategies
-- Performance and security testing
-- Quality metrics and continuous improvement
-
 ## Implementation Priority
 
 ### Phase 1: Foundation
@@ -95,7 +85,6 @@ Complete testing strategies, from unit tests to end-to-end testing, including mo
 ### Phase 2: Core Development
 1. Implement UI components following [UI Development Rules](./ui-development-rules.md)
 2. Optimize for performance using [Next.js Optimization Rules](./nextjs-optimization.md)
-3. Establish testing framework using [Testing & QA Rules](./testing-qa-rules.md)
 
 ### Phase 3: Quality & Optimization
 1. Conduct comprehensive testing and quality assurance

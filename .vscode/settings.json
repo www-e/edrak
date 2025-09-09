@@ -1,0 +1,47 @@
+{
+  // TypeScript settings
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.includeAutomaticOptionalChainCompletions": true,
+  "typescript.suggest.objectLiteralMethodSnippets.enabled": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.useAliasesForRenames": true,
+  // JavaScript settings
+  "javascript.suggest.autoImports": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // Problem highlighting
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.git": true
+  },
+  // Enable all linters
+  "editor.wordBasedSuggestions": "off",
+  "editor.suggest.showWords": false,
+  // File watching
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.next/**": true
+  },
+  // Problem matchers
+  "problems.showCurrentInStatus": true,
+  // TypeScript diagnostics
+  "typescript.reportStyleChecksAsWarnings": false,
+  // Disable built-in CSS validation since we're using Tailwind
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  // Auto-save
+  "files.autoSave": "onFocusChange",
+  // Formatting
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true
+}
