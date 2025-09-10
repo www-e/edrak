@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 
 const categories = [
-  "التكنولوجيا",
-  "تطوير الذات",
-  "الأعمال والريادة",
-  "اللغات",
-  "الفن، التصميم والإعلام",
-  "العلوم الإنسانية",
-  "البيئة الصفية",
-  "التعليم وتدريب المعلمين",
+  "Technology",
+  "Self Development",
+  "Business & Entrepreneurship",
+  "Languages",
+  "Art, Design & Media",
+  "Humanities",
+  "Classroom Environment",
+  "Teacher Education & Training",
 ];
 
 export const CategoriesSection = () => {
@@ -26,22 +26,22 @@ export const CategoriesSection = () => {
       </div>
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h3 className="text-xl font-bold text-primary">
-          ابدأ التعلّم مجاناً الآن!
+        <h3 className="text-xl font-bold text-primary font-heading">
+          Start Learning for Free Now!
         </h3>
-        <h2 className="mt-2 text-3xl md:text-4xl font-bold text-foreground max-w-3xl mx-auto">
-          اكتشف مجموعة واسعة من أكثر من 300 دورة، مصممة خصيصًا لتلبية مهاراتكم واهتماماتكم!
+        <h2 className="mt-2 text-3xl md:text-4xl font-bold text-foreground max-w-3xl mx-auto font-heading">
+          Discover a wide collection of over 300 courses, specially designed to meet your skills and interests!
         </h2>
         
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {/* Main Category Button */}
-          <Button size="lg" className="font-semibold rounded-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white">
-            الاستعداد الوظيفي
+          <Button size="lg" className="font-semibold rounded-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-heading">
+            Career Preparation
           </Button>
 
           {/* Other Category Buttons */}
           {categories.map((category) => (
-            <Button key={category} variant="outline" size="lg" className="font-semibold rounded-full px-6 py-3">
+            <Button key={category} variant="outline" size="lg" className="font-semibold rounded-full px-6 py-3 font-heading">
               {category}
             </Button>
           ))}

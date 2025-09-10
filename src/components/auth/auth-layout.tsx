@@ -19,22 +19,22 @@ export function AuthLayout({
   imageAlt = "Authentication",
   title,
   subtitle,
-  imagePosition = "right",
+  imagePosition = "left",
 }: AuthLayoutProps) {
   return (
     <div className="min-h-screen flex">
       {/* Form Section */}
       <div className={cn(
         "flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24",
-        imagePosition === "right" ? "lg:order-first" : ""
+        imagePosition === "right" ? "lg:order-last" : ""
       )}>
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
+            <h2 className="mt-6 text-3xl font-bold tracking-tight text-foreground font-heading">
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-2 text-sm text-muted-foreground font-body">
                 {subtitle}
               </p>
             )}

@@ -13,7 +13,6 @@ This is a Next.js 15.5.2 application that implements a landing page for an educa
 - **Styling**: Tailwind CSS v4 with custom theme configuration
 - **UI Components**: shadcn/ui components with Radix UI primitives
 - **State Management**: React Context API and useState hooks
-- **Fonts**: Cairo font from Google Fonts for Arabic/Latin text
 - **Icons**: Lucide React icons
 - **Build Tools**: ESLint, TypeScript compiler
 
@@ -109,7 +108,6 @@ bun lint
    - Uses Tailwind CSS v4 with custom color palette
    - Custom utilities defined in globals.css (@utility directives)
    - RTL (right-to-left) layout for Arabic content
-   - Cairo font for both Arabic and Latin characters
 
 3. **State Management**:
 

@@ -5,25 +5,25 @@ import { CourseCard } from "./CourseCard";
 const courses = [
   {
     imageUrl: "/images/course1.png",
-    level: "متوسط",
-    type: "تخصص",
-    title: "قواعد البيانات مايكروسوفت SQL Server",
+    level: "Intermediate",
+    type: "Specialization",
+    title: "Microsoft SQL Server Database",
     studentCount: "10,700",
     link: "#",
   },
   {
     imageUrl: "/images/course2.png",
-    level: "متوسط",
-    type: "تخصص",
-    title: "أدوات القيادة الأساسية",
+    level: "Intermediate",
+    type: "Specialization",
+    title: "Basic Leadership Tools",
     studentCount: "22,200",
     link: "#",
   },
   {
     imageUrl: "/images/course3.png",
-    level: "متوسط",
-    type: "تخصص",
-    title: "أساسيات القيادة المهنية",
+    level: "Intermediate",
+    type: "Specialization",
+    title: "Professional Leadership Fundamentals",
     studentCount: "11,900",
     link: "#",
   },
@@ -38,19 +38,19 @@ export const FeaturedCoursesSection = () => {
       */}
       <div 
         aria-hidden="true" 
-        className="absolute top-0 right-0 -z-10 h-full w-1/4" 
+        className="absolute top-0 left-0 -z-10 h-full w-1/4" 
         style={{
           backgroundImage: "url('/images/green-grid.svg')",
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'top right',
+          backgroundPosition: 'top left',
         }}
       />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h3 className="text-xl font-bold text-primary">التخصصات</h3>
-          <h2 className="mt-2 text-3xl md:text-4xl font-bold text-foreground">
-            طوّر مهاراتك عبر مسارات وبرامج تعليمية متخصصة
+          <h3 className="text-xl font-bold text-primary font-heading">Specializations</h3>
+          <h2 className="mt-2 text-3xl md:text-4xl font-bold text-foreground font-heading">
+            Develop your skills through specialized educational paths and programs
           </h2>
         </div>
         
@@ -61,8 +61,8 @@ export const FeaturedCoursesSection = () => {
         </div>
         
         <div className="text-center mt-16">
-          <Button size="lg" className="font-bold px-8 py-6 rounded-lg">
-            تصفح جميع التخصصات
+          <Button size="lg" className="font-bold px-8 py-6 rounded-lg font-heading">
+            Browse All Specializations
           </Button>
         </div>
       </div>

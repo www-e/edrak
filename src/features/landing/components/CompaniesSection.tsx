@@ -30,24 +30,24 @@ export const CompaniesSection = () => {
   return (
     <section className="py-20 sm:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground max-w-2xl mx-auto">
-          نتعاون مع أبرز الشركات ونثق بنا الآلاف من المتعلّمين!
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground max-w-2xl mx-auto font-heading">
+          We collaborate with leading companies and thousands of learners trust us!
         </h2>
-        <a href="#" className="inline-block mt-4 text-primary font-semibold hover:underline">
-          شركاؤنا في النجاح &larr;
+        <a href="#" className="inline-block mt-4 text-primary font-semibold hover:underline font-heading">
+          Our Success Partners &rarr;
         </a>
       </div>
       
       {/* 
         Here we use the Aceternity UI component.
         - `items`: We pass our formatted logo images.
-        - `direction`: "right" to match the RTL flow.
+        - `direction`: "left" for LTR flow.
         - `speed`: "slow" for a professional, easy-to-read pace.
       */}
       <div className="mt-12">
         <InfiniteMovingCards
           items={logoItems}
-          direction="right"
+          direction="left"
           speed="slow"
         />
       </div>

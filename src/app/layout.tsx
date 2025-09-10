@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google"; // Swapped fonts to Cairo
-import { ThemeProvider } from "@/components/theme-provider"; // Import our new provider
+import { Space_Grotesk, IBM_Plex_Sans } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
 import { SnackbarProvider } from "@/components/shared/snackbar-context";
 import "./globals.css";
 
-// Configure the Cairo font for our application
-const cairoFont = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: "--font-cairo", // We can use this in CSS if needed
+// Configure Space Grotesk for headings and IBM Plex Sans for body text
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  // Updated metadata to be more relevant
   title: "Edrak Inspired Landing Page",
   description: "Aspire. Learn. Advance.",
 };
@@ -22,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className={cairoFont.className}>
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <body className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} font-body`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

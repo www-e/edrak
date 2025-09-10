@@ -23,47 +23,45 @@ export function CourseCard({ imageUrl, level, type, title, studentCount, link }:
       <CardBody className="relative group/card w-full h-auto rounded-xl">
         {/* We use shadcn's Card component for consistent theme styling */}
         <Card className="w-full h-full rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-300">
-          <CardItem translateZ="50" className="w-full">
+          <CardItem translateZ='50' className='w-full'>
             <Image
               src={imageUrl}
-              height="1000"
-              width="1000"
-              className="h-48 w-full object-cover"
+              height='1000'
+              width='1000'
+              className='h-48 w-full object-cover'
               alt={`Promotional image for the course: ${title}`}
             />
           </CardItem>
-          <div className="p-6 text-right space-y-3">
-            <CardItem as="div" translateZ="40" className="flex justify-end gap-2 text-xs">
-              <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 font-semibold px-2 py-1 rounded">
+          <div className='p-6 space-y-3'>
+            <CardItem translateZ='40' className='flex gap-2 text-xs'>
+              <span className='bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 font-semibold px-2 py-1 rounded font-heading'>
                 {level}
               </span>
-              <span className="bg-primary/10 text-primary dark:bg-primary/20 font-semibold px-2 py-1 rounded">
+              <span className='bg-primary/10 text-primary dark:bg-primary/20 font-semibold px-2 py-1 rounded font-heading'>
                 {type}
               </span>
             </CardItem>
 
             <CardItem
-              as="h4"
-              translateZ="60"
-              className="text-lg font-bold text-foreground tracking-wide"
+              translateZ='60'
+              className='text-lg font-bold text-foreground tracking-wide font-heading'
             >
               {title}
             </CardItem>
 
             <CardItem
-              as="p"
-              translateZ="20"
-              className="text-sm text-muted-foreground"
+              translateZ='20'
+              className='text-sm text-muted-foreground font-body'
             >
-              {studentCount}+ متعلم
+              {studentCount}+ learners
             </CardItem>
 
-            <div className="border-t border-border my-4"></div>
+            <div className='border-t border-border my-4'></div>
             
-            <CardItem translateZ="30" className="w-full pt-2">
-              <Button asChild variant="outline" className="w-full font-semibold">
+            <CardItem translateZ='30' className='w-full pt-2'>
+              <Button asChild variant='outline' className='w-full font-semibold font-heading'>
                 <a href={link}>
-                  عرض التخصص &larr;
+                  View Specialization &rarr;
                 </a>
               </Button>
             </CardItem>
