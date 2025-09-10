@@ -17,7 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { AuthService, SigninCredentials } from "@/services/auth-service";
+import { AuthService } from "@/services/auth-service";
+import { SigninCredentials } from "@/types/auth";
 
 const formSchema = z.object({
   username: z.string().min(1, "Username is required"),

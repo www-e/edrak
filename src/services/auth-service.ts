@@ -1,22 +1,5 @@
 import { signIn, signOut } from "next-auth/react";
-import { SafeUser } from "@/types/auth";
-
-export interface SigninCredentials {
-  username: string;
-  password: string;
-  role: "STUDENT" | "PROFESSOR" | "ADMIN";
-}
-
-export interface SignupData {
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  secondPhoneNumber?: string;
-  categoryPreference?: string;
-  referralSource?: string;
-}
+import { SafeUser, SigninCredentials, SignupData } from "@/types/auth";
 
 /**
  * Service for handling authentication operations

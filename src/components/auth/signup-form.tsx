@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { AuthService, SignupData } from "@/services/auth-service";
+import { AuthService } from "@/services/auth-service";
+import { SignupData } from "@/types/auth";
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(1, "First name is required"),

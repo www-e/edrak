@@ -20,3 +20,22 @@ export interface CurrentUser {
   image?: string | null;
   role?: Role;
 }
+
+// Interface for signin credentials
+export interface SigninCredentials {
+  username: string;
+  password: string;
+  role: "STUDENT" | "PROFESSOR" | "ADMIN";
+}
+
+// Interface for signup data
+export interface SignupData {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  secondPhoneNumber?: string;
+  categoryPreference?: string;
+  referralSource?: string;
+}

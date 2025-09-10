@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { SignupData } from "@/services/auth-service";
+import { SignupData } from "@/types/auth";
 
 const prisma = new PrismaClient();
 
