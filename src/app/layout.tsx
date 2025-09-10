@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cairo } from "next/font/google"; // Swapped fonts to Cairo
 import { ThemeProvider } from "@/components/theme-provider"; // Import our new provider
+import { SnackbarProvider } from "@/components/shared/snackbar-context";
 import "./globals.css";
 
 // Configure the Cairo font for our application
@@ -29,7 +30,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SnackbarProvider>
+            {children}
+          </SnackbarProvider>
         </ThemeProvider>
       </body>
     </html>
