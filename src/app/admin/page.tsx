@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Users, 
@@ -5,13 +7,27 @@ import {
   CreditCard, 
   TrendingUp 
 } from "lucide-react";
+import { api } from "@/trpc/react";
 
 export default function AdminDashboardPage() {
+  const { data: metrics, isLoading: isLoadingMetrics } = api.admin.commerce.getDashboardMetrics.useQuery();
+  const { data: usersData, isLoading: isLoadingUsers } = api.admin.user.getAll.useQuery();
+  
+  const recentUsers = usersData?.slice(0, 5) ?? [];
+
+  if (isLoadingMetrics || isLoadingUsers) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="heading-1">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to the Edrak admin dashboard</p>
+        <p className="text-muted-foreground">Welcome to the sportschool admin dashboard</p>
       </div>
 
       {/* Metrics Overview */}
@@ -22,8 +38,8 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">{metrics?.totalUsers ?? 0}</div>
+            {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
         
@@ -33,8 +49,8 @@ export default function AdminDashboardPage() {
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">128</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
+            <div className="text-2xl font-bold">{metrics?.totalCourses ?? 0}</div>
+            {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
         
@@ -44,8 +60,8 @@ export default function AdminDashboardPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">EGP 45,231</div>
-            <p className="text-xs text-muted-foreground">+15% from last month</p>
+            <div className="text-2xl font-bold">EGP {metrics?.totalRevenue ?? 0}</div>
+             {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
         
@@ -55,8 +71,8 @@ export default function AdminDashboardPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">5,678</div>
-            <p className="text-xs text-muted-foreground">+5% from last month</p>
+            <div className="text-2xl font-bold">{metrics?.activeEnrollments ?? 0}</div>
+             {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
       </div>
@@ -69,20 +85,24 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} className="flex items-center">
+              {recentUsers.length > 0 ? recentUsers.map((user) => (
+                <div key={user.id} className="flex items-center">
                   <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">U</span>
+                    <span className="text-sm font-medium text-primary">
+                      {user.firstName?.[0]?.toUpperCase()}
+                    </span>
                   </div>
                   <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">User {item}</p>
+                    <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
                     <p className="text-sm text-muted-foreground">
-                      Joined today
+                      {user.username}
                     </p>
                   </div>
-                  <div className="ml-auto font-medium">Student</div>
+                  <div className="ml-auto font-medium capitalize text-sm">{user.role.toLowerCase()}</div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No recent users found.</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -92,22 +112,9 @@ export default function AdminDashboardPage() {
             <CardTitle>Recent Courses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} className="flex items-center">
-                  <div className="h-9 w-9 rounded-md bg-primary/10 flex items-center justify-center">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Course {item}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Created today
-                    </p>
-                  </div>
-                  <div className="ml-auto font-medium">Draft</div>
-                </div>
-              ))}
-            </div>
+             <div className="text-sm text-muted-foreground text-center py-4">
+               Course data will be connected in the next step.
+             </div>
           </CardContent>
         </Card>
       </div>

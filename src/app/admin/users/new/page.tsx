@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { api } from "@/trpc/react";
-import { z, ZodError } from "zod";
 
 const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -25,65 +34,33 @@ type CreateUserInput = z.infer<typeof createUserSchema>;
 export default function CreateUserPage() {
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
-  const [formData, setFormData] = useState<CreateUserInput>({
-    username: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    role: "STUDENT",
+  
+  const form = useForm<CreateUserInput>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      role: "STUDENT",
+    },
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const createUser = api.admin.user.create.useMutation({
     onSuccess: () => {
       showSnackbar("User created successfully!", "success");
       router.push("/admin/users");
+      router.refresh(); // Ensures the user list is updated
     },
     onError: (error) => {
       showSnackbar(error.message || "Failed to create user", "error");
     }
   });
 
-  const handleChange = (field: keyof CreateUserInput, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  };
-
-  const validateForm = () => {
-    try {
-      createUserSchema.parse(formData);
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const newErrors: Record<string, string> = {};
-        error.issues.forEach((issue) => {
-          if (issue.path[0]) {
-            newErrors[issue.path[0] as string] = issue.message;
-          }
-        });
-        setErrors(newErrors);
-        return false;
-      }
-      return false;
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      createUser.mutate(formData);
-    }
-  };
+  function onSubmit(data: CreateUserInput) {
+    createUser.mutate(data);
+  }
 
   return (
     <div className="space-y-6">
@@ -97,113 +74,121 @@ export default function CreateUserPage() {
         }
       />
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username *</Label>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) => handleChange("username", e.target.value)}
-              placeholder="Enter username"
-              className={errors.username ? "border-destructive" : ""}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter username" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.username && (
-              <p className="text-sm text-destructive">{errors.username}</p>
-            )}
+            
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password *</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Enter password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter first name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter last name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number *</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter phone number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="STUDENT">Student</SelectItem>
+                      <SelectItem value="PROFESSOR">Professor</SelectItem>
+                      <SelectItem value="ADMIN">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              placeholder="Enter password"
-              className={errors.password ? "border-destructive" : ""}
-            />
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="firstName">First Name *</Label>
-            <Input
-              id="firstName"
-              value={formData.firstName}
-              onChange={(e) => handleChange("firstName", e.target.value)}
-              placeholder="Enter first name"
-              className={errors.firstName ? "border-destructive" : ""}
-            />
-            {errors.firstName && (
-              <p className="text-sm text-destructive">{errors.firstName}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Last Name *</Label>
-            <Input
-              id="lastName"
-              value={formData.lastName}
-              onChange={(e) => handleChange("lastName", e.target.value)}
-              placeholder="Enter last name"
-              className={errors.lastName ? "border-destructive" : ""}
-            />
-            {errors.lastName && (
-              <p className="text-sm text-destructive">{errors.lastName}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number *</Label>
-            <Input
-              id="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={(e) => handleChange("phoneNumber", e.target.value)}
-              placeholder="Enter phone number"
-              className={errors.phoneNumber ? "border-destructive" : ""}
-            />
-            {errors.phoneNumber && (
-              <p className="text-sm text-destructive">{errors.phoneNumber}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="role">Role *</Label>
-            <Select
-              value={formData.role}
-              onValueChange={(value) => handleChange("role", value)}
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={createUser.isPending}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="STUDENT">Student</SelectItem>
-                <SelectItem value="PROFESSOR">Professor</SelectItem>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createUser.isPending}
+            >
+              {createUser.isPending ? "Creating..." : "Create User"}
+            </Button>
           </div>
-        </div>
-        
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={createUser.isPending}
-          >
-            {createUser.isPending ? "Creating..." : "Create User"}
-          </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 }

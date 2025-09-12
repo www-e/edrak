@@ -34,7 +34,7 @@ export const FeaturedCoursesSection = () => {
     <section className="py-20 sm:py-24 relative overflow-hidden">
       {/* 
         This div creates the subtle grid pattern on the left side of the section,
-        just like in the original Edrak design, adding a professional touch.
+        just like in the original sportschool design, adding a professional touch.
       */}
       <div 
         aria-hidden="true" 

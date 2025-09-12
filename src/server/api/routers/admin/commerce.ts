@@ -46,7 +46,7 @@ export const adminCommerceRouter = createTRPCRouter({
       id: z.string().uuid(), 
       data: CouponInputSchema.partial() 
     }))
-    .mutation(async ({ input }) => {
+.mutation(async ({ input }) => {
         // Convert undefined to null for optional fields
         const data = {
           ...input.data,
@@ -54,5 +54,28 @@ export const adminCommerceRouter = createTRPCRouter({
           endDate: input.data.endDate !== undefined ? input.data.endDate : undefined,
         };
         return AdminCommerceService.updateCoupon(input.id, data);
-    })
+    }),
+
+  /**
+   * Get key metrics for the admin dashboard.
+   */
+  getDashboardMetrics: adminProcedure.query(async () => {
+    return AdminCommerceService.getDashboardMetrics();
+  }),
+
+  /**
+   * Get a list of all coupons.
+   */
+  getAllCoupons: adminProcedure.query(async () => {
+    return AdminCommerceService.getAllCoupons();
+  }),
+
+  /**
+   * Get a single coupon by ID.
+   */
+  getCouponById: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => {
+      return AdminCommerceService.getCouponById(input.id);
+    }),   
 });

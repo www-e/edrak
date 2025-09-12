@@ -1,6 +1,7 @@
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminUserService } from "@/server/services/userService";
 import { CreateUserInputSchema, UpdateUserInputSchema, ResetPasswordInputSchema } from "@/types/admin";
+import { z } from "zod";
 // NOTE: For now, we use `adminProcedure`. We will upgrade this to a more secure
 // `adminProcedure` in the next batch to lock it down to only Admins.
 
@@ -12,6 +13,14 @@ export const adminUserRouter = createTRPCRouter({
     .query(async () => {
       return AdminUserService.getAllUsers();
   }),
+    /**
+   * Get a single user by ID.
+   */
+  getById: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => {
+      return AdminUserService.getUserById(input.id);
+    }),
 
   /**
    * Create a new user (Student, Professor, or Admin).

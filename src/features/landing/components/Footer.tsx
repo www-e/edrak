@@ -10,15 +10,15 @@ const socialLinks = [
 ];
 
 const linkColumns = {
-  "Edrak": [
-    { href: "#", text: "About Edrak" },
-    { href: "#", text: "How to Learn with Edrak" },
+  "sportschool": [
+    { href: "#", text: "About sportschool" },
+    { href: "#", text: "How to Learn with sportschool" },
     { href: "#", text: "Terms of Service" },
     { href: "#", text: "Privacy Policy" },
   ],
   "More": [
     { href: "#", text: "Blog" },
-    { href: "#", text: "Edrak Podcast" },
+    { href: "#", text: "sportschool Podcast" },
     { href: "#", text: "Contact Us" },
     { href: "#", text: "Help Center" },
   ],
@@ -81,7 +81,7 @@ export const Footer = () => {
           <div className="lg:col-span-4">
             <h4 className="font-bold text-white text-lg font-heading">Learn Anywhere</h4>
             <p className="text-sm mt-2 font-body">
-              Learn anytime, anywhere with the Edrak app!
+              Learn anytime, anywhere with the sportschool app!
             </p>
             <div className="flex gap-4 mt-4">
               <a href="#">
@@ -105,7 +105,7 @@ export const Footer = () => {
 
         </div>
         <div className="border-t border-gray-700/50 mt-8 pt-6 text-sm text-center text-gray-400 font-body">
-          <p>&copy; {new Date().getFullYear()} Edrak. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} sportschool. All rights reserved.</p>
         </div>
       </div>
     </footer>

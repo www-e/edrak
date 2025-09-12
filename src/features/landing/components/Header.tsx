@@ -47,7 +47,7 @@ export const Header = () => {
         {/* Left side: Logo */}
         <div className="flex items-center">
           <Link href="/" className="text-3xl font-black text-primary tracking-tight font-heading">
-            Edrak
+            sportschool
           </Link>
         </div>
 

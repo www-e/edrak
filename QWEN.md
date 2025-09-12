@@ -1,10 +1,10 @@
-# Edrak - Educational Platform Landing Page
+# sportschool - Educational Platform Landing Page
 
 READ THE RULES DIRECTORY FIRST!
 
 ## Project Overview
 
-This is a Next.js 15.5.2 application that implements a landing page for an educational platform inspired by "Edrak" (Arabic for "understanding" or "comprehension"). The platform focuses on providing high-quality educational content in Arabic, with features for course discovery, learning paths, and professional development.
+This is a Next.js 15.5.2 application that implements a landing page for an educational platform inspired by "sportschool" (Arabic for "understanding" or "comprehension"). The platform focuses on providing high-quality educational content in Arabic, with features for course discovery, learning paths, and professional development.
 
 ### Key Technologies
 

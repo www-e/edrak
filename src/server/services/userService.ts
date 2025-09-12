@@ -45,6 +45,29 @@ export class AdminUserService {
         }
     });
   }
+    /**
+   * Retrieves a single user by their ID.
+   * @param id - The ID of the user.
+   */
+  static async getUserById(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        secondPhoneNumber: true,
+        categoryPreference: true,
+        referralSource: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 
   /**
    * Updates a user's information.

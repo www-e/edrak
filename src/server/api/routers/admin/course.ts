@@ -34,6 +34,15 @@ const GetLessonInputSchema = z.object({
 const GetLessonAttachmentsInputSchema = z.object({
     lessonId: z.string().uuid(),
 });
+// ADD THESE NEW SCHEMAS
+const GetCourseByIdInputSchema = z.object({
+  id: z.string().uuid(),
+});
+
+const UpdateCourseInputSchema = z.object({
+  id: z.string().uuid(),
+  data: CreateCourseInputSchema.partial(), // Reuse the create schema but make all fields optional
+});
 
 export const adminCourseRouter = createTRPCRouter({
   /**
@@ -81,7 +90,30 @@ export const adminCourseRouter = createTRPCRouter({
     .query(async ({ input }) => {
         return AdminCourseService.getLessonAttachments(input.lessonId);
     }),
-    
+    /**
+   * Get a list of all courses.
+   */
+  getAll: adminProcedure.query(async () => {
+    return AdminCourseService.getAllCourses();
+  }),
+
+  /**
+   * Get a single course by ID.
+   */
+  getById: adminProcedure
+    .input(GetCourseByIdInputSchema)
+    .query(async ({ input }) => {
+      return AdminCourseService.getCourseById(input.id);
+    }),
+  
+  /**
+   * Update an existing course.
+   */
+  update: adminProcedure
+    .input(UpdateCourseInputSchema)
+    .mutation(async ({ input }) => {
+      return AdminCourseService.updateCourse(input.id, input.data);
+    }),
   /**
    * Soft delete a lesson.
    */

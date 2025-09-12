@@ -24,7 +24,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Edrak Inspired Landing Page",
+  title: "sportschool Inspired Landing Page",
   description: "Aspire. Learn. Advance.",
 };
 

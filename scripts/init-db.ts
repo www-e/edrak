@@ -22,13 +22,13 @@ function runCommand(command: string, errorMessage: string) {
 }
 
 async function initDatabase() {
-  console.log('Initializing Edrak Database...');
+  console.log('Initializing sportschool Database...');
   
   // Check if .env file exists
   const envPath = path.join(__dirname, '..', '.env');
   if (!existsSync(envPath)) {
     console.warn('Warning: .env file not found. Please create one with your database configuration.');
-    console.warn('Example: DATABASE_URL=postgresql://user:password@localhost:5432/edrak');
+    console.warn('Example: DATABASE_URL=postgresql://user:password@localhost:5432/sportschool');
   }
   
   // Generate Prisma client

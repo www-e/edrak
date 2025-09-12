@@ -46,7 +46,7 @@ export const HeroSection = () => {
           <div className="relative flex justify-center items-center h-full min-h-[300px] lg:min-h-0">
             {/* Using Next.js Image component for performance optimization */}
             <Image
-              src="/images/hero-image-edrak.png"
+              src="/images/hero-image-sportschool.png"
               alt="Happy students learning and advancing their careers"
               width={600}
               height={600}

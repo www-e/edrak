@@ -3,7 +3,7 @@
 /**
  * Environment Setup Script
  * 
- * This script helps set up the initial environment for the Edrak project
+ * This script helps set up the initial environment for the sportschool project
  * by creating a .env file with the required variables.
  */
 
@@ -22,7 +22,7 @@ function createEnvFile() {
   
   // Create the .env file content
   const envContent = `# Database Configuration
-DATABASE_URL=postgresql://username:password@localhost:5432/edrak
+DATABASE_URL=postgresql://username:password@localhost:5432/sportschool
 
 # NextAuth.js Configuration
 NEXTAUTH_SECRET=your_super_secret_key_here_change_this_in_production
@@ -62,7 +62,7 @@ function displaySetupInstructions() {
 
 1. Database Setup:
    - Install PostgreSQL if not already installed
-   - Create a database named 'edrak'
+   - Create a database named 'sportschool'
    - Update the DATABASE_URL with your actual database credentials
 
 2. Paymob Setup:

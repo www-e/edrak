@@ -63,7 +63,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
         <div className="flex h-full flex-col">
           {/* Sidebar header */}
           <div className="flex h-16 items-center border-b border-border px-6">
-            <h1 className="text-xl font-bold">Edrak Admin</h1>
+            <h1 className="text-xl font-bold">sportschool Admin</h1>
           </div>
 
           {/* Navigation */}

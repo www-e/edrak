@@ -8,117 +8,119 @@ import { DataTable } from "@/components/admin/shared/data-table";
 import { StatusBadge } from "@/components/admin/shared/status-badge";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
+import { type Course, type CourseVisibility } from "@prisma/client";
 
-interface Course {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  price: number;
-  language: string;
-  visibility: "DRAFT" | "PUBLISHED" | "ARCHIVED";
-  professorName: string;
-  createdAt: Date;
-}
+// This creates a specific type for our table data, which includes the nested professor info.
+type CourseWithProfessor = Course & {
+  professor: {
+    firstName: string | null;
+    lastName: string | null;
+  };
+};
 
-// Mock data for now
-const mockCourses: Course[] = [
-  {
-    id: "1",
-    title: "Introduction to React",
-    slug: "introduction-to-react",
-    description: "Learn the basics of React development",
-    price: 299.99,
-    language: "English",
-    visibility: "PUBLISHED",
-    professorName: "John Doe",
-    createdAt: new Date("2023-01-15"),
-  },
-  {
-    id: "2",
-    title: "Advanced TypeScript",
-    slug: "advanced-typescript",
-    description: "Master advanced TypeScript concepts",
-    price: 399.99,
-    language: "English",
-    visibility: "DRAFT",
-    professorName: "Jane Smith",
-    createdAt: new Date("2023-02-20"),
-  },
-  {
-    id: "3",
-    title: "Next.js Fundamentals",
-    slug: "nextjs-fundamentals",
-    description: "Build modern web applications with Next.js",
-    price: 349.99,
-    language: "English",
-    visibility: "PUBLISHED",
-    professorName: "Bob Johnson",
-    createdAt: new Date("2023-03-10"),
-  },
-];
+// Define the column type based on the DataTable's generic props for full type safety
+type CourseTableColumn = React.ComponentProps<typeof DataTable<CourseWithProfessor>>['columns'][number];
 
 export default function CoursesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<keyof Course>("createdAt");
+  const [sortBy, setSortBy] = useState<keyof CourseWithProfessor>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  
-  // Filter courses based on search term
-  const filteredCourses = mockCourses.filter(course => 
-    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.professorName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  // Sort courses
+
+  const { data: coursesData, isLoading } = api.admin.course.getAll.useQuery();
+  const courses = coursesData ?? [];
+
+  const filteredCourses = courses.filter(course => {
+    const professorName = `${course.professor.firstName || ''} ${course.professor.lastName || ''}`.trim();
+    return (
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      professorName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Sort courses with a robust, null-safe function
   const sortedCourses = [...filteredCourses].sort((a, b) => {
-    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
-    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
+    const aValue = a[sortBy];
+    const bValue = b[sortBy];
+
+    if (aValue == null) return 1;
+    if (bValue == null) return -1;
+    
+    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+    
     return 0;
   });
-  
-  // Paginate courses
+
   const pageSize = 10;
   const paginatedCourses = sortedCourses.slice(
     (page - 1) * pageSize,
     page * pageSize
   );
   
-  const columns = [
+  // Strongly typed columns array with type guards in each render function
+  const columns: CourseTableColumn[] = [
     {
-      key: "title" as keyof Course,
+      key: "title",
       title: "Title",
     },
     {
-      key: "professorName" as keyof Course,
+      key: "professor",
       title: "Professor",
+      render: (value) => {
+        // Type Guard: Ensure the value is a professor object before accessing properties
+        if (typeof value === 'object' && value && 'firstName' in value && 'lastName' in value) {
+          return `${value.firstName || ''} ${value.lastName || ''}`.trim();
+        }
+        return '--';
+      },
     },
     {
-      key: "price" as keyof Course,
+      key: "price",
       title: "Price",
-      render: (value: Course[keyof Course]) => `EGP ${(value as number).toFixed(2)}`,
+      render: (value) => {
+        // Type Guard: Ensure the value is a number before calling toFixed
+        if (typeof value === 'number') {
+          return `EGP ${value.toFixed(2)}`;
+        }
+        return '--';
+      },
     },
     {
-      key: "language" as keyof Course,
+      key: "language",
       title: "Language",
     },
     {
-      key: "visibility" as keyof Course,
+      key: "visibility",
       title: "Status",
-      render: (value: Course[keyof Course]) => (
-        <StatusBadge 
-          variant={value === "PUBLISHED" ? "success" : value === "DRAFT" ? "warning" : "secondary"}
-        >
-          {value as string}
-        </StatusBadge>
-      ),
+      render: (value) => {
+        // Type Guard: Ensure value is one of the expected visibility strings
+        if (typeof value === 'string' && ['PUBLISHED', 'DRAFT', 'ARCHIVED'].includes(value)) {
+          const visibility = value as CourseVisibility;
+          return (
+            <StatusBadge 
+              variant={visibility === "PUBLISHED" ? "success" : visibility === "DRAFT" ? "warning" : "secondary"}
+            >
+              {visibility}
+            </StatusBadge>
+          );
+        }
+        return '--';
+      },
     },
     {
-      key: "createdAt" as keyof Course,
+      key: "createdAt",
       title: "Created",
-      render: (value: Course[keyof Course]) => (value as Date).toLocaleDateString(),
+      render: (value) => {
+        // Type Guard: Ensure the value is a Date object before calling date methods
+        if (value instanceof Date) {
+          return value.toLocaleDateString();
+        }
+        return '--';
+      },
     },
   ];
 
@@ -147,6 +149,7 @@ export default function CoursesPage() {
       <DataTable
         data={paginatedCourses}
         columns={columns}
+        loading={isLoading}
         pagination={{
           page,
           pageSize,
@@ -157,7 +160,7 @@ export default function CoursesPage() {
           sortBy,
           sortOrder,
           onSortChange: (newSortBy, newSortOrder) => {
-            setSortBy(newSortBy as keyof Course);
+            setSortBy(newSortBy as keyof CourseWithProfessor);
             setSortOrder(newSortOrder);
             setPage(1);
           },

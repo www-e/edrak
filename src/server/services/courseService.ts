@@ -19,6 +19,57 @@ export class AdminCourseService {
   }
 
   /**
+   * Retrieves all courses with professor information.
+   */
+  static async getAllCourses() {
+    return prisma.course.findMany({
+      include: {
+        professor: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Retrieves a single course by its ID with detailed relations.
+   * @param id - The ID of the course.
+   */
+  static async getCourseById(id: string) {
+    return prisma.course.findUnique({
+      where: { id },
+      include: {
+        professor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        category: true,
+      },
+    });
+  }
+
+  /**
+   * Updates an existing course.
+   * @param id - The ID of the course to update.
+   * @param data - The data to update.
+   */
+  static async updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'createdAt' | 'updatedAt'>>) {
+    return prisma.course.update({
+      where: { id },
+      data,
+    });
+  }
+
+  /**
    * Creates a new lesson for a specific course.
    * @param data - The data for the new lesson.
    */

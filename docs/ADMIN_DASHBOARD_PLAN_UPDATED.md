@@ -1,10 +1,10 @@
 # Updated Admin Dashboard Implementation Plan
 
 ## Overview
-This document outlines the implementation plan for the Edrak admin dashboard, following the project's established patterns and your specific preferences.
+This document outlines the implementation plan for the sportschool admin dashboard, following the project's established patterns and your specific preferences.
 
 ## Design Principles
-- **shadcn/ui Integration**: Use existing shadcn/ui components with the Edrak theme
+- **shadcn/ui Integration**: Use existing shadcn/ui components with the sportschool theme
 - **No Hardcoded Colors**: All styling will use CSS variables from globals.css
 - **No Dead Code**: Every component and feature must be justified by existing backend APIs
 - **Full Page Flows**: Avoid modal forms; use dedicated pages for all operations
