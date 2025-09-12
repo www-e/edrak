@@ -58,15 +58,15 @@ export function AttachmentList({
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {
-      return <Image className="h-5 w-5 text-primary" />;
+      return <Image className="h-5 w-5 text-primary" aria-hidden="true" />;
     }
     if (mimeType.startsWith("video/")) {
-      return <Video className="h-5 w-5 text-primary" />;
+      return <Video className="h-5 w-5 text-primary" aria-hidden="true" />;
     }
     if (mimeType.includes("pdf") || mimeType.includes("document")) {
-      return <FileText className="h-5 w-5 text-primary" />;
+      return <FileText className="h-5 w-5 text-primary" aria-hidden="true" />;
     }
-    return <File className="h-5 w-5 text-primary" />;
+    return <File className="h-5 w-5 text-primary" aria-hidden="true" />;
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -80,7 +80,7 @@ export function AttachmentList({
   if (attachments.length === 0) {
     return (
       <div className="text-center py-8 border border-dashed rounded-lg">
-        <File className="mx-auto h-12 w-12 text-muted-foreground" />
+        <File className="mx-auto h-12 w-12 text-muted-foreground" aria-hidden="true" />
         <h3 className="mt-4 font-medium">No attachments</h3>
         <p className="text-sm text-muted-foreground">
           Upload files to add attachments to this lesson
@@ -112,7 +112,7 @@ export function AttachmentList({
               size="icon"
               onClick={() => window.open(attachment.bunnyCdnUrl, "_blank")}
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4" aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
@@ -121,9 +121,9 @@ export function AttachmentList({
               disabled={deletingId === attachment.id}
             >
               {deletingId === attachment.id ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true"></div>
               ) : (
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
               )}
             </Button>
           </div>

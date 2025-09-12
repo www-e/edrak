@@ -46,9 +46,9 @@ export const Header = () => {
         
         {/* Left side: Logo */}
         <div className="flex items-center">
-          <a href="/" className="text-3xl font-black text-primary tracking-tight font-heading">
+          <Link href="/" className="text-3xl font-black text-primary tracking-tight font-heading">
             Edrak
-          </a>
+          </Link>
         </div>
 
         {/* Middle: Navigation Links & Search */}

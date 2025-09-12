@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/shared/page-header";
-import { useSnackbar } from "@/components/shared/snackbar-context";
 import { api } from "@/trpc/react";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
@@ -21,18 +20,7 @@ interface Attachment {
   updatedAt: Date;
 }
 
-interface DbAttachment {
-  id: string;
-  name: string;
-  lessonId: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-  bunnyCdnPath: string;
-  bunnyCdnUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+
 
 export default function LessonDetailPage({ 
   courseId,
@@ -42,7 +30,6 @@ export default function LessonDetailPage({
   lessonId: string;
 }) {
   const router = useRouter();
-  const { showSnackbar } = useSnackbar();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   // Fetch lesson data and attachments
