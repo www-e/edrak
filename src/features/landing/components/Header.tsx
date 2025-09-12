@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Search, ChevronDown } from 'lucide-react';
+import { Sun, Moon, Search, ChevronDown, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 // This is the updated, functional theme toggle button
@@ -36,13 +37,15 @@ const ThemeToggleButton = () => {
 
 
 export const Header = () => {
+  const { data: session, status } = useSession();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Left side: Logo */}
         <div className="flex items-center">
-          <a href="#" className="text-3xl font-black text-primary tracking-tight font-heading">
+          <a href="/" className="text-3xl font-black text-primary tracking-tight font-heading">
             Edrak
           </a>
         </div>
@@ -72,11 +75,28 @@ export const Header = () => {
             <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Partners</a>
           </nav>
 
-          <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
-            <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background"></div>
-            <span className="font-heading font-semibold">omar</span>
-            <ChevronDown className="h-4 w-4 text-muted-foreground" />
-          </div>
+          {status === "loading" ? (
+            <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
+              <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background animate-pulse"></div>
+              <span className="font-heading font-semibold">Loading...</span>
+            </div>
+          ) : session?.user ? (
+            <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
+              <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background"></div>
+              <span className="font-heading font-semibold">{session.user.name || 'User'}</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </div>
+          ) : (
+            <Button 
+              onClick={() => signIn()} 
+              variant="outline" 
+              size="sm" 
+              className="hidden md:flex items-center gap-x-1 font-heading font-semibold"
+            >
+              <User className="h-4 w-4" />
+              Sign In
+            </Button>
+          )}
           
           <ThemeToggleButton />
 

@@ -15,7 +15,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { AuthService } from "@/services/auth-service";
 import { SigninCredentials } from "@/types/auth";
@@ -33,7 +39,10 @@ interface SigninFormProps {
   hideRoleSelector?: boolean;
 }
 
-export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninFormProps) {
+export function SigninForm({
+  defaultRole,
+  hideRoleSelector = false,
+}: SigninFormProps) {
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +58,7 @@ export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninForm
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
-    
+
     try {
       const credentials: SigninCredentials = {
         username: data.username,
@@ -60,30 +69,26 @@ export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninForm
       const result = await AuthService.signin(credentials);
 
       if (result.error) {
+        // Now handles the error message returned from the service
         showSnackbar(result.error, "error");
       } else {
-        showSnackbar("Sign in successful!", "success");
-        
-        // Wait a bit for the snackbar to be visible before proceeding
-        setTimeout(() => {
-          // Redirect based on role
-          switch (data.role) {
-            case "ADMIN":
-              router.push("/admin");
-              break;
-            case "PROFESSOR":
-              router.push("/professor/dashboard");
-              break;
-            case "STUDENT":
-              router.push("/student/dashboard");
-              break;
-            default:
-              router.push("/");
-          }
-        }, 1000);
+        showSnackbar("Sign in successful! Redirecting...", "success");
+
+        // Redirect immediately on success
+        // The page router will handle showing the correct dashboard
+        const redirectUrl =
+          {
+            ADMIN: "/admin",
+            PROFESSOR: "/professor/dashboard", // Assuming this is the correct path
+            STUDENT: "/student/dashboard", // Assuming this is the correct path
+          }[data.role] || "/";
+
+        router.push(redirectUrl);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      // This will catch unexpected errors thrown by the service
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       showSnackbar(errorMessage, "error");
     } finally {
       setIsLoading(false);
@@ -127,7 +132,11 @@ export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninForm
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select your role" />

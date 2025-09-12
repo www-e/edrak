@@ -88,48 +88,43 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
       const isValid = await personalInfoForm.trigger();
       if (isValid) {
         const data = personalInfoForm.getValues();
-        setFormData(prev => ({ ...prev, ...data }));
+        setFormData((prev) => ({ ...prev, ...data }));
         setStep(2);
       }
     } else if (step === 2) {
       const isValid = await interestsForm.trigger();
       if (isValid) {
         const data = interestsForm.getValues();
-        setFormData(prev => ({ ...prev, ...data }));
+        setFormData((prev) => ({ ...prev, ...data }));
         setStep(3);
       }
     }
   };
 
   const handleBack = () => {
-    setStep(prev => Math.max(1, prev - 1));
+    setStep((prev) => Math.max(1, prev - 1));
   };
 
   const onSubmit = async (data: CredentialsFormValues) => {
     try {
-      const completeData: SignupData = { 
-        ...formData, 
+      const completeData: SignupData = {
+        ...formData,
         ...data,
-        // Ensure required fields are present
+        // Required fields are already in formData
         firstName: formData.firstName,
         lastName: formData.lastName,
         phoneNumber: formData.phoneNumber,
       };
-      
-      const result = await AuthService.signup(completeData);
 
-      if (result.error) {
-        showSnackbar(result.error, "error");
-      } else {
-        showSnackbar("Account created successfully!", "success");
-        
-        // Wait a bit for the snackbar to be visible before proceeding
-        setTimeout(() => {
-          onSignupComplete();
-        }, 1000);
-      }
+      await AuthService.signup(completeData);
+
+      // If signup is successful, show message and trigger completion callback
+      showSnackbar("Account created successfully! Please sign in.", "success");
+      onSignupComplete();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      // Catch errors thrown by the service
+      const errorMessage =
+        error instanceof Error ? error.message : "An unexpected error occurred";
       showSnackbar(errorMessage, "error");
     }
   };
@@ -143,7 +138,9 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
             <div key={num} className="flex items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= num ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  step >= num
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {num}
@@ -169,7 +166,10 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
       <div className="bg-card rounded-lg shadow-md p-6">
         {step === 1 && (
           <Form {...personalInfoForm}>
-            <form onSubmit={personalInfoForm.handleSubmit(() => handleNext())} className="space-y-4">
+            <form
+              onSubmit={personalInfoForm.handleSubmit(() => handleNext())}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={personalInfoForm.control}
@@ -233,7 +233,10 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
 
         {step === 2 && (
           <Form {...interestsForm}>
-            <form onSubmit={interestsForm.handleSubmit(() => handleNext())} className="space-y-4">
+            <form
+              onSubmit={interestsForm.handleSubmit(() => handleNext())}
+              className="space-y-4"
+            >
               <FormField
                 control={interestsForm.control}
                 name="categoryPreference"
@@ -272,7 +275,10 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
 
         {step === 3 && (
           <Form {...credentialsForm}>
-            <form onSubmit={credentialsForm.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={credentialsForm.handleSubmit(onSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={credentialsForm.control}
                 name="username"
@@ -293,7 +299,11 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Password" {...field} />
+                      <Input
+                        type="password"
+                        placeholder="Password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

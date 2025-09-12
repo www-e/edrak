@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import Image from "next/image";
 
 export const HeroSection = () => {
@@ -25,19 +26,19 @@ export const HeroSection = () => {
             <p className="mt-6 max-w-xl mx-auto lg:mx-0 text-lg text-muted-foreground font-body">
               Enhance your skills through specialized programs in professional skill development, and earn certificates that support your career journey. All for free!
             </p>
-            <Button size="lg" className="mt-8 font-bold text-lg px-8 py-6 rounded-lg font-heading">
-              Explore Our Educational Programs
-            </Button>
             
-            <div className="mt-12 flex justify-center lg:justify-start gap-x-8 text-sm text-muted-foreground font-medium">
-              <div className="flex items-center gap-x-2">
-                <span className="text-xl" role="img" aria-label="light bulb">💡</span>
-                <span className="font-body">High-Quality & Trusted Content</span>
-              </div>
-              <div className="flex items-center gap-x-2">
-                <span className="text-xl" role="img" aria-label="graduation cap">🎓</span>
-                <span className="font-body">Learn for Free</span>
-              </div>
+            {/* CTA Buttons */}
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button size="lg" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
+                <Link href="/auth/signup">
+                  Sign Up Free
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
+                <Link href="/courses">
+                  View Courses
+                </Link>
+              </Button>
             </div>
           </div>
           

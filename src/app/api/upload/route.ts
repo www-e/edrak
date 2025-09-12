@@ -1,101 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerAuthSession } from '@/server/auth';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from '@/lib/auth';
 import { BunnyCdnService } from '@/lib/bunny-cdn';
 import { db } from '@/server/db';
 import { SessionUser } from '@/types/auth';
-import { type NextApiResponse } from 'next';
 
-// Create a minimal response object that satisfies NextApiResponse type requirements
-const createMockResponse = (): NextApiResponse => {
-  return {
-    status: () => createMockResponse(),
-    json: () => createMockResponse(),
-    send: () => createMockResponse(),
-    redirect: () => createMockResponse(),
-    setDraftMode: () => createMockResponse(),
-    setPreviewData: () => createMockResponse(),
-    clearPreviewData: () => createMockResponse(),
-    revalidate: async () => {},
-  } as unknown as NextApiResponse;
-};
+/**
+ * Handles authentication and authorization for the API route using the
+ * recommended App Router pattern for next-auth.
+ * @returns A user session if authorized, or a NextResponse object if not.
+ */
+async function handleAuth() {
+  // This is the correct, type-safe way to get the session in an App Router Route Handler.
+  // It automatically reads the request's headers and cookies.
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if ((session.user as SessionUser).role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
+  return { user: session.user };
+}
 
 export async function POST(req: NextRequest) {
   try {
-    // Check if user is authenticated
-    const session = await getServerAuthSession({
-      req: req,
-      res: createMockResponse(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const authResult = await handleAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response if auth failed
     }
 
-    // Check if user is admin
-    if ((session.user as SessionUser).role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // Get form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const courseId = formData.get('courseId') as string | null;
     const lessonId = formData.get('lessonId') as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
     if (!courseId) {
-      return NextResponse.json(
-        { error: 'Course ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
+    }
+    
+    if (!lessonId) {
+        return NextResponse.json({ error: 'Lesson ID is required to create an attachment' }, { status: 400 });
     }
 
-    // Validate course exists and user has permission
-    const course = await db.course.findUnique({
-      where: { id: courseId },
-    });
-
-    if (!course) {
-      return NextResponse.json(
-        { error: 'Course not found' },
-        { status: 404 }
-      );
+    const lesson = await db.lesson.findUnique({ where: { id: lessonId, courseId: courseId } });
+    if (!lesson) {
+      return NextResponse.json({ error: 'Lesson not found or does not belong to the specified course' }, { status: 404 });
     }
 
-    // Validate lesson exists if provided
-    if (lessonId) {
-      const lesson = await db.lesson.findUnique({
-        where: { id: lessonId },
-      });
-
-      if (!lesson) {
-        return NextResponse.json(
-          { error: 'Lesson not found' },
-          { status: 404 }
-        );
-      }
-    }
-
-    // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const folderPath = BunnyCdnService.createFolderPath(courseId, lessonId);
 
-    // Create folder path
-    const folderPath = BunnyCdnService.createFolderPath(courseId, lessonId || undefined);
-
-    // Upload file to Bunny.net
     const uploadResult = await BunnyCdnService.uploadFile(
       buffer,
       file.name,
@@ -103,10 +66,9 @@ export async function POST(req: NextRequest) {
       folderPath
     );
 
-    // Create attachment record in database
     const attachment = await db.attachment.create({
       data: {
-        lessonId: lessonId || '',
+        lessonId: lessonId,
         name: file.name,
         fileName: uploadResult.fileName,
         mimeType: uploadResult.mimeType,
@@ -131,75 +93,42 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to upload file' },
-      { status: 500 }
-    );
+    console.error("Upload error:", error);
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
-    // Check if user is authenticated
-    const session = await getServerAuthSession({
-      req: req,
-      res: createMockResponse(),
-    });
-
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const authResult = await handleAuth();
+    if (authResult instanceof NextResponse) {
+      return authResult; // Return error response if auth failed
     }
 
-    // Check if user is admin
-    if ((session.user as SessionUser).role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // Get attachment ID from query parameters
     const { searchParams } = new URL(req.url);
     const attachmentId = searchParams.get('id');
 
     if (!attachmentId) {
-      return NextResponse.json(
-        { error: 'Attachment ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Attachment ID is required' }, { status: 400 });
     }
 
-    // Find attachment
     const attachment = await db.attachment.findUnique({
       where: { id: attachmentId },
     });
 
     if (!attachment) {
-      return NextResponse.json(
-        { error: 'Attachment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Attachment not found' }, { status: 404 });
     }
 
-    // Delete file from Bunny.net
     await BunnyCdnService.deleteFile(attachment.bunnyCdnPath);
-
-    // Delete attachment record from database
-    await db.attachment.delete({
-      where: { id: attachmentId },
-    });
+    await db.attachment.delete({ where: { id: attachmentId } });
 
     return NextResponse.json({
       success: true,
       message: 'Attachment deleted successfully',
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to delete attachment' },
-      { status: 500 }
-    );
+    console.error("Delete error:", error);
+    return NextResponse.json({ error: 'Failed to delete attachment' }, { status: 500 });
   }
 }

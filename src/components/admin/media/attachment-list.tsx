@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { useSnackbar } from '@/components/shared/snackbar-context';
-import { File, Download, Trash2, Video, FileText, Image } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useSnackbar } from "@/components/shared/snackbar-context";
+import { File, Download, Trash2, Video, FileText, Image } from "lucide-react";
 
 interface Attachment {
   id: string;
@@ -24,9 +24,9 @@ interface AttachmentListProps {
   onAttachmentDelete?: (attachmentId: string) => void;
 }
 
-export function AttachmentList({ 
-  attachments, 
-  onAttachmentDelete 
+export function AttachmentList({
+  attachments,
+  onAttachmentDelete,
 }: AttachmentListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { showSnackbar } = useSnackbar();
@@ -36,50 +36,51 @@ export function AttachmentList({
 
     try {
       const response = await fetch(`/api/upload?id=${attachmentId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Delete failed');
+        throw new Error(result.error || "Delete failed");
       }
 
-      showSnackbar('Attachment deleted successfully', 'success');
+      showSnackbar("Attachment deleted successfully", "success");
       onAttachmentDelete?.(attachmentId);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete attachment';
-      showSnackbar(errorMessage, 'error');
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete attachment";
+      showSnackbar(errorMessage, "error");
     } finally {
       setDeletingId(null);
     }
   };
 
   const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith('image/')) {
-      return <Image className="h-5 w-5 text-primary" alt="Image file" />;
+    if (mimeType.startsWith("image/")) {
+      return <Image className="h-5 w-5 text-primary" />;
     }
-    if (mimeType.startsWith('video/')) {
-      return <Video className="h-5 w-5 text-primary" alt="Video file" />;
+    if (mimeType.startsWith("video/")) {
+      return <Video className="h-5 w-5 text-primary" />;
     }
-    if (mimeType.includes('pdf') || mimeType.includes('document')) {
-      return <FileText className="h-5 w-5 text-primary" alt="Document file" />;
+    if (mimeType.includes("pdf") || mimeType.includes("document")) {
+      return <FileText className="h-5 w-5 text-primary" />;
     }
-    return <File className="h-5 w-5 text-primary" alt="File" />;
+    return <File className="h-5 w-5 text-primary" />;
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (attachments.length === 0) {
     return (
       <div className="text-center py-8 border border-dashed rounded-lg">
-        <File className="mx-auto h-12 w-12 text-muted-foreground" alt="No attachments" />
+        <File className="mx-auto h-12 w-12 text-muted-foreground" />
         <h3 className="mt-4 font-medium">No attachments</h3>
         <p className="text-sm text-muted-foreground">
           Upload files to add attachments to this lesson
@@ -91,8 +92,8 @@ export function AttachmentList({
   return (
     <div className="space-y-2">
       {attachments.map((attachment) => (
-        <div 
-          key={attachment.id} 
+        <div
+          key={attachment.id}
           className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-3">
@@ -104,12 +105,12 @@ export function AttachmentList({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+              onClick={() => window.open(attachment.bunnyCdnUrl, "_blank")}
             >
               <Download className="h-4 w-4" />
             </Button>

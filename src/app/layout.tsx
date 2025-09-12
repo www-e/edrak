@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SnackbarProvider } from "@/components/shared/snackbar-context";
+import { TRPCProvider } from "@/components/admin/trpc-provider";
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import "./globals.css";
 
 // Configure Space Grotesk for headings and IBM Plex Sans for body text
@@ -24,24 +28,30 @@ export const metadata: Metadata = {
   description: "Aspire. Learn. Advance.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} font-body`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SnackbarProvider>
-            {children}
-          </SnackbarProvider>
-        </ThemeProvider>
+        <SessionProviderWrapper session={session}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SnackbarProvider>
+              <TRPCProvider>
+                {children}
+              </TRPCProvider>
+            </SnackbarProvider>
+          </ThemeProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
