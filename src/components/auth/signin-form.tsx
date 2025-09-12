@@ -69,7 +69,7 @@ export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninForm
           // Redirect based on role
           switch (data.role) {
             case "ADMIN":
-              router.push("/admin/dashboard");
+              router.push("/admin");
               break;
             case "PROFESSOR":
               router.push("/professor/dashboard");
@@ -83,8 +83,8 @@ export function SigninForm({ defaultRole, hideRoleSelector = false }: SigninForm
         }, 1000);
       }
     } catch (error) {
-      console.error("Sign in error:", error);
-      showSnackbar("Sign in failed", "error");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      showSnackbar(errorMessage, "error");
     } finally {
       setIsLoading(false);
     }

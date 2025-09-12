@@ -3,6 +3,7 @@ import {
   getServerSession,
 } from "next-auth";
 import { authOptions } from "@/lib/auth"; 
+import { type NextApiRequest, type NextApiResponse } from "next";
 
 /**
  * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
@@ -10,8 +11,11 @@ import { authOptions } from "@/lib/auth";
  * @see https://next-auth.js.org/configuration/nextjs
  */
 export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
+  req: GetServerSidePropsContext["req"] | NextApiRequest;
+  res: GetServerSidePropsContext["res"] | NextApiResponse;
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };
+
+// Export auth function for client components
+export { authOptions };

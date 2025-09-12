@@ -25,6 +25,16 @@ const CreateLessonInputSchema = z.object({
     isVisible: z.boolean().default(true),
 });
 
+// Schema for getting a lesson
+const GetLessonInputSchema = z.object({
+    id: z.string().uuid(),
+});
+
+// Schema for getting lesson attachments
+const GetLessonAttachmentsInputSchema = z.object({
+    lessonId: z.string().uuid(),
+});
+
 export const adminCourseRouter = createTRPCRouter({
   /**
    * Create a new course.
@@ -52,6 +62,24 @@ export const adminCourseRouter = createTRPCRouter({
           videoUrl: input.videoUrl ?? null,
         };
         return AdminCourseService.createLesson(data);
+    }),
+    
+  /**
+   * Get a lesson by ID.
+   */
+  getLesson: adminProcedure
+    .input(GetLessonInputSchema)
+    .query(async ({ input }) => {
+        return AdminCourseService.getLesson(input.id);
+    }),
+    
+  /**
+   * Get attachments for a lesson.
+   */
+  getLessonAttachments: adminProcedure
+    .input(GetLessonAttachmentsInputSchema)
+    .query(async ({ input }) => {
+        return AdminCourseService.getLessonAttachments(input.lessonId);
     }),
     
   /**

@@ -1,26 +1,17 @@
+// .vscode/settings.json
 {
-  // TypeScript settings
-  "typescript.validate.enable": true,
-  "typescript.preferences.includePackageJsonAutoImports": "auto",
-  "typescript.suggest.autoImports": true,
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  
-  // Problem highlighting
-  "problems.showCurrentInStatus": true,
-  "typescript.reportStyleChecksAsWarnings": false,
-  
-  // File watching
-  "files.watcherExclude": {
-    "**/node_modules/**": true,
-    "**/.next/**": true,
-    "**/.git/**": true
+
+  // Enable full-project TypeScript diagnostics
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+
+  // Ensure TS-server watches all files in your TS project
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "fixedPollingInterval",
+    "watchDirectory": "recursive",
+    "fallbackPolling": "dynamicPriority"
   },
-  
-  // Auto-save
-  "files.autoSave": "onFocusChange",
-  
-  // Error visualization
-  "editor.inlineSuggest.enabled": true,
-  "editor.lightbulb.enabled": "on",
-  "editor.hover.enabled": true
+
+  // Validate TypeScript only (disable JS validation)
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": false
 }

@@ -27,6 +27,26 @@ export class AdminCourseService {
   }
 
   /**
+   * Gets a lesson by ID.
+   * @param id - The ID of the lesson.
+   */
+  static async getLesson(id: string) {
+    return prisma.lesson.findUnique({
+      where: { id },
+    });
+  }
+
+  /**
+   * Gets attachments for a specific lesson.
+   * @param lessonId - The ID of the lesson.
+   */
+  static async getLessonAttachments(lessonId: string) {
+    return prisma.attachment.findMany({
+      where: { lessonId },
+    });
+  }
+
+  /**
    * Soft deletes a lesson by setting the isDeleted flag.
    * @param lessonId - The ID of the lesson to soft delete.
    */

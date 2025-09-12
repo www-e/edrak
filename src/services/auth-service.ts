@@ -25,8 +25,9 @@ export class AuthService {
       
       return {};
     } catch (error) {
-      console.error("Sign in error:", error);
-      return { error: "Sign in failed" };
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      showSnackbar(errorMessage, "error");
+      throw error;
     }
   }
 
@@ -53,11 +54,9 @@ export class AuthService {
       const user: SafeUser = await response.json();
       return { user };
     } catch (error) {
-      console.error("Signup error:", error);
-      if (error instanceof Error) {
-        return { error: error.message };
-      }
-      return { error: "Signup failed" };
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      showSnackbar(errorMessage, "error");
+      throw error;
     }
   }
 
@@ -69,7 +68,8 @@ export class AuthService {
     try {
       await signOut({ redirect: false });
     } catch (error) {
-      console.error("Sign out error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      showSnackbar(errorMessage, "error");
       throw error;
     }
   }

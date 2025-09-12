@@ -129,8 +129,8 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
         }, 1000);
       }
     } catch (error) {
-      console.error("Signup error:", error);
-      showSnackbar("Signup failed", "error");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      showSnackbar(errorMessage, "error");
     }
   };
 
