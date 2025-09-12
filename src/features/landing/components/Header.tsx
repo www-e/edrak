@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Search, ChevronDown, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 // This is the updated, functional theme toggle button
 const ThemeToggleButton = () => {
@@ -88,13 +89,15 @@ export const Header = () => {
             </div>
           ) : (
             <Button 
-              onClick={() => signIn()} 
+              asChild
               variant="outline" 
               size="sm" 
               className="hidden md:flex items-center gap-x-1 font-heading font-semibold"
             >
-              <User className="h-4 w-4" />
-              Sign In
+              <Link href="/auth/student/signin">
+                <User className="h-4 w-4" />
+                Sign In
+              </Link>
             </Button>
           )}
           

@@ -81,9 +81,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
+  // Removed custom signIn page to use NextAuth default behavior
   secret: process.env.NEXTAUTH_SECRET,
 };
 
