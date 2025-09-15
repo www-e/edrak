@@ -1,7 +1,7 @@
 # Updated Admin Dashboard Implementation Plan
 
 ## Overview
-This document outlines the implementation plan for the sportschool admin dashboard, following the project's established patterns and your specific preferences.
+This document outlines the implementation plan for the sportschool admin dashboard, following the project's established patterns and your specific preferences. It has been updated to reflect the current implementation status.
 
 ## Design Principles
 - **shadcn/ui Integration**: Use existing shadcn/ui components with the sportschool theme
@@ -11,117 +11,102 @@ This document outlines the implementation plan for the sportschool admin dashboa
 - **LMS Best Practices**: Follow established patterns for course/lesson management
 - **Modern UX**: Clean, intuitive interface with clear information hierarchy
 
-## Component Architecture
+## Current Component Architecture
 
 ### Layout Components (src/components/admin/layout/)
-- `AdminLayout.tsx` - Main layout with header and sidebar
-- `Header.tsx` - Top navigation bar
-- `Sidebar.tsx` - Navigation sidebar with menu items
-- `Breadcrumb.tsx` - Navigation breadcrumb component
+- `admin-layout.tsx` - Main layout with header and sidebar ✅
+- `header.tsx` - Top navigation bar ✅
+- `sidebar.tsx` - Navigation sidebar with menu items ✅
 
-### Shared Components (src/components/shared/ or src/components/admin/shared/)
-- `DataTable.tsx` - Reusable data table with sorting/filtering
-- `SearchFilter.tsx` - Search and filter component
-- `StatusBadge.tsx` - Status indicator badges
-- `MetricCard.tsx` - Summary metric cards
-- `PageHeader.tsx` - Consistent page header with title and actions
+### Shared Components (src/components/admin/shared/)
+- `data-table.tsx` - Reusable data table with sorting/filtering ✅
+- `search-filter.tsx` - Search and filter component ✅
+- `status-badge.tsx` - Status indicator badges ✅
+- `metric-card.tsx` - Summary metric cards ✅
+- `page-header.tsx` - Consistent page header with title and actions ✅
+
+### Media Components (src/components/admin/media/)
+- `attachment-list.tsx` - File attachments listing ✅
+- `file-upload.tsx` - File upload with drag-and-drop support ✅
 
 ### Feature Components (src/components/admin/[feature]/)
 
 #### Dashboard Components (src/components/admin/dashboard/)
-- `MetricsOverview.tsx` - Key metrics cards
-- `RecentActivity.tsx` - Recent user/course activity
-- `QuickActions.tsx` - Shortcut buttons for common tasks
+- Currently using shared components directly
 
 #### User Management Components (src/components/admin/users/)
-- `UserTable.tsx` - User listing with search/filter
-- `UserDetail.tsx` - User profile view
-- `UserEditPage.tsx` - Dedicated page for editing users
-- `UserCreatePage.tsx` - Dedicated page for creating users
+- Using shared components directly in page implementations
 
 #### Course Management Components (src/components/admin/courses/)
-- `CourseTable.tsx` - Course listing with search/filter
-- `CourseDetail.tsx` - Course overview page
-- `CourseEditPage.tsx` - Dedicated page for editing courses
-- `CourseCreatePage.tsx` - Dedicated page for creating courses
-- `LessonList.tsx` - List of lessons within a course
-- `LessonDetail.tsx` - Lesson view page
-- `LessonEditPage.tsx` - Dedicated page for editing lessons
-- `LessonCreatePage.tsx` - Dedicated page for creating lessons
+- Using shared components directly in page implementations
 
 #### Commerce Management Components (src/components/admin/commerce/)
-- `PaymentTable.tsx` - Payment listing with reconciliation
-- `CouponTable.tsx` - Coupon listing with status
-- `CouponDetail.tsx` - Coupon details view
-- `CouponEditPage.tsx` - Dedicated page for editing coupons
-- `CouponCreatePage.tsx` - Dedicated page for creating coupons
-- `FinancialSummary.tsx` - Financial metrics overview
+- Using shared components directly in page implementations
 
-## Page Structure (src/app/admin/)
+## Current Page Structure (src/app/admin/)
 
 ### Main Dashboard
 - Route: `/admin`
-- Components: MetricsOverview, RecentActivity, QuickActions
+- Components: MetricCard, DataTable, PageHeader
+- Status: ✅ Implemented
 
 ### User Management
 - Route: `/admin/users`
-- Components: PageHeader, SearchFilter, UserTable
+- Components: PageHeader, SearchFilter, DataTable
 - Actions: Create User button linking to `/admin/users/new`
+- Status: ✅ Implemented
 
 - Route: `/admin/users/new`
-- Components: PageHeader, UserCreatePage
+- Components: PageHeader, User Creation Form with react-hook-form
+- Status: ✅ Implemented
 
 - Route: `/admin/users/[id]`
-- Components: PageHeader, UserDetail
-- Actions: Edit button linking to `/admin/users/[id]/edit`
+- Components: PageHeader, User Detail View
+- Status: ✅ Implemented
 
 - Route: `/admin/users/[id]/edit`
-- Components: PageHeader, UserEditPage
+- Status: ❌ Not Implemented
 
 ### Course Management
 - Route: `/admin/courses`
-- Components: PageHeader, SearchFilter, CourseTable
-- Actions: Create Course button linking to `/admin/courses/new`
+- Components: PageHeader, SearchFilter, DataTable
+- Status: ✅ Implemented
 
 - Route: `/admin/courses/new`
-- Components: PageHeader, CourseCreatePage
+- Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]`
-- Components: PageHeader, CourseDetail
-- Actions: Edit button linking to `/admin/courses/[id]/edit`
-- Actions: Manage Lessons button linking to `/admin/courses/[id]/lessons`
+- Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]/edit`
-- Components: PageHeader, CourseEditPage
+- Status: ❌ Not Implemented
 
+### Lesson Management
 - Route: `/admin/courses/[id]/lessons`
-- Components: PageHeader, LessonList
-- Actions: Create Lesson button linking to `/admin/courses/[id]/lessons/new`
+- Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]/lessons/new`
-- Components: PageHeader, LessonCreatePage
+- Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]/lessons/[lessonId]`
-- Components: PageHeader, LessonDetail
-- Actions: Edit button linking to `/admin/courses/[id]/lessons/[lessonId]/edit`
+- Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]/lessons/[lessonId]/edit`
-- Components: PageHeader, LessonEditPage
+- Status: ❌ Not Implemented
 
 ### Commerce Management
 - Route: `/admin/commerce`
-- Components: PageHeader, FinancialSummary, PaymentTable, CouponTable
-- Actions: Create Coupon button linking to `/admin/commerce/coupons/new`
+- Components: PageHeader, MetricCard
+- Status: ✅ Implemented
 
 - Route: `/admin/commerce/coupons/new`
-- Components: PageHeader, CouponCreatePage
+- Status: ❌ Not Implemented
 
 - Route: `/admin/commerce/coupons/[id]`
-- Components: PageHeader, CouponDetail
-- Actions: Edit button linking to `/admin/commerce/coupons/[id]/edit`
+- Status: ❌ Not Implemented
 
 - Route: `/admin/commerce/coupons/[id]/edit`
-- Components: PageHeader, CouponEditPage
+- Status: ❌ Not Implemented
 
 ## Styling Guidelines
 
@@ -158,7 +143,7 @@ All components must use CSS variables from globals.css:
    - Visibility status
    - Soft delete capability
 
-3. **Attachments** - Future implementation for:
+3. **Attachments** - File resources linked to lessons:
    - File resources linked to lessons
    - Downloadable materials
    - External resource links
@@ -170,42 +155,26 @@ All components must use CSS variables from globals.css:
 - **Visual Hierarchy**: Use spacing, typography, and color to guide attention
 - **Responsive Design**: Mobile-first approach with touch-friendly targets
 
-## Implementation Priorities
+## Updated Implementation Priorities
 
-### Phase 1: Core Infrastructure
-1. Admin layout with navigation
-2. Dashboard overview page
-3. Authentication protection
-4. Basic data fetching with TRPC
+### Phase 1: Critical Missing Pages (High Priority)
+1. User Edit Page (`/admin/users/[id]/edit`)
+2. Course Detail Page (`/admin/courses/[id]`)
+3. Course Edit Page (`/admin/courses/[id]/edit`)
+4. Course Create Page (`/admin/courses/new`)
 
-### Phase 2: User Management
-1. User listing page
-2. User detail page
-3. User creation page
-4. User editing page
-5. Password reset functionality
+### Phase 2: Lesson Management (Medium Priority)
+1. Lesson listing page (`/admin/courses/[id]/lessons`)
+2. Lesson detail page (`/admin/courses/[id]/lessons/[lessonId]`)
+3. Lesson creation page (`/admin/courses/[id]/lessons/new`)
+4. Lesson editing page (`/admin/courses/[id]/lessons/[lessonId]/edit`)
 
-### Phase 3: Course Management
-1. Course listing page
-2. Course detail page
-3. Course creation page
-4. Course editing page
-5. Lesson management within courses
+### Phase 3: Commerce Management (Medium Priority)
+1. Payment listing page (`/admin/commerce/payments`)
+2. Coupon management pages (`/admin/commerce/coupons/*`)
+3. Financial reporting features
 
-### Phase 4: Lesson Management
-1. Lesson listing page
-2. Lesson detail page
-3. Lesson creation page
-4. Lesson editing page
-5. Soft delete/restore functionality
-
-### Phase 5: Commerce Management
-1. Payment listing page
-2. Coupon management
-3. Financial reporting
-4. Coupon creation/editing pages
-
-### Phase 6: Polish & Optimization
+### Phase 4: Polish & Optimization (Low Priority)
 1. Performance optimization
 2. Accessibility improvements
 3. Mobile responsiveness
@@ -232,3 +201,25 @@ All components must use CSS variables from globals.css:
 - Sub-100ms response times for interactions
 - Efficient data loading with pagination
 - Proper caching strategies
+
+## Current Implementation Status Summary
+
+### ✅ Completed (60-70% of planned features)
+- Admin layout and navigation
+- Dashboard with live metrics
+- User management (listing, creation, detail)
+- Course listing
+- Commerce overview
+- Media upload and attachment components
+
+### ⚠️ Partially Completed (10-15% of planned features)
+- Lesson management (directory structure only)
+
+### ❌ Not Started (20-25% of planned features)
+- User editing
+- Course detail/edit/create pages
+- Lesson management pages
+- Commerce management pages
+- Complete navigation structure
+
+This updated plan reflects the current state of implementation and provides a roadmap for completing the remaining features. The foundation is solid with most core components and APIs implemented, allowing for rapid development of the missing pages and features.

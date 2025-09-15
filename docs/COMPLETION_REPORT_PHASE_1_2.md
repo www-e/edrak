@@ -1,4 +1,6 @@
-# Project Refinement & Stabilization Report (Phases 1 & 2)
+# Project Refinement & Stabilization Report (Phases 1 & 2) - ARCHIVED
+
+**NOTE**: This report has been superseded by `COMPLETION_REPORT_PHASE_3.md` which includes the current status of the project.
 
 ## 1. Executive Summary
 

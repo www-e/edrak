@@ -13,10 +13,12 @@ This document provides a comprehensive analysis of the current implementation st
 - Authentication protection for admin routes
 - Dashboard overview page with live metrics from backend
 - Shared components: DataTable, SearchFilter, StatusBadge, MetricCard, PageHeader
+- Media components: AttachmentList, FileUpload
 
 #### User Management
 - User listing page with search/filter functionality and real API integration
 - User creation page with react-hook-form and zod validation
+- User detail page with comprehensive user information
 - Backend API endpoints: getAll, getById, create, update, resetPassword
 
 #### Course Management
@@ -32,7 +34,6 @@ This document provides a comprehensive analysis of the current implementation st
 ### User Management Pages
 | Page | Route | Status | Notes |
 |------|-------|--------|-------|
-| User Detail | `/admin/users/[id]` | ❌ Missing | No implementation |
 | User Edit | `/admin/users/[id]/edit` | ❌ Missing | No implementation |
 
 ### Course Management Pages
@@ -45,16 +46,19 @@ This document provides a comprehensive analysis of the current implementation st
 ### Lesson Management Pages
 | Page | Route | Status | Notes |
 |------|-------|--------|-------|
+| Lesson Listing | `/admin/courses/[id]/lessons` | ❌ Missing | Directory exists but no page.tsx |
+| Lesson Detail | `/admin/courses/[id]/lessons/[lessonId]` | ❌ Missing | Directory exists but no page.tsx |
 | Lesson Edit | `/admin/courses/[id]/lessons/[lessonId]/edit` | ❌ Missing | No implementation |
+| Lesson Create | `/admin/courses/[id]/lessons/new` | ❌ Missing | Directory exists but no page.tsx |
 
 ### Commerce Management Pages
 | Page | Route | Status | Notes |
 |------|-------|--------|-------|
-| Payment Listing | `/admin/commerce/payments` | ❌ Missing | No implementation |
-| Coupon Listing | `/admin/commerce/coupons` | ❌ Missing | No implementation |
-| Coupon Detail | `/admin/commerce/coupons/[id]` | ❌ Missing | No implementation |
-| Coupon Edit | `/admin/commerce/coupons/[id]/edit` | ❌ Missing | No implementation |
-| Coupon Create | `/admin/commerce/coupons/new` | ❌ Missing | No implementation |
+| Payment Listing | `/admin/commerce/payments` | ❌ Missing | No directory found |
+| Coupon Listing | `/admin/commerce/coupons` | ❌ Missing | No directory found |
+| Coupon Detail | `/admin/commerce/coupons/[id]` | ❌ Missing | No directory found |
+| Coupon Edit | `/admin/commerce/coupons/[id]/edit` | ❌ Missing | No directory found |
+| Coupon Create | `/admin/commerce/coupons/new` | ❌ Missing | No directory found |
 
 ## Implemented Backend API Endpoints
 
@@ -88,9 +92,9 @@ This document provides a comprehensive analysis of the current implementation st
 
 ### 1. Incomplete CRUD Operations
 While the backend APIs are largely complete, the frontend pages for full CRUD operations are missing:
-- User management is missing detail and edit pages
+- User management is missing edit page
 - Course management is missing detail, edit, and create pages
-- Lesson management is missing edit functionality
+- Lesson management pages are entirely missing
 - Commerce management pages are largely incomplete
 
 ### 2. Navigation Structure Gaps
@@ -110,6 +114,7 @@ While the backend APIs are largely complete, the frontend pages for full CRUD op
 3. **Form Standardization**: User creation form now uses react-hook-form and zod validation
 4. **Backend API Expansion**: tRPC backend has been significantly expanded to support full feature set
 5. **Type Safety**: Implementation now follows consistent, modern patterns for type safety
+6. **Media Management**: Added components for file upload and attachment management
 
 ### ✅ Technical Debt Reduction
 1. **Service Layer Cleanup**: Removed misleading methods from AuthService
@@ -123,15 +128,20 @@ While the backend APIs are largely complete, the frontend pages for full CRUD op
 1. Course Detail Page (`/admin/courses/[id]`)
 2. Course Edit Page (`/admin/courses/[id]/edit`)
 3. Course Create Page (`/admin/courses/new`)
-4. User Detail Page (`/admin/users/[id]`)
-5. User Edit Page (`/admin/users/[id]/edit`)
+4. User Edit Page (`/admin/users/[id]/edit`)
 
-### Phase 2: Commerce Dashboard
+### Phase 2: Lesson Management
+1. Lesson listing page
+2. Lesson detail page
+3. Lesson creation page
+4. Lesson editing page
+
+### Phase 3: Commerce Dashboard
 1. Payment listing page
 2. Complete coupon management pages
 3. Financial reporting features
 
-### Phase 3: Polish & Enhancement
+### Phase 4: Polish & Enhancement
 1. Proper breadcrumb navigation
 2. Complete sidebar navigation
 3. Data loading states and error handling
@@ -139,13 +149,13 @@ While the backend APIs are largely complete, the frontend pages for full CRUD op
 
 ## Conclusion
 
-The Edrak admin dashboard has made significant progress following the completion of Phases 1 & 2. The foundation is now stable, build errors have been eliminated, and the dashboard is fully data-driven with live backend integration. 
+The Edrak admin dashboard has made significant progress following the completion of Phases 1 & 2. The foundation is now stable, build errors have been eliminated, and the dashboard is fully data-driven with live backend integration.
 
 However, approximately 40-50% of the planned functionality is still missing, particularly the frontend pages for complete CRUD operations. The backend APIs are largely complete, which provides a solid foundation for implementing the remaining frontend pages.
 
 ## Next Steps
 
 1. **Immediate**: Implement missing course and user management pages
-2. **Short-term**: Develop commerce management pages and features
-3. **Medium-term**: Add proper navigation and breadcrumb structures
-4. **Long-term**: Polish UI/UX and add advanced features
+2. **Short-term**: Develop lesson management pages
+3. **Medium-term**: Develop commerce management pages and features
+4. **Long-term**: Add proper navigation and breadcrumb structures, then polish UI/UX
