@@ -65,7 +65,8 @@ This document outlines the implementation plan for the sportschool admin dashboa
 - Status: ✅ Implemented
 
 - Route: `/admin/users/[id]/edit`
-- Status: ❌ Not Implemented
+- Components: PageHeader, User Edit Form with react-hook-form
+- Status: ✅ Implemented
 
 ### Course Management
 - Route: `/admin/courses`
@@ -73,7 +74,8 @@ This document outlines the implementation plan for the sportschool admin dashboa
 - Status: ✅ Implemented
 
 - Route: `/admin/courses/new`
-- Status: ❌ Not Implemented
+- Components: PageHeader, Course Creation Form
+- Status: ✅ Implemented
 
 - Route: `/admin/courses/[id]`
 - Status: ❌ Not Implemented
@@ -86,10 +88,12 @@ This document outlines the implementation plan for the sportschool admin dashboa
 - Status: ❌ Not Implemented
 
 - Route: `/admin/courses/[id]/lessons/new`
-- Status: ❌ Not Implemented
+- Components: PageHeader, Lesson Creation Form
+- Status: ✅ Implemented
 
 - Route: `/admin/courses/[id]/lessons/[lessonId]`
-- Status: ❌ Not Implemented
+- Components: PageHeader, Lesson Detail View
+- Status: ✅ Implemented
 
 - Route: `/admin/courses/[id]/lessons/[lessonId]/edit`
 - Status: ❌ Not Implemented
@@ -98,6 +102,9 @@ This document outlines the implementation plan for the sportschool admin dashboa
 - Route: `/admin/commerce`
 - Components: PageHeader, MetricCard
 - Status: ✅ Implemented
+
+- Route: `/admin/commerce/payments`
+- Status: ❌ Not Implemented
 
 - Route: `/admin/commerce/coupons/new`
 - Status: ❌ Not Implemented
@@ -158,23 +165,17 @@ All components must use CSS variables from globals.css:
 ## Updated Implementation Priorities
 
 ### Phase 1: Critical Missing Pages (High Priority)
-1. User Edit Page (`/admin/users/[id]/edit`)
-2. Course Detail Page (`/admin/courses/[id]`)
-3. Course Edit Page (`/admin/courses/[id]/edit`)
-4. Course Create Page (`/admin/courses/new`)
+1. Course Detail Page (`/admin/courses/[id]`)
+2. Course Edit Page (`/admin/courses/[id]/edit`)
+3. Lesson Listing Page (`/admin/courses/[id]/lessons`)
+4. Lesson Edit Page (`/admin/courses/[id]/lessons/[lessonId]/edit`)
 
-### Phase 2: Lesson Management (Medium Priority)
-1. Lesson listing page (`/admin/courses/[id]/lessons`)
-2. Lesson detail page (`/admin/courses/[id]/lessons/[lessonId]`)
-3. Lesson creation page (`/admin/courses/[id]/lessons/new`)
-4. Lesson editing page (`/admin/courses/[id]/lessons/[lessonId]/edit`)
-
-### Phase 3: Commerce Management (Medium Priority)
+### Phase 2: Commerce Management (Medium Priority)
 1. Payment listing page (`/admin/commerce/payments`)
 2. Coupon management pages (`/admin/commerce/coupons/*`)
 3. Financial reporting features
 
-### Phase 4: Polish & Optimization (Low Priority)
+### Phase 3: Polish & Optimization (Low Priority)
 1. Performance optimization
 2. Accessibility improvements
 3. Mobile responsiveness
@@ -207,19 +208,16 @@ All components must use CSS variables from globals.css:
 ### ✅ Completed (60-70% of planned features)
 - Admin layout and navigation
 - Dashboard with live metrics
-- User management (listing, creation, detail)
-- Course listing
+- Complete user management system
+- Course listing and creation
+- Lesson creation and detail
 - Commerce overview
 - Media upload and attachment components
 
-### ⚠️ Partially Completed (10-15% of planned features)
-- Lesson management (directory structure only)
-
-### ❌ Not Started (20-25% of planned features)
-- User editing
-- Course detail/edit/create pages
-- Lesson management pages
+### ❌ Not Started (30-40% of planned features)
+- Course detail/edit pages
+- Lesson listing/edit pages
 - Commerce management pages
 - Complete navigation structure
 
-This updated plan reflects the current state of implementation and provides a roadmap for completing the remaining features. The foundation is solid with most core components and APIs implemented, allowing for rapid development of the missing pages and features.
+This updated plan reflects the current state of implementation and provides a roadmap for completing the remaining features. User management is now completely finished, and the foundation is solid with most core components and APIs implemented, allowing for rapid development of the missing pages and features.

@@ -172,6 +172,18 @@ props: {
 // Shows user details like username, role, status, contact info
 ```
 
+##### UserEditPage
+```tsx
+// Dedicated page for editing users (implemented in /admin/users/[id]/edit/page.tsx)
+props: {
+  user: User;
+  onSave: (data: UpdateUserInput) => Promise<void>;
+  onCancel: () => void;
+}
+// Full page form following LMS best practices
+// Uses react-hook-form and zod validation
+```
+
 ##### UserCreatePage
 ```tsx
 // Dedicated page for creating users (implemented in /admin/users/new/page.tsx)
@@ -195,6 +207,39 @@ props: {
   onFilterChange: (filters: Record<string, any>) => void;
 }
 // Uses DataTable component with course-specific columns
+```
+
+##### CourseCreatePage
+```tsx
+// Dedicated page for creating courses (implemented in /admin/courses/new/page.tsx)
+props: {
+  onCreate: (data: CreateCourseInput) => Promise<void>;
+  onCancel: () => void;
+}
+// Full page form with clear workflow
+```
+
+#### Lesson Management
+
+##### LessonCreatePage
+```tsx
+// Dedicated page for creating lessons (implemented in /admin/courses/[id]/lessons/new/page.tsx)
+props: {
+  courseId: string;
+  onCreate: (data: CreateLessonInput) => Promise<void>;
+  onCancel: () => void;
+}
+// Full page form with clear workflow
+```
+
+##### LessonDetail
+```tsx
+// Lesson view page (implemented in /admin/courses/[id]/lessons/[lessonId]/page.tsx)
+props: {
+  lesson: Lesson;
+  courseId: string;
+}
+// Displays lesson content with video and text
 ```
 
 #### Commerce Management
@@ -332,12 +377,18 @@ src/
         page.tsx                  # User listing
         [id]/
           page.tsx                # User detail
+          edit/
+            page.tsx              # User edit
         new/
           page.tsx                # Create user page
       courses/
         page.tsx                  # Course listing
         [id]/
           lessons/
+            [lessonId]/
+              page.tsx            # Lesson detail
+            new/
+              page.tsx            # Create lesson
       commerce/
         page.tsx                  # Commerce overview
 
@@ -347,19 +398,21 @@ src/
 1. **Layout Components**: AdminLayout, Header, Sidebar
 2. **Shared Components**: DataTable, SearchFilter, StatusBadge, MetricCard, PageHeader
 3. **Media Components**: AttachmentList, FileUpload
-4. **Pages**: Admin Dashboard, User Listing, User Creation, User Detail
-5. **API Services**: Complete backend API for users, courses, and commerce
+4. **User Management Pages**: All pages implemented (listing, creation, detail, edit)
+5. **Course Management Pages**: Listing and creation pages implemented
+6. **Lesson Management Pages**: Creation and detail pages implemented
+7. **Commerce Management Pages**: Overview page implemented
+8. **API Services**: Complete backend API for users, courses, and commerce
 
 ### ⚠️ Partially Implemented
-1. **Course Management**: Course listing page exists but detail, edit, and create pages are missing
-2. **Lesson Management**: Directory structure exists but no pages implemented
-3. **Commerce Management**: Overview page exists but payment and coupon management pages are missing
+1. **Course Management**: Detail and edit pages missing
+2. **Lesson Management**: Listing and edit pages missing
+3. **Commerce Management**: Payment and coupon management pages missing
 
 ### ❌ Not Implemented
-1. **User Management**: User edit page
-2. **Course Management**: Course detail, edit, and create pages
-3. **Lesson Management**: All lesson management pages
-4. **Commerce Management**: Payment listing, coupon management pages
+1. **Course Management**: Course detail page, Course edit page
+2. **Lesson Management**: Lesson listing page, Lesson edit page
+3. **Commerce Management**: Payment listing page, Coupon management pages
 
 ## Error Handling and User Feedback
 

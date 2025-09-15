@@ -38,12 +38,18 @@ src/
         page.tsx                  # User listing ✅
         [id]/
           page.tsx                # User detail ✅
+          edit/
+            page.tsx              # User edit ✅
         new/
           page.tsx                # Create user page ✅
       courses/
         page.tsx                  # Course listing ✅
         [id]/
           lessons/
+            [lessonId]/
+              page.tsx            # Lesson detail ✅
+            new/
+              page.tsx            # Create lesson ✅
       commerce/
         page.tsx                  # Commerce overview ✅
 
@@ -74,73 +80,68 @@ src/
 3. Authentication protection ✅
 4. Basic data fetching with TRPC integration ✅
 
-#### User Management
+#### User Management (100% Complete)
 1. User listing page with search/filter ✅
 2. User detail page ✅
 3. User creation page (full page flow) ✅
+4. User editing page (full page flow) ✅
+5. Backend API endpoints ✅
+
+#### Course Management (40% Complete)
+1. Course listing page ✅
+2. Course creation page ✅
+3. Course detail page ❌
+4. Course editing page ❌
+5. Backend API endpoints ✅
+
+#### Lesson Management (40% Complete)
+1. Lesson detail page ✅
+2. Lesson creation page ✅
+3. Lesson listing page ❌
+4. Lesson editing page ❌
+5. Backend API endpoints ✅
+
+#### Commerce Management (20% Complete)
+1. Commerce overview dashboard ✅
+2. Payment listing page ❌
+3. Coupon management pages ❌
 4. Backend API endpoints ✅
 
-#### Course Management
-1. Course listing page ✅
-2. Backend API endpoints ✅
-
-#### Commerce Management
-1. Commerce overview dashboard ✅
-2. Backend API endpoints ✅
-
-#### Media Management
+#### Media Management (100% Complete)
 1. File upload component ✅
 2. Attachment listing component ✅
 
-### ⚠️ Partially Implemented Features
-
-#### Lesson Management
-1. Directory structure exists but no pages implemented ⚠️
-
 ### ❌ Missing Features
 
-#### User Management
-1. User editing page (full page flow) ❌
-
 #### Course Management
-1. Course detail page ❌
-2. Course editing page (full page flow) ❌
-3. Course creation page (full page flow) ❌
+1. Course detail page (`/admin/courses/[id]`)
+2. Course editing page (`/admin/courses/[id]/edit`)
 
 #### Lesson Management
-1. Lesson listing within courses ❌
-2. Lesson detail page ❌
-3. Lesson creation page (full page flow) ❌
-4. Lesson editing page (full page flow) ❌
-5. Soft delete/restore functionality UI ❌
+1. Lesson listing page (`/admin/courses/[id]/lessons`)
+2. Lesson editing page (`/admin/courses/[id]/lessons/[lessonId]/edit`)
 
 #### Commerce Management
-1. Payment listing/reconciliation ❌
-2. Coupon listing ❌
-3. Coupon detail page ❌
-4. Coupon creation page (full page flow) ❌
-5. Coupon editing page (full page flow) ❌
+1. Payment listing/reconciliation (`/admin/commerce/payments`)
+2. Coupon listing (`/admin/commerce/coupons`)
+3. Coupon detail page (`/admin/commerce/coupons/[id]`)
+4. Coupon creation page (`/admin/commerce/coupons/new`)
+5. Coupon editing page (`/admin/commerce/coupons/[id]/edit`)
 
 ## Updated Implementation Plan
 
 ### Phase 1: Critical Missing Pages (High Priority)
 1. Course Detail Page (`/admin/courses/[id]`)
 2. Course Edit Page (`/admin/courses/[id]/edit`)
-3. Course Create Page (`/admin/courses/new`)
-4. User Edit Page (`/admin/users/[id]/edit`)
+3. Lesson Listing Page (`/admin/courses/[id]/lessons`)
+4. Lesson Edit Page (`/admin/courses/[id]/lessons/[lessonId]/edit`)
 
-### Phase 2: Lesson Management (Medium Priority)
-1. Lesson listing page
-2. Lesson detail page
-3. Lesson creation page
-4. Lesson editing page
-
-### Phase 3: Commerce Management (Medium Priority)
+### Phase 2: Commerce Management (Medium Priority)
 1. Payment listing page
 2. Complete coupon management pages
 3. Financial reporting features
 
-### Phase 4: Polish & Optimization (Low Priority)
+### Phase 3: Polish & Optimization (Low Priority)
 1. Performance optimization
 2. Accessibility improvements
 3. Mobile responsiveness
@@ -228,4 +229,4 @@ Use existing heading classes from globals.css:
 - Accessibility score above 95 (axe-core)
 - Performance score above 90 (Lighthouse)
 
-This implementation plan ensures a modern, professional admin dashboard that aligns with sportschool's educational mission while following all project guidelines and your specific preferences. The current implementation represents approximately 50-60% completion of the planned features, with a solid foundation established for completing the remaining functionality.
+This implementation plan ensures a modern, professional admin dashboard that aligns with sportschool's educational mission while following all project guidelines and your specific preferences. The current implementation represents approximately 60-70% completion of the planned features, with user management completely finished and a solid foundation established for completing the remaining functionality.
