@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import { type CourseVisibility } from "@prisma/client";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "@/server/api/root";
 
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/shared/page-header";
@@ -11,16 +12,16 @@ import { SearchFilter } from "@/components/admin/shared/search-filter";
 import { DataTable, type DataTableColumn } from "@/components/admin/shared/data-table";
 import { StatusBadge } from "@/components/admin/shared/status-badge";
 import { Plus } from "lucide-react";
+import { CourseVisibility } from "@prisma/client";
 
-// This is the key fix: We derive the exact type of our data directly from the tRPC query.
-// This makes the component 100% type-safe and resilient to backend changes.
-type CourseForTable = NonNullable<Awaited<ReturnType<typeof api.admin.course.getAll.useQuery>>['data']>[number];
+// This is the robust, correct way to get the type from the tRPC router.
+type RouterOutput = inferRouterOutputs<AppRouter>;
+type CourseForTable = RouterOutput["admin"]["course"]["getAll"][number];
 
 export default function CoursesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  // The state for sorting is now strictly typed to be a key of our data shape.
   const [sortBy, setSortBy] = useState<keyof CourseForTable>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
@@ -37,15 +38,20 @@ export default function CoursesPage() {
   });
   
   const sortedCourses = [...filteredCourses].sort((a, b) => {
-    // This dynamic property access is now type-safe because `sortBy` must be a key of `CourseForTable`.
     const aValue = a[sortBy];
     const bValue = b[sortBy];
 
-    if (aValue == null) return 1;
-    if (bValue == null) return -1;
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
     
-    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+    }
+
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return sortOrder === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+    }
     
     return 0;
   });
@@ -53,26 +59,40 @@ export default function CoursesPage() {
   const pageSize = 10;
   const paginatedCourses = sortedCourses.slice((page - 1) * pageSize, page * pageSize);
   
-  // This `columns` array is now strictly typed against our data and the DataTable component.
   const columns: DataTableColumn<CourseForTable>[] = [
     { key: "title", title: "Title" },
     { 
       key: "professor", 
       title: "Professor",
-      render: (value) => `${value.firstName || ''} ${value.lastName || ''}`.trim()
+      // FIX: Assert the type of 'value' to the specific professor object shape.
+      render: (value) => {
+        const professor = value as { firstName: string; lastName: string; };
+        return `${professor.firstName || ''} ${professor.lastName || ''}`.trim();
+      }
     },
-    { key: "price", title: "Price", render: (value) => `EGP ${value.toFixed(2)}` },
+    { 
+      key: "price", 
+      title: "Price", 
+      // FIX: Assert the type of 'value' to be a number.
+      render: (value) => `EGP ${(value as number).toFixed(2)}` 
+    },
     { key: "language", title: "Language" },
     { 
       key: "visibility", 
       title: "Status",
+      // FIX: Assert the type of 'value' to be CourseVisibility enum.
       render: (value) => (
-        <StatusBadge variant={value === "PUBLISHED" ? "success" : value === "DRAFT" ? "warning" : "secondary"}>
-          {value}
+        <StatusBadge variant={(value as CourseVisibility) === "PUBLISHED" ? "success" : (value as CourseVisibility) === "DRAFT" ? "warning" : "secondary"}>
+          {value as React.ReactNode}
         </StatusBadge>
       )
     },
-    { key: "createdAt", title: "Created", render: (value) => new Date(value).toLocaleDateString() },
+    { 
+      key: "createdAt", 
+      title: "Created", 
+      // FIX: Assert the type of 'value' to be a Date object.
+      render: (value) => new Date(value as Date).toLocaleDateString() 
+    },
   ];
 
   return (

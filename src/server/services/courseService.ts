@@ -3,11 +3,18 @@ import type { CreateCourseInput, CreateLessonInput, UpdateCourseInput } from '@/
 
 export class AdminCourseService {
   static async createCourse(data: CreateCourseInput) {
-    return db.course.create({ data: { ...data, categoryId: data.categoryId ?? null } });
+    return db.course.create({ data: {
+      ...data,
+      categoryId: data.categoryId ?? null,
+    }});
   }
   
-  static async updateCourse(id: string, data: UpdateCourseInput['data']) {
-    return db.course.update({ where: { id }, data });
+  static async updateCourse(data: UpdateCourseInput) {
+    const { id, ...updateData } = data;
+    return db.course.update({
+      where: { id },
+      data: updateData,
+    });
   }
 
   static async getAllCourses() {
@@ -20,7 +27,12 @@ export class AdminCourseService {
         language: true,
         visibility: true, 
         createdAt: true,
-        professor: { select: { firstName: true, lastName: true } },
+        professor: {
+          select: {
+            firstName: true,
+            lastName: true,
+          },
+        },
        },
       orderBy: { createdAt: 'desc' },
     });
@@ -38,12 +50,31 @@ export class AdminCourseService {
   }
 
   static async createLesson(data: CreateLessonInput) {
-    return db.lesson.create({ data: { ...data, videoUrl: data.videoUrl ?? null } });
+    return db.lesson.create({ data: {
+      ...data,
+      videoUrl: data.videoUrl ?? null,
+    }});
   }
-  
-  // ... (The rest of the methods are correct and unchanged) ...
-  static async getLesson(id: string) { return db.lesson.findUnique({ where: { id } }); }
-  static async getLessonAttachments(lessonId: string) { return db.attachment.findMany({ where: { lessonId } }); }
-  static async softDeleteLesson(lessonId: string) { return db.lesson.update({ where: { id: lessonId }, data: { isDeleted: true, deletedAt: new Date() } }); }
-  static async restoreLesson(lessonId: string) { return db.lesson.update({ where: { id: lessonId }, data: { isDeleted: false, deletedAt: null } }); }
+
+  static async getLesson(id: string) {
+    return db.lesson.findUnique({ where: { id } });
+  }
+
+  static async getLessonAttachments(lessonId: string) {
+    return db.attachment.findMany({ where: { lessonId } });
+  }
+
+  static async softDeleteLesson(lessonId: string) {
+    return db.lesson.update({
+      where: { id: lessonId },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+  }
+
+  static async restoreLesson(lessonId: string) {
+    return db.lesson.update({
+      where: { id: lessonId },
+      data: { isDeleted: false, deletedAt: null },
+    });
+  }
 }

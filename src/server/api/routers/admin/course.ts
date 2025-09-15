@@ -2,6 +2,7 @@ import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminCourseService } from "@/server/services/courseService";
 import { z } from "zod";
 import { CourseVisibility } from "@prisma/client";
+import { UpdateCourseInputSchema } from "@/types/admin"; // Import the centralized schema
 
 // Schema for creating a course
 const CreateCourseInputSchema = z.object({
@@ -34,14 +35,9 @@ const GetLessonInputSchema = z.object({
 const GetLessonAttachmentsInputSchema = z.object({
     lessonId: z.string().uuid(),
 });
-// ADD THESE NEW SCHEMAS
+
 const GetCourseByIdInputSchema = z.object({
   id: z.string().uuid(),
-});
-
-const UpdateCourseInputSchema = z.object({
-  id: z.string().uuid(),
-  data: CreateCourseInputSchema.partial(), // Reuse the create schema but make all fields optional
 });
 
 export const adminCourseRouter = createTRPCRouter({
@@ -51,7 +47,6 @@ export const adminCourseRouter = createTRPCRouter({
   createCourse: adminProcedure
     .input(CreateCourseInputSchema)
     .mutation(async ({ input }) => {
-      // Convert undefined to null for optional fields
       const data = {
         ...input,
         categoryId: input.categoryId ?? null,
@@ -65,7 +60,6 @@ export const adminCourseRouter = createTRPCRouter({
   createLesson: adminProcedure
     .input(CreateLessonInputSchema)
     .mutation(async ({ input }) => {
-        // Convert undefined to null for optional fields
         const data = {
           ...input,
           videoUrl: input.videoUrl ?? null,
@@ -90,7 +84,8 @@ export const adminCourseRouter = createTRPCRouter({
     .query(async ({ input }) => {
         return AdminCourseService.getLessonAttachments(input.lessonId);
     }),
-    /**
+    
+  /**
    * Get a list of all courses.
    */
   getAll: adminProcedure.query(async () => {
@@ -112,8 +107,9 @@ export const adminCourseRouter = createTRPCRouter({
   update: adminProcedure
     .input(UpdateCourseInputSchema)
     .mutation(async ({ input }) => {
-      return AdminCourseService.updateCourse(input.id, input.data);
+      return AdminCourseService.updateCourse(input);
     }),
+
   /**
    * Soft delete a lesson.
    */
@@ -131,7 +127,4 @@ export const adminCourseRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
         return AdminCourseService.restoreLesson(input.id);
     }),
-
-  // Attachment procedures will be added in a future step when we
-  // integrate the Bunny CDN file upload logic. For now, this is complete.
 });

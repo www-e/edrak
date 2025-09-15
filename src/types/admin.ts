@@ -64,3 +64,15 @@ export const CouponInputSchema = z.object({
     endDate: z.date().nullable().optional(), // Prisma: DateTime? => nullable and optional
 });
 export type CouponInput = z.infer<typeof CouponInputSchema>;
+export const UpdateCourseInputSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).optional(),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase with dashes only").optional(),
+  description: z.string().min(1).optional(),
+  price: z.number().min(0).optional(),
+  language: z.string().min(1).optional(),
+  visibility: z.nativeEnum(CourseVisibility).optional(),
+  professorId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().nullable().optional(),
+});
+export type UpdateCourseInput = z.infer<typeof UpdateCourseInputSchema>;
