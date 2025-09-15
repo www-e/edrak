@@ -3,40 +3,33 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { api } from "@/trpc/react";
+import { CreateUserInputSchema } from "@/types/admin"; // Import the schema
 
-const createUserSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  role: z.enum(["STUDENT", "PROFESSOR", "ADMIN"]),
-});
-
-type CreateUserInput = z.infer<typeof createUserSchema>;
+// Infer the type from the schema
+type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
 export default function CreateUserPage() {
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
   
   const form = useForm<CreateUserInput>({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(CreateUserInputSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -44,6 +37,7 @@ export default function CreateUserPage() {
       lastName: "",
       phoneNumber: "",
       role: "STUDENT",
+      isActive: true, // Set the default value here
     },
   });
   
@@ -51,13 +45,14 @@ export default function CreateUserPage() {
     onSuccess: () => {
       showSnackbar("User created successfully!", "success");
       router.push("/admin/users");
-      router.refresh(); // Ensures the user list is updated
+      router.refresh();
     },
     onError: (error) => {
       showSnackbar(error.message || "Failed to create user", "error");
     }
   });
 
+  // The 'data' from the form now correctly matches the schema type
   function onSubmit(data: CreateUserInput) {
     createUser.mutate(data);
   }

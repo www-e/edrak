@@ -11,18 +11,18 @@ import { UpdateUserInputSchema } from "@/types/admin";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import { Label } from "@/components/ui/label"; // <-- THIS IS THE FIX
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 
-// We can infer the type directly from our Zod schema
 type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
 
 export default function UserEditPage() {
@@ -37,7 +37,6 @@ export default function UserEditPage() {
     resolver: zodResolver(UpdateUserInputSchema),
   });
 
-  // When the user data is fetched, populate the form with it.
   useEffect(() => {
     if (user) {
       form.reset({
@@ -54,8 +53,8 @@ export default function UserEditPage() {
   const updateUser = api.admin.user.update.useMutation({
     onSuccess: () => {
       showSnackbar("User updated successfully!", "success");
-      router.push(`/admin/users/${userId}`); // Redirect back to the detail page
-      router.refresh(); // Refresh router cache to show updated data
+      router.push(`/admin/users/${userId}`);
+      router.refresh();
     },
     onError: (error) => {
       showSnackbar(error.message || "Failed to update user", "error");
@@ -97,13 +96,12 @@ export default function UserEditPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             
-            {/* Username (Read-only) */}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input id="username" value={user.username} readOnly disabled />
             </div>
 
-            <div /> {/* Spacer */}
+            <div />
 
             <FormField
               control={form.control}
@@ -176,7 +174,7 @@ export default function UserEditPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                   <Select onValueChange={(value) => field.onChange(value === 'true')} value={String(field.value)}>
+                  <Select onValueChange={(value) => field.onChange(value === 'true')} value={String(field.value)}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a status" />

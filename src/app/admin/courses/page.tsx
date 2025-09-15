@@ -1,32 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
+import { type CourseVisibility } from "@prisma/client";
+
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { SearchFilter } from "@/components/admin/shared/search-filter";
-import { DataTable } from "@/components/admin/shared/data-table";
+import { DataTable, type DataTableColumn } from "@/components/admin/shared/data-table";
 import { StatusBadge } from "@/components/admin/shared/status-badge";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { api } from "@/trpc/react";
-import { type Course, type CourseVisibility } from "@prisma/client";
 
-// This creates a specific type for our table data, which includes the nested professor info.
-type CourseWithProfessor = Course & {
-  professor: {
-    firstName: string | null;
-    lastName: string | null;
-  };
-};
-
-// Define the column type based on the DataTable's generic props for full type safety
-type CourseTableColumn = React.ComponentProps<typeof DataTable<CourseWithProfessor>>['columns'][number];
+// This is the key fix: We derive the exact type of our data directly from the tRPC query.
+// This makes the component 100% type-safe and resilient to backend changes.
+type CourseForTable = NonNullable<Awaited<ReturnType<typeof api.admin.course.getAll.useQuery>>['data']>[number];
 
 export default function CoursesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<keyof CourseWithProfessor>("createdAt");
+  // The state for sorting is now strictly typed to be a key of our data shape.
+  const [sortBy, setSortBy] = useState<keyof CourseForTable>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const { data: coursesData, isLoading } = api.admin.course.getAll.useQuery();
@@ -40,9 +35,9 @@ export default function CoursesPage() {
       professorName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-
-  // Sort courses with a robust, null-safe function
+  
   const sortedCourses = [...filteredCourses].sort((a, b) => {
+    // This dynamic property access is now type-safe because `sortBy` must be a key of `CourseForTable`.
     const aValue = a[sortBy];
     const bValue = b[sortBy];
 
@@ -56,72 +51,28 @@ export default function CoursesPage() {
   });
 
   const pageSize = 10;
-  const paginatedCourses = sortedCourses.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const paginatedCourses = sortedCourses.slice((page - 1) * pageSize, page * pageSize);
   
-  // Strongly typed columns array with type guards in each render function
-  const columns: CourseTableColumn[] = [
-    {
-      key: "title",
-      title: "Title",
-    },
-    {
-      key: "professor",
+  // This `columns` array is now strictly typed against our data and the DataTable component.
+  const columns: DataTableColumn<CourseForTable>[] = [
+    { key: "title", title: "Title" },
+    { 
+      key: "professor", 
       title: "Professor",
-      render: (value) => {
-        // Type Guard: Ensure the value is a professor object before accessing properties
-        if (typeof value === 'object' && value && 'firstName' in value && 'lastName' in value) {
-          return `${value.firstName || ''} ${value.lastName || ''}`.trim();
-        }
-        return '--';
-      },
+      render: (value) => `${value.firstName || ''} ${value.lastName || ''}`.trim()
     },
-    {
-      key: "price",
-      title: "Price",
-      render: (value) => {
-        // Type Guard: Ensure the value is a number before calling toFixed
-        if (typeof value === 'number') {
-          return `EGP ${value.toFixed(2)}`;
-        }
-        return '--';
-      },
-    },
-    {
-      key: "language",
-      title: "Language",
-    },
-    {
-      key: "visibility",
+    { key: "price", title: "Price", render: (value) => `EGP ${value.toFixed(2)}` },
+    { key: "language", title: "Language" },
+    { 
+      key: "visibility", 
       title: "Status",
-      render: (value) => {
-        // Type Guard: Ensure value is one of the expected visibility strings
-        if (typeof value === 'string' && ['PUBLISHED', 'DRAFT', 'ARCHIVED'].includes(value)) {
-          const visibility = value as CourseVisibility;
-          return (
-            <StatusBadge 
-              variant={visibility === "PUBLISHED" ? "success" : visibility === "DRAFT" ? "warning" : "secondary"}
-            >
-              {visibility}
-            </StatusBadge>
-          );
-        }
-        return '--';
-      },
+      render: (value) => (
+        <StatusBadge variant={value === "PUBLISHED" ? "success" : value === "DRAFT" ? "warning" : "secondary"}>
+          {value}
+        </StatusBadge>
+      )
     },
-    {
-      key: "createdAt",
-      title: "Created",
-      render: (value) => {
-        // Type Guard: Ensure the value is a Date object before calling date methods
-        if (value instanceof Date) {
-          return value.toLocaleDateString();
-        }
-        return '--';
-      },
-    },
+    { key: "createdAt", title: "Created", render: (value) => new Date(value).toLocaleDateString() },
   ];
 
   return (
@@ -131,50 +82,30 @@ export default function CoursesPage() {
         description="Manage all platform courses"
         actions={
           <Button onClick={() => router.push("/admin/courses/new")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Course
+            <Plus className="mr-2 h-4 w-4" /> Add Course
           </Button>
         }
       />
-      
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <SearchFilter
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Search courses..."
-          className="w-full md:w-80"
-        />
-      </div>
-      
+      <SearchFilter value={searchTerm} onChange={setSearchTerm} placeholder="Search courses..." className="w-full md:w-80"/>
       <DataTable
         data={paginatedCourses}
         columns={columns}
         loading={isLoading}
-        pagination={{
-          page,
-          pageSize,
-          total: filteredCourses.length,
-          onPageChange: setPage,
-        }}
-        sorting={{
-          sortBy,
-          sortOrder,
+        pagination={{ page, pageSize, total: filteredCourses.length, onPageChange: setPage }}
+        sorting={{ 
+          sortBy, 
+          sortOrder, 
           onSortChange: (newSortBy, newSortOrder) => {
-            setSortBy(newSortBy as keyof CourseWithProfessor);
+            setSortBy(newSortBy);
             setSortOrder(newSortOrder);
-            setPage(1);
-          },
+          }
         }}
         onRowClick={(course) => router.push(`/admin/courses/${course.id}`)}
         emptyState={
           <div className="text-center py-8">
             <p className="text-muted-foreground">No courses found</p>
-            <Button 
-              className="mt-4" 
-              onClick={() => router.push("/admin/courses/new")}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Create First Course
+            <Button className="mt-4" onClick={() => router.push("/admin/courses/new")}>
+              <Plus className="mr-2 h-4 w-4" /> Create First Course
             </Button>
           </div>
         }

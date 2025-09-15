@@ -9,7 +9,7 @@ export const CreateUserInputSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   phoneNumber: z.string().min(1, "Phone number is required"),
   role: z.nativeEnum(Role),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(), // Default will be set in the form's defaultValues
 });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
@@ -36,7 +36,7 @@ export const CreateCourseInputSchema = z.object({
   description: z.string().min(1),
   price: z.number().min(0),
   language: z.string().min(1),
-  visibility: z.nativeEnum(CourseVisibility).default('DRAFT'),
+  visibility: z.nativeEnum(CourseVisibility),
   professorId: z.string().uuid(),
   categoryId: z.string().uuid().nullable().optional(), // Prisma: String? => nullable and optional
 });
@@ -58,8 +58,8 @@ export const CouponInputSchema = z.object({
     type: z.nativeEnum(CouponType),
     amount: z.number().positive(),
     startDate: z.date(),
-    maxUsesPerUser: z.number().int().positive().default(1),
-    isActive: z.boolean().default(true),
+    maxUsesPerUser: z.number().int().positive(),
+    isActive: z.boolean(),
     maxUses: z.number().int().positive().nullable().optional(), // Prisma: Int? => nullable and optional
     endDate: z.date().nullable().optional(), // Prisma: DateTime? => nullable and optional
 });
