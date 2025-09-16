@@ -10,7 +10,7 @@
 
 @theme {
   --radius: 0.625rem;
-  
+
   /* Light Mode Palette is defined as the root/default theme */
   --background: oklch(0.982 0.012 229.61); /* #f2faff */
   --foreground: oklch(0.531 0.093 205.28); /* #0c818f */
@@ -86,56 +86,95 @@
     --font-heading: var(--font-heading);
     --font-body: var(--font-body);
   }
-  
+
   body {
     @apply background foreground font-body;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
   }
-  
+
   /* Heading classes for consistent sizing and weights */
   .heading-1 {
     @apply text-4xl md:text-5xl font-bold font-heading;
   }
-  
+
   .heading-2 {
     @apply text-3xl md:text-4xl font-bold font-heading;
   }
-  
+
   .heading-3 {
     @apply text-2xl md:text-3xl font-bold font-heading;
   }
-  
+
   .heading-4 {
     @apply text-xl md:text-2xl font-bold font-heading;
   }
-  
+
   .heading-5 {
     @apply text-lg md:text-xl font-bold font-heading;
   }
-  
+
   .heading-6 {
     @apply text-base md:text-lg font-bold font-heading;
   }
-  
+
   /* Body text classes for consistent sizing */
   .body-large {
     @apply text-lg font-body;
   }
-  
+
   .body-normal {
     @apply text-base font-body;
   }
-  
+
   .body-small {
     @apply text-sm font-body;
   }
-  
+
   @keyframes scroll {
     to {
       transform: translate(calc(-50% - 0.5rem));
+    }
+  }
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-right {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0%);
+    }
+  }
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes marquee-right {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0%);
     }
   }
 }

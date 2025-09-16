@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { useSession } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Search, ChevronDown, User } from 'lucide-react';
+import { Sun, Moon, Search, ChevronDown, User, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 
@@ -36,6 +36,118 @@ const ThemeToggleButton = () => {
   );
 };
 
+// Dropdown component for user menu
+const UserDropdown = ({ session }: { session: any }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <div 
+        className="hidden md:flex items-center gap-x-2 text-sm font-semibold cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+          {session.user.name?.charAt(0).toUpperCase() || 'U'}
+        </div>
+        <span className="font-heading font-semibold">{session.user.name || 'User'}</span>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </div>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-50">
+          <div className="px-4 py-2 border-b border-border">
+            <p className="text-sm font-medium">{session.user.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{session.user.email || 'user@example.com'}</p>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Dropdown component for learning areas
+const LearningAreasDropdown = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div 
+      className="relative"
+      ref={dropdownRef}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
+      <a 
+        href="#" 
+        className="transition-colors hover:text-foreground flex items-center gap-1 font-heading font-semibold cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }}
+      >
+        Learning Areas <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </a>
+
+      {isOpen && (
+        <div className="absolute left-0 mt-2 w-64 bg-background border border-border rounded-md shadow-lg py-2 z-50 bg-white dark:bg-gray-900">
+          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
+            <h3 className="font-medium">Programming</h3>
+            <p className="text-sm text-muted-foreground">Learn to code with our comprehensive courses</p>
+          </div>
+          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
+            <h3 className="font-medium">Data Science</h3>
+            <p className="text-sm text-muted-foreground">Master data analysis and machine learning</p>
+          </div>
+          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
+            <h3 className="font-medium">Design</h3>
+            <p className="text-sm text-muted-foreground">Create beautiful interfaces and experiences</p>
+          </div>
+          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
+            <h3 className="font-medium">Business</h3>
+            <p className="text-sm text-muted-foreground">Develop essential business skills</p>
+          </div>
+          <div className="px-4 py-2 border-t border-border mt-2">
+            <a href="#" className="text-primary hover:underline text-sm font-medium">View All Categories →</a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const Header = () => {
   const { data: session, status } = useSession();
@@ -54,9 +166,7 @@ export const Header = () => {
         {/* Middle: Navigation Links & Search */}
         <div className="flex flex-1 items-center justify-center gap-x-8">
           <nav className="hidden lg:flex items-center gap-x-6 text-sm font-medium text-muted-foreground">
-            <a href="#" className="transition-colors hover:text-foreground flex items-center gap-1 font-heading font-semibold">
-              Learning Areas <ChevronDown className="h-4 w-4" />
-            </a>
+            <LearningAreasDropdown />
           </nav>
           
           <div className="relative hidden sm:block w-full max-w-xs">
@@ -82,23 +192,18 @@ export const Header = () => {
               <span className="font-heading font-semibold">Loading...</span>
             </div>
           ) : session?.user ? (
-            <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
-              <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background"></div>
-              <span className="font-heading font-semibold">{session.user.name || 'User'}</span>
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+            <UserDropdown session={session} />
           ) : (
-            <Button 
-              asChild
-              variant="outline" 
-              size="sm" 
-              className="hidden md:flex items-center gap-x-1 font-heading font-semibold"
-            >
-              <Link href="/auth/student/signin">
+            <Link href="/auth/student/signin">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden md:flex items-center gap-x-1 font-heading font-semibold"
+              >
                 <User className="h-4 w-4" />
                 Sign In
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           )}
           
           <ThemeToggleButton />

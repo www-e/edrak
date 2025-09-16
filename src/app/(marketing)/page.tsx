@@ -3,6 +3,7 @@ import { HeroSection } from "@/features/landing/components/HeroSection";
 import { CompaniesSection } from "@/features/landing/components/CompaniesSection";
 import { CategoriesSection } from "@/features/landing/components/CategoriesSection";
 import { FeaturedCoursesSection } from "@/features/landing/components/FeaturedCoursesSection";
+import { ActivitiesSection } from "@/features/landing/components/ActivitiesSection";
 import { Footer } from "@/features/landing/components/Footer";
 
 // This is the main entry point for your landing page.
@@ -17,6 +18,7 @@ export default function LandingPage() {
         <CompaniesSection />
         <CategoriesSection />
         <FeaturedCoursesSection />
+        <ActivitiesSection />
       </main>
       <Footer />
     </div>

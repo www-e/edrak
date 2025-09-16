@@ -1,55 +1,103 @@
-import { InfiniteMovingCards } from "@/components/aceternity/infinite-moving-cards";
 import Image from "next/image";
 
-// We define our logo data right here. In a real application, this might come from a CMS.
+// The logo data provided
 const companyLogos = [
-  { src: "/images/company-logo-placeholder.svg", alt: "Meta" },
-  { src: "/images/company-logo-placeholder.svg", alt: "British Council" },
-  { src: "/images/company-logo-placeholder.svg", alt: "KPMG" },
-  { src: "/images/company-logo-placeholder.svg", alt: "CIB Bank" },
-  { src: "/images/company-logo-placeholder.svg", alt: "Queen Rania Foundation" },
-  { src: "/images/company-logo-placeholder.svg", alt: "Van Leer Foundation" },
-  { src: "/images/company-logo-placeholder.svg", alt: "Hikma" },
+  { src: "/images/meta-logo.svg", alt: "Meta" },
+  { src: "/images/google-org-logo.svg", alt: "Google.org" },
+  { src: "/images/british-council-logo.svg", alt: "British Council" },
+  { src: "/images/kpmg-logo.svg", alt: "KPMG" },
+  { src: "/images/arab-bank-logo.svg", alt: "Arab Bank" },
+  { src: "/images/queen-rania-logo.svg", alt: "Queen Rania Foundation" },
+  { src: "/images/van-leer-logo.svg", alt: "Van Leer Foundation" },
+  { src: "/images/hikma-logo.svg", alt: "Hikma" },
+  { src: "/images/arab-potash-logo.svg", alt: "Arab Potash" },
 ];
 
-export const CompaniesSection = () => {
-  // The InfiniteMovingCards component expects an array of items, where each item has a 'quote' property.
-  // We'll map our logos into this format, using the Next.js Image component as the content.
-  const logoItems = companyLogos.map((logo) => ({
-    quote: (
-      <Image
-        src={logo.src}
-        alt={logo.alt}
-        width={150}
-        height={50}
-        className="h-10 w-auto object-contain"
-      />
-    ),
-  }));
-
+// Helper component for a single carousel row to keep the code clean
+const CarouselRow = ({ logos, direction = 'left' }: { logos: typeof companyLogos; direction?: 'left' | 'right' }) => {
+  const extendedLogos = [...logos, ...logos];
+  
   return (
-    <section className="py-20 sm:py-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground max-w-2xl mx-auto font-heading">
-          We collaborate with leading companies and thousands of learners trust us!
-        </h2>
-        <a href="#" className="inline-block mt-4 text-primary font-semibold hover:underline font-heading">
-          Our Success Partners &rarr;
-        </a>
+    <div className="relative overflow-hidden">
+      <div className={`flex ${direction === 'left' ? 'animate-marquee-left' : 'animate-marquee-right'}`}>
+        {extendedLogos.map((logo, index) => (
+          <div 
+            key={index} 
+            className="flex-shrink-0 mx-6 flex items-center justify-center"
+            style={{ minWidth: '160px' }}
+          >
+            <Image
+              src={logo.src}
+              alt={logo.alt}
+              width={140}
+              height={60}
+              className="h-12 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity duration-300 filter grayscale hover:grayscale-0"
+            />
+          </div>
+        ))}
       </div>
-      
-      {/* 
-        Here we use the Aceternity UI component.
-        - `items`: We pass our formatted logo images.
-        - `direction`: "left" for LTR flow.
-        - `speed`: "slow" for a professional, easy-to-read pace.
-      */}
-      <div className="mt-12">
-        <InfiniteMovingCards
-          items={logoItems}
-          direction="left"
-          speed="slow"
-        />
+    </div>
+  );
+};
+
+export const CompaniesSection = () => {
+  return (
+    <section className="py-20 sm:py-24 bg-background overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main container using Flexbox for the two-column layout */}
+        <div className="flex flex-col lg:flex-row items-center gap-12">
+
+          {/* ===== Left Column: Logo Carousel ===== */}
+          <div className="relative w-full lg:w-2/3">
+            {/* Gradient Mask Overlay for the far left */}
+            <div 
+              aria-hidden="true"
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                background: `linear-gradient(to right, 
+                  hsl(var(--background)) 0%, 
+                  transparent 15%, 
+                  transparent 100%)`
+              }}
+            />
+            
+            {/* Rows Container */}
+            <div className="flex flex-col gap-8 py-4">
+              <CarouselRow logos={companyLogos} direction="left" />
+              <CarouselRow logos={companyLogos} direction="right" />
+              <CarouselRow logos={companyLogos} direction="left" />
+            </div>
+          </div>
+
+          {/* ===== Right Column: Text Content ===== */}
+          <div className="relative w-full lg:w-1/3 text-center lg:text-left">
+             {/* Gradient Mask Overlay to fade into the carousel on the left */}
+            <div 
+              aria-hidden="true"
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                background: `linear-gradient(to left, 
+                  transparent 70%, 
+                  hsl(var(--background)) 100%)`
+              }}
+            />
+
+            {/* Actual text content */}
+            <div className="relative z-0">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mx-auto mb-2">
+                Partner with leading companies trusted by thousands of learners!
+              </h2>
+              <a 
+                href="#" 
+                className="group inline-flex items-center gap-1 text-primary font-semibold hover:underline transition-all duration-300 hover:gap-2"
+              >
+                Our Success Partners
+                <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
       </div>
     </section>
   );
