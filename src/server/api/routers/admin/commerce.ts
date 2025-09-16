@@ -1,18 +1,19 @@
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminCommerceService } from "@/server/services/commerceService";
 import { z } from "zod";
+import { UpdateCouponInputSchema } from "@/types/admin";
 
 // Placeholder for coupon creation/update schemas. For now, we use a generic object.
 // We would replace this with strong Zod schemas in a real implementation.
 const CouponInputSchema = z.object({
-    code: z.string(),
-    type: z.enum(['PERCENTAGE', 'FIXED']),
-    amount: z.number(),
-    maxUses: z.number().nullable().optional(),
-    maxUsesPerUser: z.number().default(1),
-    startDate: z.date(),
-    endDate: z.date().nullable().optional(),
-    isActive: z.boolean().default(true),
+  code: z.string(),
+  type: z.enum(["PERCENTAGE", "FIXED"]),
+  amount: z.number(),
+  maxUses: z.number().nullable().optional(),
+  maxUsesPerUser: z.number().default(1),
+  startDate: z.date(),
+  endDate: z.date().nullable().optional(),
+  isActive: z.boolean().default(true),
 });
 
 export const adminCommerceRouter = createTRPCRouter({
@@ -22,7 +23,7 @@ export const adminCommerceRouter = createTRPCRouter({
   getAllPayments: adminProcedure.query(async () => {
     return AdminCommerceService.getAllPayments();
   }),
-  
+
   /**
    * Create a new coupon.
    */
@@ -37,23 +38,19 @@ export const adminCommerceRouter = createTRPCRouter({
       };
       return AdminCommerceService.createCoupon(data);
     }),
-    
+
+  /**
+   * Update an existing coupon.
+   */
   /**
    * Update an existing coupon.
    */
   updateCoupon: adminProcedure
-    .input(z.object({ 
-      id: z.string().uuid(), 
-      data: CouponInputSchema.partial() 
-    }))
-.mutation(async ({ input }) => {
-        // Convert undefined to null for optional fields
-        const data = {
-          ...input.data,
-          maxUses: input.data.maxUses !== undefined ? input.data.maxUses : undefined,
-          endDate: input.data.endDate !== undefined ? input.data.endDate : undefined,
-        };
-        return AdminCommerceService.updateCoupon(input.id, data);
+    .input(UpdateCouponInputSchema)
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      // The id is required by the schema, so we can assert its existence.
+      return AdminCommerceService.updateCoupon(id!, data);
     }),
 
   /**
@@ -77,5 +74,5 @@ export const adminCommerceRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ input }) => {
       return AdminCommerceService.getCouponById(input.id);
-    }),   
+    }),
 });

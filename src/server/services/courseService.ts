@@ -1,14 +1,21 @@
 import { db } from "@/server/db";
-import type { CreateCourseInput, CreateLessonInput, UpdateCourseInput } from '@/types/admin';
+import type {
+  CreateCourseInput,
+  CreateLessonInput,
+  UpdateCourseInput,
+  UpdateLessonInput,
+} from "@/types/admin";
 
 export class AdminCourseService {
   static async createCourse(data: CreateCourseInput) {
-    return db.course.create({ data: {
-      ...data,
-      categoryId: data.categoryId ?? null,
-    }});
+    return db.course.create({
+      data: {
+        ...data,
+        categoryId: data.categoryId ?? null,
+      },
+    });
   }
-  
+
   static async updateCourse(data: UpdateCourseInput) {
     const { id, ...updateData } = data;
     return db.course.update({
@@ -19,13 +26,13 @@ export class AdminCourseService {
 
   static async getAllCourses() {
     return db.course.findMany({
-      select: { 
-        id: true, 
-        title: true, 
+      select: {
+        id: true,
+        title: true,
         description: true,
-        price: true, 
+        price: true,
         language: true,
-        visibility: true, 
+        visibility: true,
         createdAt: true,
         professor: {
           select: {
@@ -33,8 +40,8 @@ export class AdminCourseService {
             lastName: true,
           },
         },
-       },
-      orderBy: { createdAt: 'desc' },
+      },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -44,16 +51,28 @@ export class AdminCourseService {
       include: {
         professor: { select: { id: true, firstName: true, lastName: true } },
         category: true,
-        lessons: { where: { isDeleted: false }, orderBy: { order: 'asc' } },
+        lessons: { where: { isDeleted: false }, orderBy: { order: "asc" } },
       },
     });
   }
 
   static async createLesson(data: CreateLessonInput) {
-    return db.lesson.create({ data: {
-      ...data,
-      videoUrl: data.videoUrl ?? null,
-    }});
+    return db.lesson.create({
+      data: {
+        ...data,
+        videoUrl: data.videoUrl ?? null,
+      },
+    });
+  }
+    static async updateLesson(data: UpdateLessonInput) {
+    const { id, ...updateData } = data;
+    return db.lesson.update({
+      where: { id },
+      data: {
+        ...updateData,
+        videoUrl: updateData.videoUrl, // Handles setting to null or a new value
+      },
+    });
   }
 
   static async getLesson(id: string) {
@@ -77,4 +96,5 @@ export class AdminCourseService {
       data: { isDeleted: false, deletedAt: null },
     });
   }
+
 }

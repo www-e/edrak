@@ -147,10 +147,11 @@ export function FileUpload({
           <div className="space-y-4">
             {previewUrl ? (
               <div className="relative inline-block">
-                {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={previewUrl} 
                   className="max-h-40 rounded-md object-contain"
+                  alt="File preview"
                 />
                 <Button
                   type="button"

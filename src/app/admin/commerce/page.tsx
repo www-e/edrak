@@ -1,107 +1,83 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { api } from "@/trpc/react";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { MetricCard } from "@/components/admin/shared/metric-card";
 import { 
   CreditCard, 
-  Ticket, 
   TrendingUp, 
-  TrendingDown 
+  Users,
+  BookOpen
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 
 export default function CommercePage() {
+  const router = useRouter();
+  const { data: metrics, isLoading } = api.admin.commerce.getDashboardMetrics.useQuery();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Commerce"
         description="Manage payments, coupons, and financial metrics"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={() => router.push("/admin/commerce/coupons")}>Manage Coupons</Button>
+            {/* This will link to the payments page we build later */}
+            <Button variant="outline" onClick={() => router.push("/admin/commerce/payments")}>View Payments</Button>
+          </div>
+        }
       />
       
       {/* Financial Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Revenue"
-          value="EGP 45,231.00"
-          description="+12% from last month"
+          value={`EGP ${metrics?.totalRevenue.toFixed(2) ?? '0.00'}`}
+          description="From completed payments"
           icon={<TrendingUp className="h-4 w-4" />}
         />
         
         <MetricCard
-          title="Pending Payments"
-          value="EGP 1,234.00"
-          description="+3% from last month"
+          title="Total Users"
+          value={metrics?.totalUsers ?? 0}
+          description="All user roles included"
+          icon={<Users className="h-4 w-4" />}
+        />
+        
+        <MetricCard
+          title="Total Courses"
+          value={metrics?.totalCourses ?? 0}
+          description="Published and draft courses"
+          icon={<BookOpen className="h-4 w-4" />}
+        />
+        
+         <MetricCard
+          title="Active Enrollments"
+          value={metrics?.activeEnrollments ?? 0}
+          description="Currently active students"
           icon={<CreditCard className="h-4 w-4" />}
-        />
-        
-        <MetricCard
-          title="Active Coupons"
-          value="24"
-          description="3 expiring soon"
-          icon={<Ticket className="h-4 w-4" />}
-        />
-        
-        <MetricCard
-          title="Conversion Rate"
-          value="4.2%"
-          description="-0.5% from last month"
-          icon={<TrendingDown className="h-4 w-4" />}
         />
       </div>
       
-      {/* Recent Payments */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Payments</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Payment #{1000 + item}</p>
-                    <p className="text-sm text-muted-foreground">User {item} - Course {item}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">EGP {(item * 299.99).toFixed(2)}</p>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Active Coupons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Coupons</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center">
-                    <Ticket className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">COUPON{100 + item}</p>
-                    <p className="text-sm text-muted-foreground">20% off - 50 uses left</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">20% OFF</p>
-                  <p className="text-sm text-muted-foreground">Expires 2023-12-31</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Placeholder for Recent Payments/Coupons - We can build this out later */}
+      <div className="text-center py-12 border border-dashed rounded-lg">
+        <h3 className="text-lg font-semibold">Coupon Management</h3>
+        <p className="text-muted-foreground mt-1">Create and manage discount codes for your courses.</p>
+        <Button className="mt-4" onClick={() => router.push("/admin/commerce/coupons/new")}>
+          <Plus className="mr-2 h-4 w-4" /> Create First Coupon
+        </Button>
+      </div>
     </div>
   );
 }

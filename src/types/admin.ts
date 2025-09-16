@@ -76,3 +76,16 @@ export const UpdateCourseInputSchema = z.object({
   categoryId: z.string().uuid().nullable().optional(),
 });
 export type UpdateCourseInput = z.infer<typeof UpdateCourseInputSchema>;
+export const UpdateLessonInputSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).optional(),
+  order: z.number().int().min(1).optional(),
+  content: z.string().optional(),
+  isVisible: z.boolean().optional(),
+  videoUrl: z.string().url().nullable().optional(),
+});
+export type UpdateLessonInput = z.infer<typeof UpdateLessonInputSchema>;
+export const UpdateCouponInputSchema = CouponInputSchema.extend({
+  id: z.string().uuid(),
+}).partial(); // Makes all fields, except the new 'id', optional.
+export type UpdateCouponInput = z.infer<typeof UpdateCouponInputSchema>;

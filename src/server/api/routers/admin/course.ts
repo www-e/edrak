@@ -2,8 +2,7 @@ import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminCourseService } from "@/server/services/courseService";
 import { z } from "zod";
 import { CourseVisibility } from "@prisma/client";
-import { UpdateCourseInputSchema } from "@/types/admin"; // Import the centralized schema
-
+import { UpdateCourseInputSchema, UpdateLessonInputSchema } from "@/types/admin";
 // Schema for creating a course
 const CreateCourseInputSchema = z.object({
   title: z.string().min(1),
@@ -126,5 +125,13 @@ export const adminCourseRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input }) => {
         return AdminCourseService.restoreLesson(input.id);
+    }),
+    /**
+   * Update an existing lesson.
+   */
+  updateLesson: adminProcedure
+    .input(UpdateLessonInputSchema)
+    .mutation(async ({ input }) => {
+      return AdminCourseService.updateLesson(input);
     }),
 });
