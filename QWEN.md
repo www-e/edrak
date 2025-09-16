@@ -1,6 +1,7 @@
 # sportschool - Educational Platform Landing Page
 
 READ THE RULES DIRECTORY FIRST!
+sportologyacademy.vercel.app
 
 ## Project Overview
 

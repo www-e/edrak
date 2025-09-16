@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
+import { Session } from 'next-auth';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Search, ChevronDown, User, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -37,7 +38,7 @@ const ThemeToggleButton = () => {
 };
 
 // Dropdown component for user menu
-const UserDropdown = ({ session }: { session: any }) => {
+const UserDropdown = ({ session }: { session: Session }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -61,17 +62,17 @@ const UserDropdown = ({ session }: { session: any }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-          {session.user.name?.charAt(0).toUpperCase() || 'U'}
+          {session.user?.name?.charAt(0).toUpperCase() || 'U'}
         </div>
-        <span className="font-heading font-semibold">{session.user.name || 'User'}</span>
+        <span className="font-heading font-semibold">{session.user?.name || 'User'}</span>
         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </div>
 
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-50">
           <div className="px-4 py-2 border-b border-border">
-            <p className="text-sm font-medium">{session.user.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{session.user.email || 'user@example.com'}</p>
+            <p className="text-sm font-medium">{session.user?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{session.user?.email || 'user@example.com'}</p>
           </div>
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
