@@ -35,7 +35,7 @@ export const CategoriesSection = () => {
         
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           {/* Main Category Button */}
-          <Button size="lg" className="font-semibold rounded-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-heading">
+          <Button size="lg" className="font-semibold rounded-full px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-heading">
             Career Preparation
           </Button>
 

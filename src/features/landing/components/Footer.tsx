@@ -31,7 +31,7 @@ const linkColumns = {
 export const Footer = () => {
   return (
     // We use a dark background color directly, as the footer is always dark.
-    <footer className="bg-[#06292b] text-gray-300 relative pt-20">
+    <footer className="bg-background text-foreground relative pt-20">
       {/* 
         This SVG creates the elegant curved shape at the top of the footer.
         It sits above the footer's content, and its color is set to the main
@@ -51,7 +51,7 @@ export const Footer = () => {
           ></path>
           <path
             d="M600,112.77C268.63,112.77,0,65.52,0,7.23V0h1200v7.23C1200,65.52,931.37,112.77,600,112.77Z"
-            className="fill-[#06292b]" // Must match the footer's background color
+            className="fill-background" // Must match the footer's background color
           ></path>
         </svg>
       </div>
@@ -63,11 +63,11 @@ export const Footer = () => {
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
             {Object.entries(linkColumns).map(([title, links]) => (
               <div key={title}>
-                <h5 className="font-bold text-white tracking-wider font-heading">{title}</h5>
+                <h5 className="font-bold text-foreground tracking-wider font-heading">{title}</h5>
                 <ul className="mt-4 space-y-3 text-sm">
                   {links.map((link) => (
                     <li key={link.text}>
-                      <a href={link.href} className="hover:text-white transition-colors font-body">
+                      <a href={link.href} className="hover:text-foreground transition-colors font-body">
                         {link.text}
                       </a>
                     </li>
@@ -79,7 +79,7 @@ export const Footer = () => {
 
           {/* Social & Apps (takes up remaining space) */}
           <div className="lg:col-span-4">
-            <h4 className="font-bold text-white text-lg font-heading">Learn Anywhere</h4>
+            <h4 className="font-bold text-foreground text-lg font-heading">Learn Anywhere</h4>
             <p className="text-sm mt-2 font-body">
               Learn anytime, anywhere with the sportschool app!
             </p>
@@ -91,12 +91,12 @@ export const Footer = () => {
                 <Image src="/images/google-play-badge-en.svg" alt="Get it on Google Play" width={150} height={50} className="h-12 w-auto" />
               </a>
             </div>
-            <h4 className="font-bold text-white text-lg mt-8 font-heading">
+            <h4 className="font-bold text-foreground text-lg mt-8 font-heading">
               Find Us on Social Media
             </h4>
             <div className="flex gap-4 mt-4">
               {socialLinks.map((social, index) => (
-                <a key={index} href={social.href} className="hover:text-white transition-colors">
+                <a key={index} href={social.href} className="hover:text-foreground transition-colors">
                   <social.icon className="h-6 w-6" />
                 </a>
               ))}
@@ -104,7 +104,7 @@ export const Footer = () => {
           </div>
 
         </div>
-        <div className="border-t border-gray-700/50 mt-8 pt-6 text-sm text-center text-gray-400 font-body">
+        <div className="border-t border-border mt-8 pt-6 text-sm text-center text-muted-foreground font-body">
           <p>&copy; {new Date().getFullYear()} sportschool. All rights reserved.</p>
         </div>
       </div>

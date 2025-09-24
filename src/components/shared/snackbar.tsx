@@ -9,10 +9,10 @@ const snackbarVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-blue-500 text-white",
-        success: "bg-green-500 text-white",
-        warning: "bg-yellow-500 text-black",
-        error: "bg-red-500 text-white",
+        default: "bg-primary text-primary-foreground",
+        success: "bg-secondary text-secondary-foreground",
+        warning: "bg-accent text-accent-foreground",
+        error: "bg-destructive text-destructive-foreground",
       },
       state: {
         entering: "translate-x-full opacity-0",
@@ -75,7 +75,7 @@ export function Snackbar({
             setState("exiting");
             setTimeout(onClose, 300);
           }}
-          className="ml-4 text-white hover:text-gray-200 focus:outline-none"
+          className="ml-4 text-primary-foreground hover:text-muted-foreground focus:outline-none"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
