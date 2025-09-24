@@ -7,7 +7,7 @@ import { useState } from "react";
 import superjson from "superjson";
 import { type AppRouter } from "@/server/api/root";
 
-const trpc = createTRPCReact<AppRouter>();
+export const trpc = createTRPCReact<AppRouter>();
 
 export function TRPCProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({

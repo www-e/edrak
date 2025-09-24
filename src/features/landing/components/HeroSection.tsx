@@ -34,9 +34,9 @@ export const HeroSection = () => {
                   Sign Up Free
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
+              <Button size="lg" variant="secondary" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
                 <Link href="/courses">
-                  View Courses
+                  Browse Courses
                 </Link>
               </Button>
             </div>

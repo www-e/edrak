@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { createCategories, createProfessors, createCourses } from './seed-courses';
+import { createLessons } from './seed-lessons';
 
 const prisma = new PrismaClient();
 
@@ -22,6 +24,20 @@ async function main() {
   });
 
   console.log('Admin user created/updated:', adminUser.username);
+
+  // Create categories
+  const categories = await createCategories();
+
+  // Create professors
+  const professors = await createProfessors();
+
+  // Create courses
+  const courses = await createCourses(categories, professors);
+
+  // Create lessons for each course
+  await createLessons(courses);
+
+  console.log('Database seeding completed successfully!');
 }
 
 main()

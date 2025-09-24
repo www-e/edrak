@@ -1,4 +1,5 @@
 import { db } from "@/server/db";
+import { CourseVisibility, Prisma } from "@prisma/client";
 import type {
   CreateCourseInput,
   CreateLessonInput,
@@ -96,5 +97,145 @@ export class AdminCourseService {
       data: { isDeleted: false, deletedAt: null },
     });
   }
+}
 
+export class CourseService {
+  /**
+   * Get all published courses with relevant information for public display
+   */
+  static async getPublishedCourses(filters?: {
+    category?: string;
+    price?: 'free' | 'paid';
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const where: Prisma.CourseWhereInput = {
+      visibility: CourseVisibility.PUBLISHED
+    };
+
+    // Add category filter
+    if (filters?.category) {
+      where.category = {
+        name: filters.category
+      };
+    }
+
+    // Add price filter
+    if (filters?.price === 'free') {
+      where.price = 0;
+    } else if (filters?.price === 'paid') {
+      where.price = { gt: 0 };
+    }
+
+    // Add search filter
+    if (filters?.search) {
+      where.OR = [
+        { title: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } }
+      ];
+    }
+
+    const page = filters?.page || 1;
+    const limit = filters?.limit || 12;
+    const skip = (page - 1) * limit;
+
+    const [courses, totalCount] = await Promise.all([
+      db.course.findMany({
+        where,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          language: true,
+          slug: true,
+          rating: true,
+          ratingCount: true,
+          createdAt: true,
+          category: {
+            select: {
+              name: true
+            }
+          },
+          professor: {
+            select: {
+              firstName: true,
+              lastName: true
+            }
+          },
+          _count: {
+            select: {
+              enrollments: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: "desc"
+        },
+        skip,
+        take: limit
+      }),
+      db.course.count({ where })
+    ]);
+
+    return {
+      courses,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasNext: page * limit < totalCount,
+        hasPrev: page > 1
+      }
+    };
+  }
+
+  /**
+   * Get a specific course by its slug
+   */
+  static async getCourseBySlug(slug: string) {
+    return db.course.findUnique({
+      where: { 
+        slug,
+        visibility: CourseVisibility.PUBLISHED
+      },
+      include: {
+        category: true,
+        professor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            username: true
+          }
+        },
+        lessons: {
+          where: { 
+            isDeleted: false 
+          },
+          orderBy: { 
+            order: "asc" 
+          },
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            isVisible: true
+          }
+        },
+        _count: {
+          select: {
+            enrollments: true,
+            lessons: {
+              where: {
+                isDeleted: false
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 }

@@ -1,85 +1,33 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
 }
-
-// Configure seed script
-// Run with: npx prisma db seed
-// Seeding requires the seed.ts file in this directory
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Enum for user roles
-enum Role {
-  ADMIN
-  PROFESSOR
-  STUDENT
-}
-
-// Enum for course visibility
-enum CourseVisibility {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-// Enum for enrollment status
-enum EnrollmentStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-// Enum for payment status
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-// Enum for payment gateway
-enum PaymentGateway {
-  PAYMOB
-  OTHER
-}
-
-// Enum for coupon type
-enum CouponType {
-  PERCENTAGE
-  FIXED
-}
-
-// User model
 model User {
-  id              String    @id @default(uuid())
-  username        String    @unique
-  password        String
-  firstName       String
-  lastName        String
-  phoneNumber     String
-  secondPhoneNumber String?
+  id                 String       @id @default(uuid())
+  username           String       @unique
+  password           String
+  firstName          String
+  lastName           String
+  phoneNumber        String
+  secondPhoneNumber  String?
   categoryPreference String?
-  referralSource  String?
-  role            Role      @default(STUDENT)
-  isActive        Boolean   @default(true)
-  lastLoginAt     DateTime? @updatedAt
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relations
-  enrollments     Enrollment[]
-  payments        Payment[]
-  taughtCourses   Course[]      @relation("CourseProfessor")
+  referralSource     String?
+  role               Role         @default(STUDENT)
+  isActive           Boolean      @default(true)
+  lastLoginAt        DateTime?    @updatedAt
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  taughtCourses      Course[]     @relation("CourseProfessor")
+  enrollments        Enrollment[]
+  payments           Payment[]
 }
 
-// Category model
 model Category {
   id          String   @id @default(uuid())
   name        String
@@ -87,55 +35,48 @@ model Category {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
   courses     Course[]
 }
 
-// Course model
 model Course {
-  id            String           @id @default(uuid())
-  title         String
-  slug          String           @unique
-  description   String
-  price         Float            @default(0.0)
-  language      String
-  visibility    CourseVisibility @default(DRAFT)
-  categoryId    String?
-  professorId   String
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  publishedAt   DateTime?
-
-  // Relations
-  category      Category?        @relation(fields: [categoryId], references: [id])
-  professor     User             @relation("CourseProfessor", fields: [professorId], references: [id])
-  lessons       Lesson[]
-  enrollments   Enrollment[]
-  payments      Payment[]
+  id          String           @id @default(uuid())
+  title       String
+  slug        String           @unique
+  description String
+  price       Float            @default(0.0)
+  language    String
+  visibility  CourseVisibility @default(DRAFT)
+  categoryId  String?
+  professorId String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  publishedAt DateTime?
+  rating      Float            @default(0.0)
+  ratingCount Int              @default(0)
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  professor   User             @relation("CourseProfessor", fields: [professorId], references: [id])
+  enrollments Enrollment[]
+  lessons     Lesson[]
+  payments    Payment[]
 }
 
-// Lesson model
 model Lesson {
-  id                    String   @id @default(uuid())
+  id                    String           @id @default(uuid())
   courseId              String
   title                 String
   order                 Int
   content               String
   videoUrl              String?
-  isVisible             Boolean  @default(true)
-  isDeleted             Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  isVisible             Boolean          @default(true)
+  isDeleted             Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
   deletedAt             DateTime?
-
-  // Relations
-  course                Course           @relation(fields: [courseId], references: [id])
   attachments           Attachment[]
+  course                Course           @relation(fields: [courseId], references: [id])
   lessonProgressEntries LessonProgress[]
 }
 
-// Attachment model
 model Attachment {
   id           String   @id @default(uuid())
   lessonId     String
@@ -147,84 +88,105 @@ model Attachment {
   bunnyCdnUrl  String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  // Relations
   lesson       Lesson   @relation(fields: [lessonId], references: [id])
 }
 
-// Enrollment model
 model Enrollment {
-  id                  String           @id @default(uuid())
-  userId              String
-  courseId            String
-  enrolledAt          DateTime         @default(now())
-  status              EnrollmentStatus @default(ACTIVE)
-  completionPercentage Int             @default(0)
-
-  // Relations
-  user                User             @relation(fields: [userId], references: [id])
-  course              Course           @relation(fields: [courseId], references: [id])
-  lessonProgress      LessonProgress[]
-  payments            Payment[]
+  id                   String           @id @default(uuid())
+  userId               String
+  courseId             String
+  enrolledAt           DateTime         @default(now())
+  status               EnrollmentStatus @default(ACTIVE)
+  completionPercentage Int              @default(0)
+  course               Course           @relation(fields: [courseId], references: [id])
+  user                 User             @relation(fields: [userId], references: [id])
+  lessonProgress       LessonProgress[]
+  payments             Payment[]
 }
 
-// LessonProgress model
 model LessonProgress {
-  id                     String   @id @default(uuid())
+  id                     String     @id @default(uuid())
   enrollmentId           String
   lessonId               String
-  isCompleted            Boolean  @default(false)
-  videoWatchedPercentage Int      @default(0)
+  isCompleted            Boolean    @default(false)
+  videoWatchedPercentage Int        @default(0)
   completedAt            DateTime?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-
-  // Relations
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
   enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
   lesson                 Lesson     @relation(fields: [lessonId], references: [id])
 
   @@unique([enrollmentId, lessonId])
 }
 
-// Coupon model
 model Coupon {
-  id              String     @id @default(uuid())
-  code            String     @unique
-  type            CouponType
-  amount          Float
-  maxUses         Int?
-  usedCount       Int        @default(0)
-  maxUsesPerUser  Int        @default(1)
-  startDate       DateTime
-  endDate         DateTime?
-  isActive        Boolean    @default(true)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // Relations
-  payments        Payment[]
+  id             String     @id @default(uuid())
+  code           String     @unique
+  type           CouponType
+  amount         Float
+  maxUses        Int?
+  usedCount      Int        @default(0)
+  maxUsesPerUser Int        @default(1)
+  startDate      DateTime
+  endDate        DateTime?
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  payments       Payment[]
 }
 
-// Payment model
 model Payment {
-  id               String          @id @default(uuid())
+  id               String         @id @default(uuid())
   userId           String
   courseId         String?
   enrollmentId     String?
   amount           Float
-  currency         String          @default("EGP")
-  status           PaymentStatus   @default(PENDING)
-  paymentGateway   PaymentGateway  @default(PAYMOB)
+  currency         String         @default("EGP")
+  status           PaymentStatus  @default(PENDING)
+  paymentGateway   PaymentGateway @default(PAYMOB)
   gatewayReference String?
   gatewayResponse  Json?
   couponId         String?
-  enrolledAt       DateTime?       @updatedAt
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  enrolledAt       DateTime?      @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  coupon           Coupon?        @relation(fields: [couponId], references: [id])
+  course           Course?        @relation(fields: [courseId], references: [id])
+  enrollment       Enrollment?    @relation(fields: [enrollmentId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
+}
 
-  // Relations
-  user             User            @relation(fields: [userId], references: [id])
-  course           Course?         @relation(fields: [courseId], references: [id])
-  enrollment       Enrollment?     @relation(fields: [enrollmentId], references: [id])
-  coupon           Coupon?         @relation(fields: [couponId], references: [id])
+enum Role {
+  ADMIN
+  PROFESSOR
+  STUDENT
+}
+
+enum CourseVisibility {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentGateway {
+  PAYMOB
+  OTHER
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED
 }

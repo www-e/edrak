@@ -168,6 +168,9 @@ export const Header = () => {
         <div className="flex flex-1 items-center justify-center gap-x-8">
           <nav className="hidden lg:flex items-center gap-x-6 text-sm font-medium text-muted-foreground">
             <LearningAreasDropdown />
+            <Link href="/courses" className="transition-colors hover:text-foreground font-heading font-semibold">
+              Courses
+            </Link>
           </nav>
           
           <div className="relative hidden sm:block w-full max-w-xs">
@@ -182,6 +185,9 @@ export const Header = () => {
         {/* Right side: User Actions */}
         <div className="flex items-center gap-x-4">
           <nav className="hidden lg:flex items-center gap-x-6 text-sm font-medium text-muted-foreground">
+            <Link href="/courses" className="transition-colors hover:text-foreground font-heading font-semibold">
+              Courses
+            </Link>
             <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Specializations</a>
             <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Tools</a>
             <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Partners</a>
