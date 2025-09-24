@@ -34,7 +34,7 @@ export default function CreateCoursePage() {
   const { data: users, isLoading: isLoadingUsers } = api.admin.user.getAll.useQuery();
   const { data: categories, isLoading: isLoadingCategories } = api.admin.category.getAll.useQuery();
 
-  const professors = users?.filter(user => user.role === Role.PROFESSOR) ?? [];
+  const professors = users?.users?.filter(user => user.role === Role.PROFESSOR) ?? [];
 
   // 2. Initialize the form
   const form = useForm<CreateCourseFormInput>({

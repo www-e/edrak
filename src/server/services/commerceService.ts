@@ -56,20 +56,34 @@ export class AdminCommerceService {
     });
   }
   /**
-   * Retrieves key metrics for the admin dashboard.
+   * Retrieves key metrics for the admin dashboard with optimized parallel queries.
    */
   static async getDashboardMetrics() {
-    const totalUsers = await prisma.user.count();
-    const totalCourses = await prisma.course.count();
-    // Placeholder for revenue and enrollments until payments are fully integrated
-    const totalRevenue = 0;
-    const activeEnrollments = 0;
+    // Execute all queries in parallel for maximum performance
+    const [userStats, courseStats, enrollmentStats, revenueStats] = await Promise.all([
+      prisma.user.aggregate({
+        _count: { id: true },
+        where: { isActive: true }
+      }),
+      prisma.course.aggregate({
+        _count: { id: true },
+        where: { visibility: 'PUBLISHED' }
+      }),
+      prisma.enrollment.aggregate({
+        _count: { id: true },
+        where: { status: 'ACTIVE' }
+      }),
+      prisma.payment.aggregate({
+        _sum: { amount: true },
+        where: { status: 'COMPLETED' }
+      })
+    ]);
 
     return {
-      totalUsers,
-      totalCourses,
-      totalRevenue,
-      activeEnrollments,
+      totalUsers: userStats._count.id,
+      totalCourses: courseStats._count.id,
+      activeEnrollments: enrollmentStats._count.id,
+      totalRevenue: revenueStats._sum.amount || 0,
     };
   }
 

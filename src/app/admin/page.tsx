@@ -1,26 +1,25 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Users, 
-  BookOpen, 
-  CreditCard, 
-  TrendingUp 
+import {
+  Users,
+  BookOpen,
+  CreditCard,
+  TrendingUp
 } from "lucide-react";
 import { api } from "@/trpc/react";
+import { DashboardSkeleton, UsersSkeleton } from "@/components/admin/shared/dashboard-skeleton";
+import { Suspense } from "react";
 
 export default function AdminDashboardPage() {
   const { data: metrics, isLoading: isLoadingMetrics } = api.admin.commerce.getDashboardMetrics.useQuery();
-  const { data: usersData, isLoading: isLoadingUsers } = api.admin.user.getAll.useQuery();
-  
-  const recentUsers = usersData?.slice(0, 5) ?? [];
+  const { data: usersData} = api.admin.user.getAll.useQuery();
 
-  if (isLoadingMetrics || isLoadingUsers) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+  const recentUsers = usersData?.users?.slice(0, 5) ?? [];
+
+  // Show skeleton while critical data loads
+  if (isLoadingMetrics) {
+    return <DashboardSkeleton />;
   }
 
   return (
@@ -84,26 +83,28 @@ export default function AdminDashboardPage() {
             <CardTitle>Recent Users</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentUsers.length > 0 ? recentUsers.map((user) => (
-                <div key={user.id} className="flex items-center">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-sm font-medium text-primary">
-                      {user.firstName?.[0]?.toUpperCase()}
-                    </span>
+            <Suspense fallback={<UsersSkeleton />}>
+              <div className="space-y-4">
+                {recentUsers.length > 0 ? recentUsers.map((user) => (
+                  <div key={user.id} className="flex items-center">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-sm font-medium text-primary">
+                        {user.firstName?.[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="ml-4 space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.username}
+                      </p>
+                    </div>
+                    <div className="ml-auto font-medium capitalize text-sm">{user.role.toLowerCase()}</div>
                   </div>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {user.username}
-                    </p>
-                  </div>
-                  <div className="ml-auto font-medium capitalize text-sm">{user.role.toLowerCase()}</div>
-                </div>
-              )) : (
-                <p className="text-sm text-muted-foreground text-center py-4">No recent users found.</p>
-              )}
-            </div>
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No recent users found.</p>
+                )}
+              </div>
+            </Suspense>
           </CardContent>
         </Card>
         

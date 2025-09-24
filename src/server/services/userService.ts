@@ -30,20 +30,53 @@ export class AdminUserService {
   }
   
   /**
-   * Retrieves all users.
+   * Retrieves all users with pagination and search support.
    */
-  static async getAllUsers() {
-    return prisma.user.findMany({
+  static async getAllUsers(options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const { page = 1, limit = 50, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+
+    const skip = (page - 1) * limit;
+
+    const where = search ? {
+      OR: [
+        { username: { contains: search, mode: 'insensitive' as const } },
+        { firstName: { contains: search, mode: 'insensitive' as const } },
+        { lastName: { contains: search, mode: 'insensitive' as const } }
+      ]
+    } : {};
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
         select: {
-            id: true,
-            username: true,
-            firstName: true,
-            lastName: true,
-            role: true,
-            isActive: true,
-            createdAt: true,
-        }
-    });
+          id: true,
+          username: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isActive: true,
+          createdAt: true,
+        },
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: limit,
+      }),
+      prisma.user.count({ where })
+    ]);
+
+    return {
+      users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
     /**
    * Retrieves a single user by their ID.

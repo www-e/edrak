@@ -7,11 +7,18 @@ import { z } from "zod";
 
 export const adminUserRouter = createTRPCRouter({
   /**
-   * Get a list of all users.
+   * Get a list of all users with pagination and search support.
    */
   getAll: adminProcedure
-    .query(async () => {
-      return AdminUserService.getAllUsers();
+    .input(z.object({
+      page: z.number().min(1).optional(),
+      limit: z.number().min(1).max(100).optional(),
+      search: z.string().optional(),
+      sortBy: z.string().optional(),
+      sortOrder: z.enum(['asc', 'desc']).optional(),
+    }).optional())
+    .query(async ({ input }) => {
+      return AdminUserService.getAllUsers(input);
   }),
     /**
    * Get a single user by ID.

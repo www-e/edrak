@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { usePathname } from "next/navigation";
-import { AdminHeader } from "@/components/admin/layout/header";
-import { AdminSidebar } from "@/components/admin/layout/sidebar";
+
+// Lazy load components for better performance
+const AdminHeader = lazy(() => import("@/components/admin/layout/header").then(module => ({ default: module.AdminHeader })));
+const AdminSidebar = lazy(() => import("@/components/admin/layout/sidebar").then(module => ({ default: module.AdminSidebar })));
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -20,15 +22,21 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <AdminSidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
-      />
+      <Suspense fallback={<div className="flex-1 flex items-center justify-center">Loading sidebar...</div>}>
+        <AdminSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </Suspense>
       <div className="flex flex-1 flex-col">
-        <AdminHeader onMenuToggle={() => setSidebarOpen(true)} />
+        <Suspense fallback={<div className="h-16 bg-background border-b flex items-center justify-center">Loading header...</div>}>
+          <AdminHeader onMenuToggle={() => setSidebarOpen(true)} />
+        </Suspense>
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
-            {children}
+            <Suspense fallback={<div className="flex items-center justify-center h-64">Loading page...</div>}>
+              {children}
+            </Suspense>
           </div>
         </main>
       </div>

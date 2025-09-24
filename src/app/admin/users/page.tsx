@@ -27,12 +27,18 @@ export default function UsersPage() {
   const [sortBy, setSortBy] = useState<keyof User>("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   
-  const { data, isLoading } = api.admin.user.getAll.useQuery();
-  
-  const users = data ?? [];
-  
-  // Filter users based on search term
-  const filteredUsers = users.filter(user => 
+  const { data, isLoading } = api.admin.user.getAll.useQuery({
+    page,
+    limit: 50,
+    search: searchTerm,
+    sortBy,
+    sortOrder
+  });
+
+  const users = data?.users ?? [];
+
+  // Filter users based on search term (client-side for current page)
+  const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -119,7 +125,7 @@ export default function UsersPage() {
         pagination={{
           page,
           pageSize,
-          total: filteredUsers.length,
+          total: data?.total ?? 0,
           onPageChange: setPage,
         }}
         sorting={{
