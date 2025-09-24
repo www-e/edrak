@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { CacheService } from "./cacheService";
 
 // Placeholder for Zod schemas
 import { Coupon } from "@prisma/client";
@@ -56,9 +57,27 @@ export class AdminCommerceService {
     });
   }
   /**
-   * Retrieves key metrics for the admin dashboard with optimized parallel queries.
+   * Retrieves key metrics for the admin dashboard with optimized parallel queries and caching.
    */
-  static async getDashboardMetrics() {
+  static async getDashboardMetrics(): Promise<{
+    totalUsers: number;
+    totalCourses: number;
+    activeEnrollments: number;
+    totalRevenue: number;
+  }> {
+    const cacheKey = CacheService.createKey('dashboard', 'metrics');
+
+    // Try to get from cache first
+    const cachedMetrics = CacheService.get<{
+      totalUsers: number;
+      totalCourses: number;
+      activeEnrollments: number;
+      totalRevenue: number;
+    }>(cacheKey);
+    if (cachedMetrics) {
+      return cachedMetrics;
+    }
+
     // Execute all queries in parallel for maximum performance
     const [userStats, courseStats, enrollmentStats, revenueStats] = await Promise.all([
       prisma.user.aggregate({
@@ -79,12 +98,17 @@ export class AdminCommerceService {
       })
     ]);
 
-    return {
+    const metrics = {
       totalUsers: userStats._count.id,
       totalCourses: courseStats._count.id,
       activeEnrollments: enrollmentStats._count.id,
       totalRevenue: revenueStats._sum.amount || 0,
     };
+
+    // Cache the metrics for 30 seconds
+    CacheService.set(cacheKey, metrics, 30 * 1000);
+
+    return metrics;
   }
 
   /**
