@@ -6,9 +6,15 @@ import { SigninForm } from "@/components/auth/signin-form";
 export default function ProfessorSigninPage() {
   return (
     <AuthLayout
-      title="Professor Sign In"
-      subtitle="Access your course management dashboard"
+      title="Welcome Back, Professor"
+      subtitle="Manage your courses and students"
       imagePosition="left"
+      features={[
+        "Create & Edit Courses",
+        "Track Student Progress",
+        "View Analytics",
+        "Earn Revenue"
+      ]}
     >
       <SigninForm defaultRole="PROFESSOR" hideRoleSelector />
     </AuthLayout>

@@ -14,9 +14,15 @@ export default function SignupPage() {
 
   return (
     <AuthLayout
-      title="Create your account"
-      subtitle="Fill in your information to get started"
+      title="Join Edraak Today"
+      subtitle="Start your learning journey with thousands of courses"
       imagePosition="right"
+      features={[
+        "300+ Free Courses",
+        "Expert Instructors",
+        "Lifetime Access",
+        "Certificate of Completion"
+      ]}
     >
       <SignupForm onSignupComplete={handleSignupComplete} />
     </AuthLayout>
