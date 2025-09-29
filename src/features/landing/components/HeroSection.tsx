@@ -51,14 +51,14 @@ export const HeroSection = () => {
             </div>
           </div>
           
-          <div className="relative h-[450px] lg:h-[550px] hidden lg:block">
+          <div className="relative h-[450px] lg:h-[550px] order-first lg:order-last">
             <Image
               src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/52c174da636f73477b63e89dc2f23932-6.svg?"
               alt="Decorative background shape"
               fill
               style={{ objectFit: 'contain' }}
               className="absolute -top-4 -left-16"
-              sizes="(max-width: 1024px) 0vw, 50vw"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
             <Image
               src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/8e9b55875528c3338eef2de87c4a112f-2.png?"
@@ -66,7 +66,7 @@ export const HeroSection = () => {
               fill
               style={{ objectFit: 'contain' }}
               className="relative z-10"
-              sizes="(max-width: 1024px) 0vw, 50vw"
+              sizes="(max-width: 1024px) 100vw, 50vw"
               priority={true}
             />
           </div>

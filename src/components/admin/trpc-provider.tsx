@@ -27,6 +27,12 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: "/api/trpc",
           transformer: superjson,
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include', // This ensures cookies are sent with requests
+            });
+          },
         }),
       ],
     })
