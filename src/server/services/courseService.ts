@@ -114,11 +114,18 @@ export class CourseService {
       visibility: CourseVisibility.PUBLISHED
     };
 
-    // Add category filter
+    // Add category filter - get categoryId first if category name is provided
     if (filters?.category) {
-      where.category = {
-        name: filters.category
-      };
+      const category = await db.category.findFirst({
+        where: { name: filters.category },
+        select: { id: true }
+      });
+      if (category) {
+        where.categoryId = category.id;
+      } else {
+        // If category not found, return no results
+        where.id = 'non-existent-id';
+      }
     }
 
     // Add price filter
