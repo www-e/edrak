@@ -1,104 +1,90 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users } from "lucide-react";
-import Image from "next/image";
+import Link from "next/link";
+import {
+  MoveRight,
+  MoveLeft,
+} from "lucide-react";
+import { CourseCard } from "./CourseCard";
+import { api } from "@/trpc/react";
 
-const activities = [
-  {
-    id: 1,
-    title: "Edraak Innovation Summit 2023",
-    date: "15-17 Nov 2023",
-    location: "Amman, Jordan",
-    attendees: "500+ participants",
-    type: "Conference",
-    description: "A gathering of educators, technologists, and innovators to discuss the future of online learning in the Arab world.",
-    image: "/images/activity-placeholder-1.svg",
-  },
-  {
-    id: 2,
-    title: "Digital Skills Workshop Series",
-    date: "Monthly sessions",
-    location: "Online & Regional Centers",
-    attendees: "1000+ learners",
-    type: "Workshop",
-    description: "Hands-on workshops covering essential digital skills for career advancement and personal development.",
-    image: "/images/activity-placeholder-2.svg",
-  },
-  {
-    id: 3,
-    title: "Education for All Campaign",
-    date: "Ongoing initiative",
-    location: "Nationwide",
-    attendees: "10,000+ beneficiaries",
-    type: "Campaign",
-    description: "Our commitment to providing free access to quality education for underserved communities across the region.",
-    image: "/images/activity-placeholder-3.svg",
-  },
-];
 
 export const ActivitiesSection = () => {
-  return (
-    <section className="py-20 sm:py-24 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground font-heading">
-            Our Activities & Initiatives
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto font-body">
-            Discover our latest campaigns, events, and community initiatives that are shaping the future of education.
-          </p>
-        </div>
+    // Fetch real courses data using tRPC
+    const { data: courseData, isLoading } = api.public.course.getAllCourses.useQuery();
+    const courses = courseData?.courses || [];
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {activities.map((activity, index) => (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Card className="h-full overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className="relative">
-                  <Image
-                    src={activity.image}
-                    alt={activity.title}
-                    width={400}
-                    height={192}
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-4 right-4" variant="secondary">
-                    {activity.type}
-                  </Badge>
+    // Get the first 3 courses for display
+    const displayCourses = courses.slice(0, 3);
+
+    if (isLoading) {
+        return (
+            <section className="bg-background py-20">
+                <div className="container mx-auto px-5">
+                    <div className="text-center mb-12">
+                        <h2 className="font-display text-4xl font-bold text-dark-navy relative inline-block pb-4">
+                            Most Popular Courses
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full"></span>
+                        </h2>
+                        <p className="max-w-3xl mx-auto mt-4 text-lg text-muted-foreground font-body">
+                            Discover the key courses that help enhance your skills and develop your career path, carefully designed to provide the highest levels of quality and impact
+                        </p>
+                    </div>
+                    <div className="flex justify-center items-center h-64">
+                        <div className="text-2xl font-bold text-primary">Loading courses...</div>
+                    </div>
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold font-heading">{activity.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground font-body">{activity.description}</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {activity.date}
+            </section>
+        );
+    }
+
+    return (
+        <section className="bg-background py-20">
+            <div className="container mx-auto px-5">
+                <div className="text-center mb-12">
+                     <h2 className="font-display text-4xl font-bold text-dark-navy relative inline-block pb-4">
+                        Most Popular Courses
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full"></span>
+                    </h2>
+                    <p className="max-w-3xl mx-auto mt-4 text-lg text-muted-foreground font-body">
+                        Discover the key courses that help enhance your skills and develop your career path, carefully designed to provide the highest levels of quality and impact
+                    </p>
+                </div>
+
+                <div className="relative">
+                    <button className="absolute top-1/2 -translate-y-1/2 -left-6 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-muted-foreground hover:text-primary transition-colors duration-300 z-10">
+                        <MoveRight className="w-6 h-6"/>
+                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {displayCourses.map((course) => (
+                            <CourseCard
+                                key={course.id}
+                                id={course.id}
+                                image="/images/course-placeholder.jpg"
+                                duration="4 Weeks"
+                                specialization={course.description?.substring(0, 100) + "..." || ""}
+                                type="Course"
+                                level="Beginner"
+                                title={course.title}
+                                enrollment={`+${course._count?.enrollments || 0} enrolled`}
+                                url={`/courses/${course.slug}`}
+                            />
+                        ))}
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {activity.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users className="h-4 w-4 mr-2" />
-                      {activity.attendees}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+                     <button className="absolute top-1/2 -translate-y-1/2 -right-6 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-muted-foreground hover:text-primary transition-colors duration-300 z-10">
+                        <MoveLeft className="w-6 h-6"/>
+                    </button>
+                </div>
+
+                <div className="text-center mt-16">
+                    <Link
+                        href="/courses"
+                        className="inline-flex items-center justify-center px-8 py-3 text-base font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors duration-300 shadow-md"
+                    >
+                        Browse More Courses
+                    </Link>
+                </div>
+            </div>
+        </section>
+    );
 };

@@ -5,22 +5,26 @@ import { CategoriesSection } from "@/features/landing/components/CategoriesSecti
 import { FeaturedCoursesSection } from "@/features/landing/components/FeaturedCoursesSection";
 import { ActivitiesSection } from "@/features/landing/components/ActivitiesSection";
 import { Footer } from "@/features/landing/components/Footer";
+import { K12Section } from "@/features/landing/components/K12Section";
+import { BlogSection } from "@/features/landing/components/BlogSection";
+import { CourseSearch } from "@/features/landing/components/CourseSearch";
 
 // This is the main entry point for your landing page.
 // We are composing the page from the sections we've built.
 // This approach keeps the page file clean and focuses on the structure.
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <main className="min-h-screen bg-background font-body">
       <Header />
-      <main className="flex-1">
-        <HeroSection />
-        <CompaniesSection />
-        <CategoriesSection />
-        <FeaturedCoursesSection />
-        <ActivitiesSection />
-      </main>
+      <HeroSection />
+      <CompaniesSection />
+      <CategoriesSection />
+      <FeaturedCoursesSection />
+      <CourseSearch />
+      <ActivitiesSection />
+      <K12Section />
+      <BlogSection />
       <Footer />
-    </div>
+    </main>
   );
 }

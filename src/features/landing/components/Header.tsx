@@ -1,228 +1,240 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { useTheme } from 'next-themes';
+import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { Session } from 'next-auth';
 import { Button } from '@/components/ui/button';
-import { Sun, Moon, Search, ChevronDown, User, LogOut } from 'lucide-react';
+import { Search, ChevronDown, Menu, X, ChevronLeft } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import Image from 'next/image';
 
-// This is the updated, functional theme toggle button
-const ThemeToggleButton = () => {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // This prevents a hydration mismatch error by ensuring the component only renders on the client
-  if (!mounted) {
-    return <div className="w-10 h-10" />;
-  }
-
-  const isDark = theme === 'dark';
-
-  return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      onClick={() => setTheme(isDark ? 'light' : 'dark')} 
-      aria-label="Toggle theme"
-    >
-      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-    </Button>
-  );
-};
-
-// Dropdown component for user menu
-const UserDropdown = ({ session }: { session: Session }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <div 
-        className="hidden md:flex items-center gap-x-2 text-sm font-semibold cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-          {session.user?.name?.charAt(0).toUpperCase() || 'U'}
-        </div>
-        <span className="font-heading font-semibold">{session.user?.name || 'User'}</span>
-        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </div>
-
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-md shadow-lg py-1 z-50">
-          <div className="px-4 py-2 border-b border-border">
-            <p className="text-sm font-medium">{session.user?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{session.user?.email || 'user@example.com'}</p>
-          </div>
-          <button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="w-full text-left px-4 py-2 text-sm hover:bg-muted flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Dropdown component for learning areas
-const LearningAreasDropdown = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  return (
-    <div 
-      className="relative"
-      ref={dropdownRef}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      <a 
-        href="#" 
-        className="transition-colors hover:text-foreground flex items-center gap-1 font-heading font-semibold cursor-pointer"
-        onClick={(e) => {
-          e.preventDefault();
-          setIsOpen(!isOpen);
-        }}
-      >
-        Learning Areas <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </a>
-
-      {isOpen && (
-        <div className="absolute left-0 mt-2 w-64 bg-background border border-border rounded-md shadow-lg py-2 z-50">
-          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
-            <h3 className="font-medium">Programming</h3>
-            <p className="text-sm text-muted-foreground">Learn to code with our comprehensive courses</p>
-          </div>
-          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
-            <h3 className="font-medium">Data Science</h3>
-            <p className="text-sm text-muted-foreground">Master data analysis and machine learning</p>
-          </div>
-          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
-            <h3 className="font-medium">Design</h3>
-            <p className="text-sm text-muted-foreground">Create beautiful interfaces and experiences</p>
-          </div>
-          <div className="px-4 py-2 hover:bg-muted cursor-pointer">
-            <h3 className="font-medium">Business</h3>
-            <p className="text-sm text-muted-foreground">Develop essential business skills</p>
-          </div>
-          <div className="px-4 py-2 border-t border-border mt-2">
-            <a href="#" className="text-primary hover:underline text-sm font-medium">View All Categories →</a>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+const ChevronBack = ChevronLeft;
 
 export const Header = () => {
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuPage, setMobileMenuPage] = useState('main'); // 'main', 'categories', 'languages'
   const { data: session, status } = useSession();
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        
-        {/* Left side: Logo */}
-        <div className="flex items-center">
-          <Link href="/" className="text-3xl font-black text-primary tracking-tight font-heading">
-            sportschool
-          </Link>
-        </div>
+  const navLinks = [
+    { href: "/explore/?type=specialization", label: "Specializations" },
+    { href: "/explore/?type=course", label: "Courses" },
+    { href: "/partners/", label: "Partners" },
+  ];
 
-        {/* Middle: Navigation Links & Search */}
-        <div className="flex flex-1 items-center justify-center gap-x-8">
-          <nav className="hidden lg:flex items-center gap-x-6 text-sm font-medium text-muted-foreground">
-            <LearningAreasDropdown />
-            <Link href="/courses" className="transition-colors hover:text-foreground font-heading font-semibold">
-              Courses
-            </Link>
-          </nav>
-          
-          <div className="relative hidden sm:block w-full max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search" 
-              className="w-full rounded-full bg-muted pl-9 pr-4 py-2 text-sm font-body"
+  const exploreLinks = [
+    { href: "/explore/?category=career-preparation", label: "Career Preparation" },
+    { href: "/explore/?category=technology", label: "Technology" },
+    { href: "/explore/?category=personal-development", label: "Personal Development" },
+    { href: "/explore/?category=business-and-entrepreneurship", label: "Business & Entrepreneurship" },
+    { href: "/explore/?category=languages", label: "Languages" },
+  ];
+
+  return (
+    <header className="sticky top-0 z-50 h-[88px] bg-white shadow-[0_4px_16px_0_rgba(0,0,0,0.06)] font-body">
+      {/* Desktop Navigation */}
+      <nav className="hidden lg:flex items-center justify-between h-full max-w-[1200px] mx-auto px-5">
+        <div className="flex items-center h-full gap-x-6">
+          <Link href="/">
+            <Image
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/logo-light.5df7d56d5214-1.png?"
+              alt="sportschool Logo"
+              width={110}
+              height={34}
+              className="h-8 w-auto"
+              priority={true}
+              sizes="110px"
             />
+          </Link>
+          
+          <div className="relative h-full flex items-center" onMouseEnter={() => setIsExploreOpen(true)} onMouseLeave={() => setIsExploreOpen(false)}>
+            <button className="flex items-center gap-x-1 text-foreground text-base font-semibold hover:text-primary transition-colors">
+              Learning Areas
+              <ChevronDown size={16} className={`transition-transform duration-200 ${isExploreOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isExploreOpen && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-4 z-10">
+                <div className="flex flex-col">
+                  {exploreLinks.map((link) => (
+                    <Link key={link.href} href={link.href} className="px-6 py-2 text-foreground hover:bg-muted transition-colors text-left">
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="border-t border-border my-2"></div>
+                  <Link href="/explore/" className="px-6 py-2 text-primary font-semibold hover:bg-muted transition-colors text-left">
+                    Explore All Areas
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+           <div className="relative">
+            <Input 
+              type="search" 
+              placeholder="Search"
+              className="bg-muted border-none rounded-full h-10 w-64 pl-10 pr-4 text-foreground placeholder:text-muted-foreground"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
           </div>
         </div>
 
-        {/* Right side: User Actions */}
-        <div className="flex items-center gap-x-4">
-          <nav className="hidden lg:flex items-center gap-x-6 text-sm font-medium text-muted-foreground">
-            <Link href="/courses" className="transition-colors hover:text-foreground font-heading font-semibold">
-              Courses
-            </Link>
-            <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Specializations</a>
-            <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Tools</a>
-            <a href="#" className="transition-colors hover:text-foreground font-heading font-semibold">Partners</a>
-          </nav>
+        <div className="flex items-center gap-x-6">
+          <div className="flex items-center gap-x-6">
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="text-base font-semibold text-foreground hover:text-primary transition-colors">
+                {link.label}
+              </Link>
+            ))}
+          </div>
 
-          {status === "loading" ? (
-            <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
-              <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background animate-pulse"></div>
-              <span className="font-heading font-semibold">Loading...</span>
-            </div>
-          ) : session?.user ? (
-            <UserDropdown session={session} />
-          ) : (
-            <Link href="/auth/student/signin">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="hidden md:flex items-center gap-x-1 font-heading font-semibold"
-              >
-                <User className="h-4 w-4" />
+          <div className="h-6 border-l border-border"></div>
+
+          <div className="flex items-center gap-x-4">
+            {status === "loading" ? (
+              <div className="flex items-center text-sm font-semibold">
+                <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background animate-pulse"></div>
+                <span className="ml-2">Loading...</span>
+              </div>
+            ) : session?.user ? (
+              <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                  {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <span className="font-body font-semibold">{session.user?.name || 'User'}</span>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link href="/auth/student/signin" className="text-base font-semibold text-foreground hover:text-primary transition-colors">
                 Sign In
+              </Link>
+            )}
+            <Link href="/auth/signup" passHref>
+              <Button asChild className="bg-primary text-primary-foreground rounded-lg px-6 py-2 h-auto text-base font-semibold hover:bg-primary/90">
+                Sign Up Free
               </Button>
             </Link>
-          )}
-          
-          <ThemeToggleButton />
-
-          <div className="lg:hidden">
-            <Button variant="ghost" size="icon">
-              <svg strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-6 w-6"><path d="M3 5h18M3 12h18M3 19h18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
+            
+            <div className="relative">
+              <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors">
+                <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24}/>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
+      {/* Mobile Navigation */}
+      <nav className="lg:hidden flex items-center justify-between h-full px-5">
+        <div className="flex items-center gap-x-4">
+          <button onClick={() => { setIsMobileMenuOpen(true); setMobileMenuPage('main'); }} aria-label="Open menu">
+            <Menu size={24} className="text-foreground" />
+          </button>
+          <Link href="/">
+            <Image
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/logo-light.5df7d56d5214-1.png?"
+              alt="sportschool Logo"
+              width={90}
+              height={28}
+              className="h-7 w-auto"
+              priority
+            />
+          </Link>
+        </div>
+        <div className="flex items-center gap-x-2">
+          {status === "loading" ? (
+            <div className="flex items-center text-xs">
+              <div className="w-4 h-4 bg-green-400 rounded-full border animate-pulse"></div>
+              <span className="ml-1">Loading...</span>
+            </div>
+          ) : session?.user ? (
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="text-sm font-semibold text-foreground"
+            >
+              Sign Out
+            </button>
+          ) : (
+            <Link href="/auth/student/signin" className="text-sm font-semibold text-foreground">
+              Sign In
+            </Link>
+          )}
+          <Link href="/auth/signup" passHref>
+            <Button asChild size="sm" className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 h-auto text-sm font-semibold">
+              Sign Up
+            </Button>
+          </Link>
+        </div>
+      </nav>
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className={`fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
+            {/* Main Menu */}
+            <div className={`flex flex-col h-full ${mobileMenuPage === 'main' ? '' : 'hidden'}`}>
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <button onClick={() => setMobileMenuPage('languages')}>
+                  <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24}/>
+                </button>
+                <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
+                  <X size={24} className="text-muted-foreground" />
+                </button>
+              </div>
+              <div className="p-4">
+                <div className="relative">
+                  <Input type="search" placeholder="Search" className="bg-muted border-none rounded-full h-10 w-full pl-10 pr-4"/>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                </div>
+              </div>
+              <div className="flex flex-col p-4 text-lg font-semibold text-foreground">
+                <button onClick={() => setMobileMenuPage('categories')} className="w-full text-left py-3">Learning Areas</button>
+                {navLinks.map((link) => (
+                     <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="w-full text-left py-3">{link.label}</Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Categories Menu */}
+            <div className={`flex flex-col h-full ${mobileMenuPage === 'categories' ? '' : 'hidden'}`}>
+                 <div className="flex items-center p-4 border-b border-border">
+                  <button onClick={() => setMobileMenuPage('main')}>
+                    <ChevronBack size={24} className="text-muted-foreground" />
+                  </button>
+                  <h6 className="flex-grow text-center font-bold text-xl">Learning Areas</h6>
+                </div>
+                <div className="flex flex-col p-4 text-lg font-semibold text-foreground">
+                  {exploreLinks.map((link) => (
+                    <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="py-3">
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="border-t border-border my-2"></div>
+                  <Link href="/explore/" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-primary">
+                    Explore All Areas
+                  </Link>
+                </div>
+            </div>
+            
+             <div className={`flex flex-col h-full ${mobileMenuPage === 'languages' ? '' : 'hidden'}`}>
+                 <div className="flex items-center p-4 border-b border-border">
+                  <button onClick={() => setMobileMenuPage('main')}>
+                    <ChevronBack size={24} className="text-muted-foreground" />
+                  </button>
+                  <h6 className="flex-grow text-center font-bold text-xl">Languages</h6>
+                </div>
+                 <div className="flex flex-col p-4 font-semibold text-foreground">
+                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-x-3 py-3">
+                    <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24} />
+                    <span>English</span>
+                  </Link>
+                </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

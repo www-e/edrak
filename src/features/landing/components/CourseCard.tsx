@@ -1,73 +1,80 @@
-"use client";
-
-import Image from "next/image";
-import { CardContainer, CardBody, CardItem } from "@/components/aceternity/3d-card";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, Signal, Info, ChevronRight, Bookmark } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 // Define the shape of the data a card will receive
 type CourseCardProps = {
-  imageUrl: string;
-  level: string;
+  id: string | number;
+  image: string;
+  duration: string;
+  specialization?: string;
   type: string;
+  level: 'Beginner' | 'Intermediate';
   title: string;
-  studentCount: string;
-  link: string;
+  enrollment: string;
+  url: string;
 };
 
-export function CourseCard({ imageUrl, level, type, title, studentCount, link }: CourseCardProps) {
+export function CourseCard({
+  image,
+  duration,
+  specialization,
+  type,
+  level,
+  title,
+  enrollment,
+  url
+}: CourseCardProps) {
   return (
-    // CardContainer from Aceternity UI enables the 3D effect.
-    // We remove the default padding (`py-20`) to make it fit our design.
-    <CardContainer containerClassName="py-0" className="w-full">
-      <CardBody className="relative group/card w-full h-auto rounded-xl">
-        {/* We use shadcn's Card component for consistent theme styling */}
-        <Card className="w-full h-full rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 transform-gpu">
-          <CardItem translateZ='75' className='w-full'>
-            <Image
-              src={imageUrl}
-              height='1000'
-              width='1000'
-              className='h-48 w-full object-cover'
-              alt={`Promotional image for the course: ${title}`}
-            />
-          </CardItem>
-          <div className='p-6 space-y-3'>
-            <CardItem translateZ='50' className='flex gap-2 text-xs'>
-              <span className='bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 font-semibold px-2 py-1 rounded font-heading'>
-                {level}
-              </span>
-              <span className='bg-primary/10 text-primary dark:bg-primary/20 font-semibold px-2 py-1 rounded font-heading'>
-                {type}
-              </span>
-            </CardItem>
-
-            <CardItem
-              translateZ='100'
-              className='text-lg font-bold text-foreground tracking-wide font-heading'
-            >
-              {title}
-            </CardItem>
-
-            <CardItem
-              translateZ='30'
-              className='text-sm text-muted-foreground font-body'
-            >
-              {studentCount}+ learners
-            </CardItem>
-
-            <div className='border-t border-border my-4'></div>
-            
-            <CardItem translateZ='40' className='w-full pt-2'>
-              <Button asChild variant='outline' className='w-full font-semibold font-heading hover:scale-105 transition-transform duration-200'>
-                <a href={link}>
-                  View Specialization &rarr;
-                </a>
-              </Button>
-            </CardItem>
+    <Card className="w-full max-w-[360px] flex-shrink-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-xl overflow-hidden bg-card transition-shadow duration-300 hover:shadow-lg">
+        <div className="relative">
+          <Image
+            src={image}
+            alt={title}
+            width={360}
+            height={202}
+            className="object-cover w-full h-[202px]"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 360px"
+            priority={false}
+          />
+          <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 text-sm font-semibold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
+            <Calendar className="w-4 h-4 text-gray-500" />
+            <span>{duration}</span>
           </div>
-        </Card>
-      </CardBody>
-    </CardContainer>
+          <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/40 rounded-full hover:bg-black/60 transition-colors">
+            <Info className="w-5 h-5 text-white" />
+          </div>
+          <div className="absolute bottom-3 left-3 flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
+              <Signal className="w-4 h-4 text-red-500" />
+              <span>{level}</span>
+            </div>
+            <div className="bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
+              <span>{type}</span>
+            </div>
+          </div>
+        </div>
+        <CardContent className="p-4 flex flex-col gap-3">
+          {specialization && (
+            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">{specialization}</p>
+          )}
+          <Link href={url} className="group">
+            <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+              {title}
+            </h3>
+          </Link>
+          <div className="flex justify-between items-center text-accent font-bold">
+            <div className="flex items-center gap-2 text-blue-800">
+              <span className="text-sm">{enrollment}</span>
+              <Bookmark className="w-5 h-5" />
+            </div>
+          </div>
+          <Link href={url} className="w-full inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary text-primary font-bold py-2.5 px-4 hover:bg-primary hover:text-primary-foreground transition-colors">
+            <span>View Course</span>
+            <ChevronRight className="w-5 h-5" />
+          </Link>
+        </CardContent>
+      </Card>
   );
 }

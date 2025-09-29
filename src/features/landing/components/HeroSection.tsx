@@ -1,60 +1,77 @@
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 
+const features = [
+  {
+    text: 'Free Learning',
+    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1df27a1f65d7a11c430110d8c0b19059-3.svg?',
+  },
+  {
+    text: 'In Arabic Language',
+    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/24a5b0927f8bfdee096f8788396076ef-4.svg?',
+  },
+  {
+    text: 'High-Quality Content & Expert Trainers!',
+    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1b5b8c5bbcaaa4382cf7d3656fd0d067-5.svg?',
+  },
+];
+
 export const HeroSection = () => {
   return (
-    <section className="relative w-full overflow-hidden pt-16 pb-24 sm:pt-24 sm:pb-32">
-      {/* 
-        This is the decorative background shape. 
-        It's a large, blurred, semi-transparent div positioned absolutely.
-        This technique creates the soft, modern "gradient blob" effect.
-      */}
-      <div 
-        aria-hidden="true" 
-        className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] rounded-full bg-secondary/30 dark:bg-secondary/40 blur-3xl -z-10"
-      />
-      
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+    <section className="bg-white overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative pt-16 pb-12 lg:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           
-          {/* Text Content */}
-          <div className="text-center lg:text-left">
-            <h1 className="text-5xl md:text-7xl font-black text-foreground leading-tight font-heading">
+          <div className="z-10">
+            <h1 className="text-5xl font-bold font-display text-foreground leading-tight">
               Aspire. Learn. Advance.
             </h1>
-            <p className="mt-6 max-w-xl mx-auto lg:mx-0 text-lg text-muted-foreground font-body">
+            <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-lg">
               Enhance your skills through specialized programs in professional skill development, and earn certificates that support your career journey. All for free!
             </p>
-            
-            {/* CTA Buttons */}
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button size="lg" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
-                <Link href="/auth/signup">
-                  Sign Up Free
-                </Link>
-              </Button>
-              <Button size="lg" variant="secondary" className="font-bold text-lg px-8 py-6 rounded-lg font-heading">
-                <Link href="/courses">
-                  Browse Courses
-                </Link>
-              </Button>
+            <Link
+              href="/courses"
+              className="inline-block mt-8 py-4 px-8 bg-primary text-primary-foreground font-semibold text-base rounded-lg shadow-md hover:bg-primary/90 transition-colors"
+            >
+              Discover Our Learning Programs
+            </Link>
+
+            <div className="mt-16 flex">
+              <div className="flex flex-col sm:flex-row gap-y-6 gap-x-8">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-x-3">
+                    <Image src={feature.icon} alt="" width={44} height={44} className="flex-shrink-0" />
+                    <h6 className="text-[15px] font-semibold text-foreground max-w-[140px] leading-snug">
+                      {feature.text}
+                    </h6>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           
-          {/* Image */}
-          <div className="relative flex justify-center items-center h-full min-h-[300px] lg:min-h-0">
-            {/* Using Next.js Image component for performance optimization */}
+          <div className="relative h-[450px] lg:h-[550px] hidden lg:block">
             <Image
-              src="/images/hero-image-sportschool.png"
-              alt="Happy students learning and advancing their careers"
-              width={600}
-              height={600}
-              quality={95}
-              priority // This tells Next.js to load this image first, as it's above the fold.
-              className="relative z-10 max-w-full h-auto rounded-lg object-contain"
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/52c174da636f73477b63e89dc2f23932-6.svg?"
+              alt="Decorative background shape"
+              fill
+              style={{ objectFit: 'contain' }}
+              className="absolute -top-4 -left-16"
+              sizes="(max-width: 1024px) 0vw, 50vw"
+            />
+            <Image
+              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/8e9b55875528c3338eef2de87c4a112f-2.png?"
+              alt="Two students, a woman and a man, smiling"
+              fill
+              style={{ objectFit: 'contain' }}
+              className="relative z-10"
+              sizes="(max-width: 1024px) 0vw, 50vw"
+              priority={true}
             />
           </div>
+
         </div>
       </div>
     </section>

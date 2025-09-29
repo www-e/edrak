@@ -1,104 +1,82 @@
-import Image from "next/image";
+import Image from 'next/image';
+import { ChevronRight } from 'lucide-react';
 
-// The logo data provided
-const companyLogos = [
-  { src: "/images/meta-logo.svg", alt: "Meta" },
-  { src: "/images/google-org-logo.svg", alt: "Google.org" },
-  { src: "/images/british-council-logo.svg", alt: "British Council" },
-  { src: "/images/kpmg-logo.svg", alt: "KPMG" },
-  { src: "/images/arab-bank-logo.svg", alt: "Arab Bank" },
-  { src: "/images/queen-rania-logo.svg", alt: "Queen Rania Foundation" },
-  { src: "/images/van-leer-logo.svg", alt: "Van Leer Foundation" },
-  { src: "/images/hikma-logo.svg", alt: "Hikma" },
-  { src: "/images/arab-potash-logo.svg", alt: "Arab Potash" },
+const partnersLogos = [
+  { alt: "Queen Rania Teacher Academy", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/QRTA_PNG-3.png?" },
+  { alt: "Arab Bank", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/Logo_without_Tagline-3_11zon_3-4.jpg?" },
+  { alt: "KPMG", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/KPMG_logo-5.png?" },
+  { alt: "Turquoise Mountain", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/Turquoise_Mountain-Logo-6.png?" },
+  { alt: "American Academy of Pediatrics", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/aap-logo-2017-cine-7.jpg?" },
+  { alt: "Netherlands Embassy", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/logo_Kingdom_of_the_netherlands-8.png?" },
+  { alt: "British Council", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/BritishCouncil_Logo-9.png?" },
+  { alt: "Jack Ma Foundation", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/JMF-logo-10.png?" },
+  { alt: "Google.org", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/google-logo-11.png?" },
+  { alt: "UCL", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/University_College_London_logo-12.png?" },
+  { alt: "GIZ", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/gizlogo_unternehmen-en-implemented-rgb-13.png?" },
+  { alt: "META", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/Meta_Platforms_Inc._logo.svg-7.png?" },
+  { alt: "Crescent Petroleum", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/Crescent_Petroleum_logo.svg-8.png?" },
+  { alt: "Arab Potash", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/potash-14.png?" },
+  { alt: "Hikma", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1280px-Hikma_Pharmaceuticals_logo.svg_Custom-9.png?" },
+  { alt: "Van Leer Foundation", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/VanLeer_short_colour-grey-15.png?" },
+  { alt: "German Federal Ministry", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/German_Jordanian_Cooperation_logo_300_dpi-16.jpg?" },
+  { alt: "RIT", src: "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/ritlogo-17.png?" },
 ];
 
-// Helper component for a single carousel row to keep the code clean
-const CarouselRow = ({ logos, direction = 'left' }: { logos: typeof companyLogos; direction?: 'left' | 'right' }) => {
-  const extendedLogos = [...logos, ...logos];
-  
-  return (
-    <div className="relative overflow-hidden">
-      <div className={`flex ${direction === 'left' ? 'animate-marquee-left' : 'animate-marquee-right'}`}>
-        {extendedLogos.map((logo, index) => (
-          <div 
-            key={index} 
-            className="flex-shrink-0 mx-6 flex items-center justify-center"
-            style={{ minWidth: '160px' }}
-          >
-            <Image
-              src={logo.src}
-              alt={logo.alt}
-              width={140}
-              height={60}
-              className="h-12 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity duration-300 filter grayscale hover:grayscale-0"
-            />
+const row1 = partnersLogos.slice(0, 6);
+const row2 = partnersLogos.slice(6, 12);
+const row3 = partnersLogos.slice(12, 18);
+
+interface Logo {
+  alt: string;
+  src: string;
+}
+
+const LogoRow = ({ logos, reverse = false }: { logos: Logo[], reverse?: boolean }) => (
+  <div className="w-full inline-flex flex-nowrap overflow-hidden [mask-image:_linear-gradient(to_right,transparent_0,_black_40px,_black_calc(100%-40px),transparent_100%)]">
+    <ul className={`flex items-center justify-center md:justify-start [&_li]:mx-2 group-hover:[animation-play-state:paused] ${reverse ? 'animate-infinite-scroll-reverse' : 'animate-infinite-scroll'}`}>
+      {[...logos, ...logos].map((logo, index) => (
+        <li key={index} className="flex-shrink-0">
+          <div className="w-[184px] h-[112px] bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center p-4 transition-transform duration-300 hover:scale-105">
+            <div className="relative w-full h-full">
+              <Image
+                src={logo.src}
+                alt={logo.alt}
+                fill
+                style={{ objectFit: 'contain' }}
+                className="grayscale hover:grayscale-0 transition-all duration-300"
+                sizes="184px"
+              />
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 export const CompaniesSection = () => {
-  return (
-    <section className="py-20 sm:py-24 bg-background overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Main container using Flexbox for the two-column layout */}
-        <div className="flex flex-col lg:flex-row items-center gap-12">
-
-          {/* ===== Left Column: Logo Carousel ===== */}
-          <div className="relative w-full lg:w-2/3">
-            {/* Gradient Mask Overlay for the far left */}
-            <div 
-              aria-hidden="true"
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                background: `linear-gradient(to right, 
-                  hsl(var(--background)) 0%, 
-                  transparent 15%, 
-                  transparent 100%)`
-              }}
-            />
-            
-            {/* Rows Container */}
-            <div className="flex flex-col gap-8 py-4">
-              <CarouselRow logos={companyLogos} direction="left" />
-              <CarouselRow logos={companyLogos} direction="right" />
-              <CarouselRow logos={companyLogos} direction="left" />
+    return (
+        <section className="bg-secondary py-20">
+            <div className="container mx-auto px-5 max-w-6xl">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-y-12 lg:gap-x-16">
+                    <div className="lg:w-7/12 w-full group">
+                        <div className="flex flex-col gap-4">
+                           <LogoRow logos={row1} />
+                           <LogoRow logos={row2} reverse />
+                           <LogoRow logos={row3} />
+                        </div>
+                    </div>
+                    <div className="lg:w-5/12 w-full">
+                        <h2 className="font-display text-4xl font-bold text-dark-navy leading-snug">
+                            We collaborate with the most prominent companies and are trusted by thousands of learners!
+                        </h2>
+                        <a href="/partners" className="mt-6 inline-flex items-center gap-3 text-accent hover:text-primary transition-colors duration-300">
+                          <span className="font-semibold text-lg">Our Success Partners</span>
+                          <ChevronRight className="w-5 h-5" />
+                        </a>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          {/* ===== Right Column: Text Content ===== */}
-          <div className="relative w-full lg:w-1/3 text-center lg:text-left">
-             {/* Gradient Mask Overlay to fade into the carousel on the left */}
-            <div 
-              aria-hidden="true"
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                background: `linear-gradient(to left, 
-                  transparent 70%, 
-                  hsl(var(--background)) 100%)`
-              }}
-            />
-
-            {/* Actual text content */}
-            <div className="relative z-0">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mx-auto mb-2">
-                Partner with leading companies trusted by thousands of learners!
-              </h2>
-              <a 
-                href="#" 
-                className="group inline-flex items-center gap-1 text-primary font-semibold hover:underline transition-all duration-300 hover:gap-2"
-              >
-                Our Success Partners
-                <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
-              </a>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    );
 };

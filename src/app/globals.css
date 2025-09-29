@@ -1,61 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Open+Sans:wght@400;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
-
-/* 
-  These @-rules are part of Tailwind CSS v4's modern features.
-  If your VS Code shows warnings here, ensure the official
-  "Tailwind CSS IntelliSense" extension by Tailwind Labs is installed and up-to-date.
-*/
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --radius: 0.625rem;
+  /* Shadcn/UI Colors */
+  --color-background: #ffffff;
+  --color-foreground: #2C3E50; /* Text Dark */
 
-  /* Light Mode Palette is defined as the root/default theme */
-  --background: oklch(0.982 0.012 229.61); /* #f2faff */
-  --foreground: oklch(0.531 0.093 205.28); /* #0c818f */
-  --muted: oklch(0.951 0.021 229.09);
-  --muted-foreground: oklch(0.638 0.081 205.86);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.531 0.093 205.28);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.531 0.093 205.28);
-  --border: oklch(0.916 0.033 216.94);
-  --input: oklch(0.916 0.033 216.94);
-  --primary: oklch(0.649 0.111 198.13); /* #0ba7aa */
-  --primary-foreground: oklch(0.982 0.012 229.61);
-  --secondary: oklch(0.77 0.094 199.98); /* #48c6c8 */
-  --secondary-foreground: oklch(0.531 0.093 205.28);
-  --accent: oklch(0.88 0.147 85.24); /* #ffd479 */
-  --accent-foreground: oklch(0.385 0.133 80.38);
-  --destructive: oklch(0.577 0.245 27.325);
-  --ring: oklch(0.649 0.111 198.13);
+  --color-card: #ffffff;
+  --color-card-foreground: #2C3E50;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #2C3E50;
+
+  --color-primary: #2E8B8B; /* Primary Teal */
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #F0F8FF; /* Light Blue Background */
+  --color-secondary-foreground: #2C3E50;
+
+  --color-muted: #ECF0F1; /* Light Grey */
+  --color-muted-foreground: #7F8C8D; /* Text Medium */
+
+  --color-accent: #3498DB; /* Blue Accent */
+  --color-accent-foreground: #ffffff;
+
+  --color-destructive: #E74C3C; /* Red Accent */
+  --color-destructive-foreground: #ffffff;
+
+  --color-border: #ECF0F1; /* Light Grey */
+  --color-input: #ECF0F1; /* Light Grey */
+  --color-ring: #2E8B8B; /* Primary Teal */
+
+  --color-chart-1: #e67e22;
+  --color-chart-2: #2d8659;
+  --color-chart-3: #1e3a5f;
+  --color-chart-4: #f1c40f;
+  --color-chart-5: #e74c3c;
+
+  --color-sidebar: #F0F8FF;
+  --color-sidebar-foreground: #2C3E50;
+  --color-sidebar-primary: #2E8B8B;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #ECF0F1;
+  --color-sidebar-accent-foreground: #2C3E50;
+  --color-sidebar-border: #ECF0F1;
+  --color-sidebar-ring: #2E8B8B;
+
+  /* Edraak Specific Colors */
+  --color-dark-navy: #1A2B3D;
+  --color-purple-accent: #9B59B6;
+  --color-orange-accent: #F39C12;
+  --color-green-accent: #27AE60;
+
+  /* Typography */
+  --font-display: "Inter", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+
+  /* Shadcn/UI Radii */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+
+  /* Shadcn/UI Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
 }
 
-/* 
-  Dark Mode Palette is defined in a separate .dark block, OUTSIDE of @theme.
-  This is the correct syntax for Tailwind CSS v4.
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
 */
-.dark {
-  --background: oklch(0.242 0.041 199.3); /* #06292b */
-  --foreground: oklch(0.95 0.033 199.89); /* #c6f3f4 */
-  --muted: oklch(0.285 0.049 199.64);
-  --muted-foreground: oklch(0.758 0.044 199.9);
-  --popover: oklch(0.187 0.034 199.1);
-  --popover-foreground: oklch(0.95 0.033 199.89);
-  --card: oklch(0.285 0.049 199.64);
-  --card-foreground: oklch(0.95 0.033 199.89);
-  --border: oklch(0.531 0.093 205.28);
-  --input: oklch(0.531 0.093 205.28);
-  --primary: oklch(0.649 0.111 198.13); /* #0ba7aa */
-  --primary-foreground: oklch(0.242 0.041 199.3);
-  --secondary: oklch(0.531 0.093 205.28); /* #0c818f */
-  --secondary-foreground: oklch(0.95 0.033 199.89);
-  --accent: oklch(0.801 0.122 195.14); /* #2ecfc7 */
-  --accent-foreground: oklch(0.198 0.046 195.03);
-  --destructive: oklch(0.704 0.191 22.216);
-  --ring: oklch(0.649 0.111 198.13);
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
 }
+
+@layer base {
+  :root {
+    --background: var(--color-background);
+    --foreground: var(--color-foreground);
+    --card: var(--color-card);
+    --card-foreground: var(--color-card-foreground);
+    --popover: var(--color-popover);
+    --popover-foreground: var(--color-popover-foreground);
+    --primary: var(--color-primary);
+    --primary-foreground: var(--color-primary-foreground);
+    --secondary: var(--color-secondary);
+    --secondary-foreground: var(--color-secondary-foreground);
+    --muted: var(--color-muted);
+    --muted-foreground: var(--color-muted-foreground);
+    --accent: var(--color-accent);
+    --accent-foreground: var(--color-accent-foreground);
+    --destructive: var(--color-destructive);
+    --destructive-foreground: var(--color-destructive-foreground);
+    --border: var(--color-border);
+    --input: var(--color-input);
+    --ring: var(--color-ring);
+    --chart-1: var(--color-chart-1);
+    --chart-2: var(--color-chart-2);
+    --chart-3: var(--color-chart-3);
+    --chart-4: var(--color-chart-4);
+    --chart-5: var(--color-chart-5);
+    --radius: var(--radius-lg);
+    --sidebar-background: var(--color-sidebar);
+    --sidebar-foreground: var(--color-sidebar-foreground);
+    --sidebar-primary: var(--color-sidebar-primary);
+    --sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
+    --sidebar-accent: var(--color-sidebar-accent);
+    --sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
+    --sidebar-border: var(--color-sidebar-border);
+    --sidebar-ring: var(--color-sidebar-ring);
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    line-height: 1.6;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--color-foreground);
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--color-dark-navy);
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  p {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--color-muted-foreground);
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
 
 @utility background {
   background-color: var(--background);
@@ -74,7 +210,7 @@
 }
 
 @utility font-heading {
-  font-family: var(--font-heading);
+  font-family: var(--font-display);
 }
 
 @utility font-body {
@@ -83,7 +219,7 @@
 
 @layer base {
   :root {
-    --font-heading: var(--font-heading);
+    --font-heading: var(--font-display);
     --font-body: var(--font-body);
   }
 
@@ -176,5 +312,54 @@
     to {
       transform: translateX(0%);
     }
+  }
+
+  @keyframes infinite-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes infinite-scroll-reverse {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  /* Performance optimizations */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Line clamp utilities for consistent text truncation */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }

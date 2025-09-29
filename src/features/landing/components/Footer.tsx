@@ -1,111 +1,75 @@
 import Image from 'next/image';
-import { Linkedin, Youtube, Instagram, Twitter, Facebook } from 'lucide-react';
-
-const socialLinks = [
-  { href: '#', icon: Facebook },
-  { href: '#', icon: Twitter },
-  { href: '#', icon: Instagram },
-  { href: '#', icon: Youtube },
-  { href: '#', icon: Linkedin },
-];
-
-const linkColumns = {
-  "sportschool": [
-    { href: "#", text: "About sportschool" },
-    { href: "#", text: "How to Learn with sportschool" },
-    { href: "#", text: "Terms of Service" },
-    { href: "#", text: "Privacy Policy" },
-  ],
-  "More": [
-    { href: "#", text: "Blog" },
-    { href: "#", text: "sportschool Podcast" },
-    { href: "#", text: "Contact Us" },
-    { href: "#", text: "Help Center" },
-  ],
-  "Browse": [
-    { href: "#", text: "Specializations" },
-    { href: "#", text: "School Education Platform" },
-  ],
-};
+import Link from 'next/link';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 
 export const Footer = () => {
   return (
-    // We use a dark background color directly, as the footer is always dark.
-    <footer className="bg-background text-foreground relative pt-20">
-      {/* 
-        This SVG creates the elegant curved shape at the top of the footer.
-        It sits above the footer's content, and its color is set to the main
-        page background to create a perfect "cutout" effect.
-      */}
-      <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0]">
-        <svg
-          className="relative block w-[calc(100%+1.3px)] h-[100px]"
-          data-name="Layer 1"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M1200 120L0 120 0 0 1200 0 1200 120z"
-            className="fill-background"
-          ></path>
-          <path
-            d="M600,112.77C268.63,112.77,0,65.52,0,7.23V0h1200v7.23C1200,65.52,931.37,112.77,600,112.77Z"
-            className="fill-background" // Must match the footer's background color
-          ></path>
-        </svg>
-      </div>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <footer className="bg-[#1a2b3d] text-white">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
           
-          {/* Link Columns */}
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-            {Object.entries(linkColumns).map(([title, links]) => (
-              <div key={title}>
-                <h5 className="font-bold text-foreground tracking-wider font-heading">{title}</h5>
-                <ul className="mt-4 space-y-3 text-sm">
-                  {links.map((link) => (
-                    <li key={link.text}>
-                      <a href={link.href} className="hover:text-foreground transition-colors font-body">
-                        {link.text}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+          {/* Column 1: Logo & Social */}
+          <div className="flex flex-col items-start">
+            <h2 className="text-4xl font-bold text-white mb-2 font-display">sportschool</h2>
+            <p className="text-gray-400 text-base">Learn wherever you are</p>
+            
+            <h3 className="font-bold text-lg text-white mt-10 mb-4 font-display">Follow us on social networks</h3>
+            <div className="flex space-x-4 space-x-reverse">
+              <a href="https://www.facebook.com/EdraakOrg/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-white transition-colors"><Facebook size={24} /></a>
+              <a href="https://twitter.com/edraakorg" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-gray-400 hover:text-white transition-colors"><Twitter size={24} /></a>
+              <a href="https://www.instagram.com/edraakorg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition-colors"><Instagram size={24} /></a>
+              <a href="https://www.linkedin.com/school/edraak/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-gray-400 hover:text-white transition-colors"><Linkedin size={24} /></a>
+              <a href="https://www.youtube.com/channel/UC__mh5-5o_3j2Cj76-1M8UA" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-gray-400 hover:text-white transition-colors"><Youtube size={24} /></a>
+            </div>
           </div>
 
-          {/* Social & Apps (takes up remaining space) */}
-          <div className="lg:col-span-4">
-            <h4 className="font-bold text-foreground text-lg font-heading">Learn Anywhere</h4>
-            <p className="text-sm mt-2 font-body">
-              Learn anytime, anywhere with the sportschool app!
-            </p>
-            <div className="flex gap-4 mt-4">
-              <a href="#">
-                <Image src="/images/apple-store-badge-en.svg" alt="Download on the App Store" width={150} height={50} className="h-12 w-auto" />
-              </a>
-              <a href="#">
-                <Image src="/images/google-play-badge-en.svg" alt="Get it on Google Play" width={150} height={50} className="h-12 w-auto" />
-              </a>
-            </div>
-            <h4 className="font-bold text-foreground text-lg mt-8 font-heading">
-              Find Us on Social Media
-            </h4>
-            <div className="flex gap-4 mt-4">
-              {socialLinks.map((social, index) => (
-                <a key={index} href={social.href} className="hover:text-foreground transition-colors">
-                  <social.icon className="h-6 w-6" />
+          {/* Column 2: Browse Links */}
+          <div>
+            <h3 className="font-bold text-lg text-white mb-5 font-display">Browse</h3>
+            <ul className="space-y-3">
+              <li><Link href="/courses" className="text-gray-300 hover:text-white transition-colors text-sm">Curriculum</Link></li>
+              <li><Link href="/specializations" className="text-gray-300 hover:text-white transition-colors text-sm">Specializations</Link></li>
+              <li><Link href="/k12" className="text-gray-300 hover:text-white transition-colors text-sm">School Education Platform</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Platform Links */}
+          <div>
+            <h3 className="font-bold text-lg text-white mb-5 font-display">Platform</h3>
+            <ul className="space-y-3">
+              <li><Link href="/about" className="text-gray-300 hover:text-white transition-colors text-sm">How to learn with sportschool</Link></li>
+              <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors text-sm">Contact Us</Link></li>
+              <li><Link href="https://help.edraak.org/" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-sm">Help Center</Link></li>
+            </ul>
+          </div>
+      
+          {/* Column 4: App Downloads */}
+          <div className="flex flex-col items-start">
+             <h3 className="font-bold text-lg text-white mb-5 font-display">Learn anytime, anywhere with the sportschool app!</h3>
+             <div className="flex flex-col space-y-4">
+                <a href="https://play.google.com/store/apps/details?id=org.edraak.android" target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play" className="block w-[160px] h-[48px]">
+                    <div className="bg-black border border-gray-700 rounded-md flex items-center justify-center h-full w-full">
+                         {/* Placeholder for Google Play Badge */}
+                         <Image src="https://www.edraak.org/static/images/google-play-badge.f8d429a39f28.png" width={160} height={48} alt="Get it on Google Play" />
+
+                    </div>
                 </a>
-              ))}
-            </div>
+                 <a href="https://apps.apple.com/us/app/edraak/id1062539639" target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store" className="block w-[160px] h-[48px]">
+                    <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/ios.624bd34de543-12.svg?" width={160} height={48} alt="Download on the App Store" />
+                 </a>
+             </div>
           </div>
-
         </div>
-        <div className="border-t border-border mt-8 pt-6 text-sm text-center text-muted-foreground font-body">
-          <p>&copy; {new Date().getFullYear()} sportschool. All rights reserved.</p>
+
+        <hr className="my-10 border-gray-700" />
+        
+        <div className="flex flex-col-reverse md:flex-row justify-between items-center text-center md:text-left gap-y-4">
+            <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} sportschool. All rights reserved</p>
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                <Link href="/terms-of-service" className="text-gray-300 hover:text-white transition-colors text-sm">Terms of Service</Link>
+                <Link href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">Privacy Policy</Link>
+                <Link href="/data-analytics-agreement" className="text-gray-300 hover:text-white transition-colors text-sm">Data Analytics Agreement</Link>
+            </div>
         </div>
       </div>
     </footer>
