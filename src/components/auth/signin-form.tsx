@@ -79,7 +79,7 @@ export function SigninForm({
           {
             ADMIN: "/admin",
             PROFESSOR: "/professor/dashboard",
-            STUDENT: "/student/dashboard",
+            STUDENT: "/student",
           }[data.role] || "/";
 
         router.push(redirectUrl);

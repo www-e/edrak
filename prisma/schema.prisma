@@ -9,24 +9,25 @@ datasource db {
 }
 
 model User {
-  id                 String       @id @default(uuid())
-  username           String       @unique
-  password           String
-  firstName          String
-  lastName           String
-  phoneNumber        String
-  secondPhoneNumber  String?
-  categoryPreference String?
-  referralSource     String?
-  role               Role         @default(STUDENT)
-  isActive           Boolean      @default(true)
-  lastLoginAt        DateTime?    @updatedAt
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  taughtCourses      Course[]     @relation("CourseProfessor")
-  enrollments        Enrollment[]
-  payments           Payment[]
-}
+   id                 String       @id @default(uuid())
+   username           String       @unique
+   password           String
+   firstName          String
+   lastName           String
+   phoneNumber        String
+   secondPhoneNumber  String?
+   categoryPreference String?
+   referralSource     String?
+   role               Role         @default(STUDENT)
+   isActive           Boolean      @default(true)
+   lastLoginAt        DateTime?    @updatedAt
+   createdAt          DateTime     @default(now())
+   updatedAt          DateTime     @updatedAt
+   taughtCourses      Course[]     @relation("CourseProfessor")
+   enrollments        Enrollment[]
+   payments           Payment[]
+   studentProfile     StudentProfile?
+ }
 
 model Category {
   id          String   @id @default(uuid())
@@ -39,85 +40,81 @@ model Category {
 }
 
 model Course {
-  id          String           @id @default(uuid())
-  title       String
-  slug        String           @unique
-  description String
-  price       Float            @default(0.0)
-  language    String
-  visibility  CourseVisibility @default(DRAFT)
-  categoryId  String?
-  professorId String
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  publishedAt DateTime?
-  rating      Float            @default(0.0)
-  ratingCount Int              @default(0)
-  category    Category?        @relation(fields: [categoryId], references: [id])
-  professor   User             @relation("CourseProfessor", fields: [professorId], references: [id])
-  enrollments Enrollment[]
-  lessons     Lesson[]
-  payments    Payment[]
-}
+   id             String           @id @default(uuid())
+   title          String
+   slug           String           @unique
+   description    String
+   price          Float            @default(0.0)
+   language       String
+   visibility     CourseVisibility @default(DRAFT)
+   categoryId     String?
+   professorId    String
+   createdAt      DateTime         @default(now())
+   updatedAt      DateTime         @updatedAt
+   publishedAt    DateTime?
+   rating         Float            @default(0.0)
+   ratingCount    Int              @default(0)
+   enrollmentCount Int             @default(0)
+   totalDuration   Int?            // Total duration in minutes
+   category       Category?        @relation(fields: [categoryId], references: [id])
+   professor      User             @relation("CourseProfessor", fields: [professorId], references: [id])
+   enrollments    Enrollment[]
+   lessons        Lesson[]
+   payments       Payment[]
+
+   @@index([professorId, visibility])
+   @@index([categoryId, visibility])
+ }
 
 model Lesson {
-  id                    String           @id @default(uuid())
-  courseId              String
-  title                 String
-  order                 Int
-  content               String
-  videoUrl              String?
-  isVisible             Boolean          @default(true)
-  isDeleted             Boolean          @default(false)
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
-  deletedAt             DateTime?
-  attachments           Attachment[]
-  course                Course           @relation(fields: [courseId], references: [id])
-  lessonProgressEntries LessonProgress[]
-}
+   id                    String           @id @default(uuid())
+   courseId              String
+   title                 String
+   order                 Int
+   content               String
+   videoUrl              String?
+   isVisible             Boolean          @default(true)
+   isDeleted             Boolean          @default(false)
+   createdAt             DateTime         @default(now())
+   updatedAt             DateTime         @updatedAt
+   deletedAt             DateTime?
+   attachments           Attachment[]
+   course                Course           @relation(fields: [courseId], references: [id])
+   lessonProgress        LessonProgress[]
+   duration              Int?             // Duration in minutes
+ }
 
 model Attachment {
-  id           String   @id @default(uuid())
-  lessonId     String
-  name         String
-  fileName     String
-  mimeType     String
-  fileSize     Int
-  bunnyCdnPath String
-  bunnyCdnUrl  String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  lesson       Lesson   @relation(fields: [lessonId], references: [id])
-}
-
-model Enrollment {
-  id                   String           @id @default(uuid())
-  userId               String
-  courseId             String
-  enrolledAt           DateTime         @default(now())
-  status               EnrollmentStatus @default(ACTIVE)
-  completionPercentage Int              @default(0)
-  course               Course           @relation(fields: [courseId], references: [id])
-  user                 User             @relation(fields: [userId], references: [id])
-  lessonProgress       LessonProgress[]
-  payments             Payment[]
-}
+   id           String   @id @default(uuid())
+   lessonId     String
+   name         String
+   fileName     String
+   mimeType     String
+   fileSize     Int
+   bunnyCdnPath String
+   bunnyCdnUrl  String
+   createdAt    DateTime @default(now())
+   updatedAt    DateTime @updatedAt
+   lesson       Lesson   @relation(fields: [lessonId], references: [id])
+ }
 
 model LessonProgress {
-  id                     String     @id @default(uuid())
-  enrollmentId           String
-  lessonId               String
-  isCompleted            Boolean    @default(false)
-  videoWatchedPercentage Int        @default(0)
-  completedAt            DateTime?
-  createdAt              DateTime   @default(now())
-  updatedAt              DateTime   @updatedAt
-  enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
-  lesson                 Lesson     @relation(fields: [lessonId], references: [id])
+   id                     String     @id @default(uuid())
+   enrollmentId           String
+   lessonId               String
+   isCompleted            Boolean    @default(false)
+   videoWatchedPercentage Int        @default(0)
+   completedAt            DateTime?
+   createdAt              DateTime   @default(now())
+   updatedAt              DateTime   @updatedAt
+   enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
+   lesson                 Lesson     @relation(fields: [lessonId], references: [id])
 
-  @@unique([enrollmentId, lessonId])
-}
+   @@unique([enrollmentId, lessonId])
+   @@index([lessonId, isCompleted])
+ }
+
+
 
 model Coupon {
   id             String     @id @default(uuid())
@@ -136,25 +133,62 @@ model Coupon {
 }
 
 model Payment {
-  id               String         @id @default(uuid())
-  userId           String
-  courseId         String?
-  enrollmentId     String?
-  amount           Float
-  currency         String         @default("EGP")
-  status           PaymentStatus  @default(PENDING)
-  paymentGateway   PaymentGateway @default(PAYMOB)
-  gatewayReference String?
-  gatewayResponse  Json?
-  couponId         String?
-  enrolledAt       DateTime?      @updatedAt
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  coupon           Coupon?        @relation(fields: [couponId], references: [id])
-  course           Course?        @relation(fields: [courseId], references: [id])
-  enrollment       Enrollment?    @relation(fields: [enrollmentId], references: [id])
-  user             User           @relation(fields: [userId], references: [id])
-}
+   id               String         @id @default(uuid())
+   userId           String
+   courseId         String?
+   enrollmentId     String?
+   amount           Float
+   currency         String         @default("EGP")
+   status           PaymentStatus  @default(PENDING)
+   paymentGateway   PaymentGateway @default(PAYMOB)
+   gatewayReference String?
+<<<<<<< HEAD
+   paymobOrderId    Int?           @unique // New field for PayMob order ID
+   gatewayResponse  Json?
+=======
+>>>>>>> 08f3b93e2de3a44b460668b37e410e8227bee719
+   gatewayResponse  Json?
+   couponId         String?
+   enrolledAt       DateTime?      @updatedAt
+   createdAt        DateTime       @default(now())
+   updatedAt        DateTime       @updatedAt
+   coupon           Coupon?        @relation(fields: [couponId], references: [id])
+   course           Course?        @relation(fields: [courseId], references: [id])
+   enrollment       Enrollment?    @relation(fields: [enrollmentId], references: [id])
+   user             User           @relation(fields: [userId], references: [id])
+ }
+
+model StudentProfile {
+   id                 String   @id @default(uuid())
+   userId             String   @unique
+   bio                String?
+   avatar             String?
+   preferredLanguage  String?
+   timezone           String?
+   notifications      Json?    // Notification preferences
+   createdAt          DateTime @default(now())
+   updatedAt          DateTime @updatedAt
+   user               User     @relation(fields: [userId], references: [id])
+ }
+
+model Enrollment {
+   id                   String           @id @default(uuid())
+   userId               String
+   courseId             String
+   enrolledAt           DateTime         @default(now())
+   status               EnrollmentStatus @default(ACTIVE)
+   completionPercentage Int              @default(0)
+   lastAccessedAt       DateTime?
+   completedAt          DateTime?
+   course               Course           @relation(fields: [courseId], references: [id])
+   user                 User             @relation(fields: [userId], references: [id])
+   lessonProgress       LessonProgress[]
+   payments             Payment[]
+
+   @@unique([userId, courseId])
+   @@index([userId, status])
+   @@index([courseId, status])
+ }
 
 enum Role {
   ADMIN
@@ -169,10 +203,11 @@ enum CourseVisibility {
 }
 
 enum EnrollmentStatus {
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
+   PENDING
+   ACTIVE
+   COMPLETED
+   CANCELLED
+ }
 
 enum PaymentStatus {
   PENDING
