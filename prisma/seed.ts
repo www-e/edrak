@@ -13,6 +13,7 @@ async function main() {
     update: {},
     create: {
       username: 'admin',
+      email: 'admin@example.com',
       password: adminPassword,
       firstName: 'System',
       lastName: 'Administrator',
@@ -30,6 +31,7 @@ async function main() {
     update: {},
     create: {
       username: 'professor1',
+      email: 'professor1@example.com',
       password: professorPassword,
       firstName: 'Dr. John',
       lastName: 'Smith',
@@ -45,18 +47,21 @@ async function main() {
   const studentUsers = [
     {
       username: 'student1',
+      email: 'student1@example.com',
       firstName: 'Ahmed',
       lastName: 'Hassan',
       phoneNumber: '+20123456781',
     },
     {
       username: 'student2',
+      email: 'student2@example.com',
       firstName: 'Fatima',
       lastName: 'Ali',
       phoneNumber: '+20123456782',
     },
     {
       username: 'student3',
+      email: 'student3@example.com',
       firstName: 'Mohamed',
       lastName: 'Sayed',
       phoneNumber: '+20123456783',

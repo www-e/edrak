@@ -30,12 +30,13 @@ export interface SigninCredentials {
 
 // Interface for signup data
 export interface SignupData {
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  secondPhoneNumber?: string;
-  categoryPreference?: string;
-  referralSource?: string;
-}
+   username: string;
+   email: string;
+   password: string;
+   firstName: string;
+   lastName: string;
+   phoneNumber: string;
+   secondPhoneNumber?: string;
+   categoryPreference?: string;
+   referralSource?: string;
+ }

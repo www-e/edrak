@@ -44,12 +44,13 @@ export class AdminUserService {
     const skip = (page - 1) * limit;
 
     const where = search ? {
-      OR: [
-        { username: { contains: search, mode: 'insensitive' as const } },
-        { firstName: { contains: search, mode: 'insensitive' as const } },
-        { lastName: { contains: search, mode: 'insensitive' as const } }
-      ]
-    } : {};
+       OR: [
+         { username: { contains: search, mode: 'insensitive' as const } },
+         { email: { contains: search, mode: 'insensitive' as const } },
+         { firstName: { contains: search, mode: 'insensitive' as const } },
+         { lastName: { contains: search, mode: 'insensitive' as const } }
+       ]
+     } : {};
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -88,6 +89,7 @@ export class AdminUserService {
       select: {
         id: true,
         username: true,
+        email: true,
         firstName: true,
         lastName: true,
         phoneNumber: true,
@@ -114,6 +116,7 @@ export class AdminUserService {
       select: {
         id: true,
         username: true,
+        email: true,
         firstName: true,
         lastName: true,
         role: true,

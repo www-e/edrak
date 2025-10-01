@@ -58,8 +58,9 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = (user as User).id;
+        token.id = user.id;
         token.role = (user as User).role;
+        token.email = user.email; // Add email to the token
       }
       return token;
     },
@@ -70,7 +71,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
           role: token.role as Role,
           name: session.user.name,
-          email: session.user.email,
+          email: token.email as string, // Ensure email is passed to the session
           image: session.user.image
         };
         session.user = extendedUser;
@@ -81,7 +82,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  // Removed custom signIn page to use NextAuth default behavior
   secret: process.env.NEXTAUTH_SECRET,
 };
 

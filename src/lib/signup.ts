@@ -5,14 +5,23 @@ import { SignupData } from "@/types/auth";
 const prisma = new PrismaClient();
 
 export async function signupUser(data: SignupData) {
-  // Check if username already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { username: data.username },
-  });
+   // Check if username already exists
+   const existingUser = await prisma.user.findUnique({
+     where: { username: data.username },
+   });
 
-  if (existingUser) {
-    throw new Error("Username already exists");
-  }
+   if (existingUser) {
+     throw new Error("Username already exists");
+   }
+
+   // Check if email already exists
+   const existingEmail = await prisma.user.findUnique({
+     where: { email: data.email },
+   });
+
+   if (existingEmail) {
+     throw new Error("Email already exists");
+   }
 
   // Hash password
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -21,6 +30,7 @@ export async function signupUser(data: SignupData) {
   const user = await prisma.user.create({
     data: {
       username: data.username,
+      email: data.email,
       password: hashedPassword,
       firstName: data.firstName,
       lastName: data.lastName,

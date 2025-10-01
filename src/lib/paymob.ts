@@ -9,6 +9,30 @@ interface AuthTokenResponse { token: string; }
 interface OrderRegistrationResponse { id: number; }
 interface PaymentKeyResponse { token: string; }
 interface WalletPaymentResponse { redirect_url: string; }
+interface PayMobWebhookData {
+  amount_cents: string;
+  created_at: string;
+  currency: string;
+  error_occured: string;
+  has_parent_transaction: string;
+  id: string;
+  integration_id: string;
+  is_3d_secure: string;
+  is_auth: string;
+  is_capture: string;
+  is_refunded: string;
+  is_standalone_payment: string;
+  is_voided: string;
+  order: { id: string };
+  owner: string;
+  pending: string;
+  source_data: {
+    pan: string;
+    sub_type: string;
+    type: string;
+  };
+  success: string;
+}
 
 export type PaymentInitiationResult =
   | { type: 'iframe'; token: string }
@@ -107,7 +131,7 @@ export class PayMobService {
     throw new Error("Invalid payment method.");
   }
 
-  public static verifyHmac(hmac: string, data: Record<string, any>): boolean {
+  public static verifyHmac(hmac: string, data: PayMobWebhookData): boolean {
     // This string must be ordered alphabetically by key
     const orderedData = {
         amount_cents: data.amount_cents, created_at: data.created_at, currency: data.currency, error_occured: data.error_occured,

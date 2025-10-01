@@ -32,9 +32,10 @@ const interestsSchema = z.object({
 });
 
 const credentialsSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+   username: z.string().min(3, "Username must be at least 3 characters"),
+   email: z.string().email("Please enter a valid email address"),
+   password: z.string().min(6, "Password must be at least 6 characters"),
+ });
 
 type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
 type InterestsFormValues = z.infer<typeof interestsSchema>;
@@ -57,6 +58,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
     categoryPreference: "",
     referralSource: "",
     username: "",
+    email: "",
     password: "",
   });
 
@@ -380,6 +382,28 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
                 onSubmit={credentialsForm.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
+                <FormField
+                  control={credentialsForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-foreground font-medium">Email Address</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                          <Input
+                            type="email"
+                            placeholder="Enter your email address"
+                            className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20"
+                            {...field}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={credentialsForm.control}
                   name="username"

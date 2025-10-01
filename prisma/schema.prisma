@@ -11,6 +11,7 @@ datasource db {
 model User {
    id                 String       @id @default(uuid())
    username           String       @unique
+   email              String       @unique
    password           String
    firstName          String
    lastName           String
@@ -143,7 +144,6 @@ model Payment {
    paymentGateway   PaymentGateway @default(PAYMOB)
    gatewayReference String?
    paymobOrderId    Int?           @unique // New field for PayMob order ID
-   gatewayResponse  Json?
    gatewayResponse  Json?
    couponId         String?
    enrolledAt       DateTime?      @updatedAt
