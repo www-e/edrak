@@ -142,11 +142,8 @@ model Payment {
    status           PaymentStatus  @default(PENDING)
    paymentGateway   PaymentGateway @default(PAYMOB)
    gatewayReference String?
-<<<<<<< HEAD
    paymobOrderId    Int?           @unique // New field for PayMob order ID
    gatewayResponse  Json?
-=======
->>>>>>> 08f3b93e2de3a44b460668b37e410e8227bee719
    gatewayResponse  Json?
    couponId         String?
    enrolledAt       DateTime?      @updatedAt
