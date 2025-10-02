@@ -7,6 +7,9 @@ export interface SessionUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  phoneNumber?: string | null;
 }
 
 // User type without password for safe return

@@ -9,29 +9,30 @@ interface AuthTokenResponse { token: string; }
 interface OrderRegistrationResponse { id: number; }
 interface PaymentKeyResponse { token: string; }
 interface WalletPaymentResponse { redirect_url: string; }
-interface PayMobWebhookData {
-  amount_cents: string;
+export interface PayMobWebhookData {
+  amount_cents: number;
   created_at: string;
   currency: string;
-  error_occured: string;
-  has_parent_transaction: string;
-  id: string;
-  integration_id: string;
-  is_3d_secure: string;
-  is_auth: string;
-  is_capture: string;
-  is_refunded: string;
-  is_standalone_payment: string;
-  is_voided: string;
-  order: { id: string };
-  owner: string;
-  pending: string;
+  error_occured: boolean;
+  has_parent_transaction: boolean;
+  id: number;
+  integration_id: number;
+  is_3d_secure: boolean;
+  is_auth: boolean;
+  is_capture: boolean;
+  is_refunded: boolean;
+  is_standalone_payment: boolean;
+  is_voided: boolean;
+  order: { id: number; merchant_order_id: string };
+  owner: number;
+  pending: boolean;
   source_data: {
     pan: string;
     sub_type: string;
     type: string;
   };
-  success: string;
+  success: boolean;
+  hmac: string;
 }
 
 export type PaymentInitiationResult =
@@ -77,19 +78,44 @@ export class PayMobService {
         expiration: 3600,
         order_id: orderId,
         billing_data: {
-          email: user.username,
-          first_name: user.firstName,
-          last_name: user.lastName,
-          phone_number: user.phoneNumber,
-          apartment: "NA", floor: "NA", street: "NA", building: "NA", shipping_method: "NA",
-          postal_code: "NA", city: "NA", country: "NA", state: "NA",
+          first_name: user.firstName || 'Unknown',
+          last_name: user.lastName || 'User',
+          email: user.email || 'noemail@example.com',
+          phone_number: user.phoneNumber || '+201000000000',
+          country: 'EG',
+          state: 'Cairo',
+          city: 'Cairo',
+          street: 'N/A',
+          building: 'N/A',
+          floor: 'N/A',
+          apartment: 'N/A',
         },
         currency: "EGP",
         integration_id: integrationId,
+        lock_order_when_paid: true,
       }),
     });
-    if (!response.ok) throw new Error("Failed to get PayMob payment key.");
-    return ((await response.json()) as PaymentKeyResponse).token;
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("PayMob payment key request failed:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+        authToken: authToken.substring(0, 10) + "...",
+        integrationId,
+        orderId,
+        amountCents
+      });
+      throw new Error(`Failed to get PayMob payment key. Status: ${response.status}, Error: ${errorText}`);
+    }
+
+    const responseData = await response.json();
+    if (!responseData.token) {
+      throw new Error("PayMob payment key response missing token field");
+    }
+
+    return responseData.token;
   }
   
   private static async getWalletRedirectUrl(paymentKeyToken: string, walletNumber: string): Promise<string> {
@@ -113,7 +139,7 @@ export class PayMobService {
     const authToken = await this.getAuthToken();
     const paymobOrderId = await this.registerOrder(authToken, amountCents, paymentId);
 
-    await db.payment.update({ where: { id: paymentId }, data: { paymobOrderId } });
+    await db.payment.update({ where: { id: paymentId }, data: { paymobOrderId: paymobOrderId.toString() } as Record<string, unknown> });
 
     if (paymentMethod === 'card') {
       const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
@@ -132,21 +158,61 @@ export class PayMobService {
   }
 
   public static verifyHmac(hmac: string, data: PayMobWebhookData): boolean {
-    // This string must be ordered alphabetically by key
-    const orderedData = {
-        amount_cents: data.amount_cents, created_at: data.created_at, currency: data.currency, error_occured: data.error_occured,
-        has_parent_transaction: data.has_parent_transaction, id: data.id, integration_id: data.integration_id, is_3d_secure: data.is_3d_secure,
-        is_auth: data.is_auth, is_capture: data.is_capture, is_refunded: data.is_refunded, is_standalone_payment: data.is_standalone_payment,
-        is_voided: data.is_voided, 'order.id': data.order.id, owner: data.owner, pending: data.pending,
-        'source_data.pan': data.source_data.pan, 'source_data.sub_type': data.source_data.sub_type, 'source_data.type': data.source_data.type,
-        success: data.success
-    };
-    const concatenatedString = Object.values(orderedData).join('');
-    const calculatedHmac = crypto.createHmac('sha512', env.PAYMOB_HMAC_SECRET).update(concatenatedString).digest('hex');
     try {
-        return crypto.timingSafeEqual(Buffer.from(calculatedHmac), Buffer.from(hmac));
-    } catch (e) {
-        return false;
+      const { hmac: receivedHmac, ...dataWithoutHmac } = data;
+
+      // The fields must be ordered alphabetically by key.
+      const orderedKeys = [
+        "amount_cents",
+        "created_at",
+        "currency",
+        "error_occured",
+        "has_parent_transaction",
+        "id",
+        "integration_id",
+        "is_3d_secure",
+        "is_auth",
+        "is_capture",
+        "is_refunded",
+        "is_standalone_payment",
+        "is_voided",
+        "order",
+        "owner",
+        "pending",
+        "source_data.pan",
+        "source_data.sub_type",
+        "source_data.type",
+        "success",
+      ];
+
+      // Build the concatenated string from the data object
+      const concatenatedString = orderedKeys
+        .map((key) => {
+          if (key.startsWith("source_data.")) {
+            const subKey = key.split(".")[1];
+            return (
+              dataWithoutHmac.source_data?.[subKey as keyof typeof dataWithoutHmac.source_data] ??
+              "false"
+            );
+          }
+          if (key === "order") {
+            return dataWithoutHmac.order?.id;
+          }
+          return dataWithoutHmac[key as keyof typeof dataWithoutHmac];
+        })
+        .join("");
+
+      // Generate our own HMAC
+      const calculatedHmac = crypto
+        .createHmac("sha512", env.PAYMOB_HMAC_SECRET)
+        .update(concatenatedString)
+        .digest("hex");
+
+      // Compare safely
+      return crypto.timingSafeEqual(Buffer.from(calculatedHmac, 'hex'), Buffer.from(hmac, 'hex'));
+    } catch (error) {
+      console.error("HMAC verification error:", error);
+      return false;
     }
   }
 }

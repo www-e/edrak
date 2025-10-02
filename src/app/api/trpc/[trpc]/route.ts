@@ -8,7 +8,7 @@ import { authOptions } from "@/lib/auth";
 
 const createContext = async (req: NextRequest) => {
   // For App Router API routes, we get the JWT token directly from cookies
-  const token = await getToken({ 
+  const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
   });
@@ -20,7 +20,10 @@ const createContext = async (req: NextRequest) => {
       name: token.name as string,
       email: token.email as string,
       image: token.picture as string,
-      role: token.role as string
+      role: token.role as string,
+      firstName: (token as { firstName?: string }).firstName || null,
+      lastName: (token as { lastName?: string }).lastName || null,
+      phoneNumber: (token as { phoneNumber?: string }).phoneNumber || null,
     } as SessionUser
   } : null;
 

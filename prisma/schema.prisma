@@ -27,6 +27,8 @@ model User {
    taughtCourses      Course[]     @relation("CourseProfessor")
    enrollments        Enrollment[]
    payments           Payment[]
+   progressMilestones ProgressMilestone[]
+   certificates       Certificate[]
    studentProfile     StudentProfile?
  }
 
@@ -62,6 +64,8 @@ model Course {
    enrollments    Enrollment[]
    lessons        Lesson[]
    payments       Payment[]
+   certificates   Certificate[]
+   progressMilestones ProgressMilestone[]
 
    @@index([professorId, visibility])
    @@index([categoryId, visibility])
@@ -134,26 +138,64 @@ model Coupon {
 }
 
 model Payment {
-   id               String         @id @default(uuid())
-   userId           String
-   courseId         String?
-   enrollmentId     String?
-   amount           Float
-   currency         String         @default("EGP")
-   status           PaymentStatus  @default(PENDING)
-   paymentGateway   PaymentGateway @default(PAYMOB)
-   gatewayReference String?
-   paymobOrderId    Int?           @unique // New field for PayMob order ID
-   gatewayResponse  Json?
-   couponId         String?
-   enrolledAt       DateTime?      @updatedAt
-   createdAt        DateTime       @default(now())
-   updatedAt        DateTime       @updatedAt
-   coupon           Coupon?        @relation(fields: [couponId], references: [id])
-   course           Course?        @relation(fields: [courseId], references: [id])
-   enrollment       Enrollment?    @relation(fields: [enrollmentId], references: [id])
-   user             User           @relation(fields: [userId], references: [id])
- }
+    id                    String        @id @default(cuid())
+    amount                Decimal
+    currency              String        @default("EGP")
+    status                PaymentStatus @default(PENDING)
+    paymentMethod         String?
+
+    // PayMob specific fields
+    paymobOrderId         String?       @unique
+    paymobTransactionId   BigInt?       // PayMob transaction ID from webhook
+    paymobResponse        Json?         // Store full PayMob response
+
+    // Payment completion tracking
+    completedAt           DateTime?     // When payment was completed
+    failureReason         String?       // Reason for payment failure
+
+    userId                String
+    user                  User          @relation(fields: [userId], references: [id])
+
+    courseId              String
+    course                Course        @relation(fields: [courseId], references: [id])
+
+    enrollmentId          String?
+    enrollment            Enrollment?   @relation(fields: [enrollmentId], references: [id])
+
+    couponId              String?
+    coupon                Coupon?       @relation(fields: [couponId], references: [id])
+
+    // Relations
+    webhooks              PaymentWebhook[]
+
+    createdAt             DateTime      @default(now())
+    updatedAt             DateTime      @updatedAt
+
+    @@index([userId])
+    @@index([courseId])
+    @@index([status])
+    @@index([paymobOrderId])
+    @@index([paymobTransactionId])
+  }
+
+model PaymentWebhook {
+    id                    String    @id @default(cuid())
+    paymentId             String
+    paymobTransactionId   BigInt
+    webhookPayload        Json      // Full webhook payload from PayMob
+    processedAt           DateTime? // When webhook was successfully processed
+    processingAttempts    Int       @default(0)
+    lastError             String?   // Last error message if processing failed
+
+    payment               Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
+
+    @@index([paymentId])
+    @@index([paymobTransactionId])
+    @@index([processedAt])
+}
 
 model StudentProfile {
    id                 String   @id @default(uuid())
@@ -219,6 +261,73 @@ enum PaymentGateway {
 }
 
 enum CouponType {
-  PERCENTAGE
-  FIXED
+   PERCENTAGE
+   FIXED
+}
+
+// Certificate System Models
+enum CertificateStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum MilestoneType {
+  COURSE_START
+  LESSON_COMPLETE
+  COURSE_COMPLETE
+  QUIZ_PASS
+  ASSIGNMENT_SUBMIT
+}
+
+model Certificate {
+  id              String            @id @default(cuid())
+  certificateCode String            @unique
+  userId          String
+  courseId        String
+  status          CertificateStatus @default(ACTIVE)
+  issuedAt        DateTime          @default(now())
+  validUntil      DateTime?
+  isRevoked       Boolean           @default(false)
+  revokedAt       DateTime?
+  revokedReason   String?
+
+  // Certificate metadata
+  studentName     String
+  courseName      String
+  professorName   String
+  completionDate  DateTime
+  grade           String?
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([certificateCode])
+  @@index([status])
+}
+
+model ProgressMilestone {
+  id            String        @id @default(cuid())
+  userId        String
+  courseId      String
+  milestoneType MilestoneType
+  metadata      Json?         // Additional milestone-specific data
+  achievedAt    DateTime      @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@unique([userId, courseId, milestoneType])
+  @@index([userId])
+  @@index([courseId])
+  @@index([milestoneType])
 }

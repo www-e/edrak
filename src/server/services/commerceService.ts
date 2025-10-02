@@ -102,7 +102,7 @@ export class AdminCommerceService {
       totalUsers: userStats._count.id,
       totalCourses: courseStats._count.id,
       activeEnrollments: enrollmentStats._count.id,
-      totalRevenue: revenueStats._sum.amount || 0,
+      totalRevenue: Number(revenueStats._sum.amount || 0),
     };
 
     // Cache the metrics for 30 seconds

@@ -1,79 +1,239 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from "next/server";
 import { db } from '@/server/db';
-import { PayMobService } from '@/lib/paymob';
+import { PayMobService, PayMobWebhookData } from '@/lib/paymob';
+import { createSuccessResponse, createErrorResponse } from '@/lib/api-response';
 import { EnrollmentStatus } from '@prisma/client';
 
+// Type definitions for webhook data
+interface PayMobWebhookPayload {
+  type: string;
+  obj: {
+    id: number;
+    success: boolean;
+    error_occured?: boolean;
+    order?: {
+      id: number;
+      merchant_order_id?: string;
+    };
+    amount_cents?: number;
+    currency?: string;
+  };
+}
+
 // This function handles the server-to-server webhook from PayMob
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
+  let webhookData: PayMobWebhookPayload | null = null;
+  let transactionId: number | null = null;
+
   try {
-    const body = await req.json();
-    
-    // Ensure the webhook is of type TRANSACTION
-    if (body.type !== 'TRANSACTION') {
-      return NextResponse.json({ received: true, message: 'Not a transaction webhook.' });
+    // Parse webhook data
+    webhookData = await request.json();
+
+    if (!webhookData) {
+      return createErrorResponse(
+        "WEBHOOK_DATA_MISSING",
+        "Webhook data is missing or invalid",
+        400
+      );
     }
 
-    const transactionData = body.obj;
-    const hmac = req.headers.get('x-paymob-hmac');
+    transactionId = webhookData.obj?.id ?? null;
 
-    if (!hmac || !PayMobService.verifyHmac(hmac, transactionData)) {
-      console.error("PayMob Webhook: Invalid HMAC signature.");
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    console.log("PayMob webhook received:", {
+      transactionId: transactionId,
+      orderId: webhookData.obj?.order?.id,
+      success: webhookData.obj?.success,
+      amount: webhookData.obj?.amount_cents,
+      timestamp: new Date().toISOString(),
+    });
+
+    const webhookObject = webhookData.obj;
+
+    // Validate webhook payload structure
+    if (!webhookObject || typeof webhookObject !== 'object') {
+      console.error("Invalid webhook payload structure:", webhookObject);
+      return createErrorResponse(
+        "WEBHOOK_PAYLOAD_INVALID",
+        "Invalid webhook payload structure",
+        400,
+        { receivedPayload: webhookObject }
+      );
     }
 
-    const paymobOrderId = transactionData.order.id;
-    const isSuccess = transactionData.success === true;
+    // Verify webhook signature
+    const hmac = request.headers.get('x-paymob-hmac');
+    if (!hmac || !PayMobService.verifyHmac(hmac, webhookObject as PayMobWebhookData)) {
+      console.error(
+        "Invalid PayMob webhook signature for transaction:",
+        transactionId
+      );
+      return createErrorResponse(
+        "WEBHOOK_SIGNATURE_INVALID",
+        "Invalid webhook signature",
+        401,
+        { transactionId: transactionId }
+      );
+    }
 
-    const payment = await db.payment.findUnique({
-      where: { paymobOrderId },
+    // Process webhook data
+    const isSuccess = Boolean(webhookObject.success && !webhookObject.error_occured);
+    const orderId = webhookObject.order?.id;
+
+    if (!orderId) {
+      console.error("Missing order ID in webhook data");
+      return createErrorResponse(
+        "WEBHOOK_MISSING_ORDER_ID",
+        "Missing order identification",
+        400
+      );
+    }
+
+    // Find the payment record
+    const payment = await db.payment.findFirst({
+      where: {
+        paymobOrderId: orderId.toString(),
+      } as Record<string, unknown>,
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+        course: { select: { id: true, title: true } },
+      },
     });
 
     if (!payment) {
-      console.error(`PayMob Webhook: Payment not found for PayMob Order ID ${paymobOrderId}`);
-      return NextResponse.json({ error: 'Payment record not found' }, { status: 404 });
+      console.error("Payment not found for webhook:", {
+        orderId: orderId,
+        transactionId: transactionId,
+      });
+
+      return createErrorResponse(
+        "PAYMENT_NOT_FOUND",
+        "Payment record not found",
+        404
+      );
     }
-    
-    // Only process if the payment was successful and is still PENDING in our system
-    if (isSuccess && payment.status === 'PENDING') {
-        await db.$transaction(async (prisma) => {
-            await prisma.payment.update({
-                where: { id: payment.id },
-                data: {
-                    status: 'COMPLETED',
-                    gatewayReference: transactionData.id.toString(),
-                },
+
+    // Determine new payment status
+    const newStatus = isSuccess ? "COMPLETED" : "FAILED";
+
+    // Execute payment update and enrollment creation in a single transaction
+    const transactionResult = await db.$transaction(async (tx) => {
+      // Update payment record
+      const updatedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: newStatus,
+        },
+      });
+
+      // For successful payments, create enrollment within the same transaction
+      let enrollmentResult = null;
+      if (isSuccess) {
+        try {
+          // Check if enrollment already exists
+          const existingEnrollment = await tx.enrollment.findUnique({
+            where: {
+              userId_courseId: {
+                userId: payment.userId,
+                courseId: payment.courseId!,
+              },
+            },
+          });
+
+          if (!existingEnrollment) {
+            // Create enrollment
+            const newEnrollment = await tx.enrollment.create({
+              data: {
+                userId: payment.userId,
+                courseId: payment.courseId!,
+                status: EnrollmentStatus.ACTIVE,
+                completionPercentage: 0,
+                lastAccessedAt: null,
+              },
             });
 
-            if (payment.userId && payment.courseId) {
-                // Ensure enrollment doesn't already exist
-                const existingEnrollment = await prisma.enrollment.findFirst({
-                    where: { userId: payment.userId, courseId: payment.courseId },
-                });
+            enrollmentResult = {
+              success: true,
+              enrollmentId: newEnrollment.id,
+              created: true,
+            };
 
-                if (!existingEnrollment) {
-                    await prisma.enrollment.create({
-                        data: {
-                            userId: payment.userId,
-                            courseId: payment.courseId,
-                            status: EnrollmentStatus.ACTIVE,
-                        },
-                    });
-                }
-            }
-        });
-        console.log(`Webhook: Successfully processed and enrolled payment for PayMob Order ID: ${paymobOrderId}`);
-    } else if (!isSuccess && payment.status === 'PENDING') {
-        await db.payment.update({
-            where: { id: payment.id },
-            data: { status: 'FAILED' },
-        });
-        console.log(`Webhook: Failed payment recorded for PayMob Order ID: ${paymobOrderId}`);
-    }
+            console.log("Enrollment created within transaction:", {
+              enrollmentId: newEnrollment.id,
+              paymentId: payment.id,
+              userId: payment.userId,
+              courseId: payment.courseId,
+            });
+          } else {
+            enrollmentResult = {
+              success: true,
+              enrollmentId: existingEnrollment.id,
+              created: false,
+            };
 
-    return NextResponse.json({ received: true });
+            console.log("Enrollment already exists:", {
+              enrollmentId: existingEnrollment.id,
+              paymentId: payment.id,
+            });
+          }
+        } catch (enrollmentError) {
+          console.error(
+            "Enrollment creation failed within transaction:",
+            enrollmentError
+          );
+
+          enrollmentResult = {
+            success: false,
+            error: enrollmentError instanceof Error ? enrollmentError.message : "Unknown error",
+            requiresManualReview: true,
+          };
+        }
+      }
+
+      return {
+        payment: updatedPayment,
+        enrollment: enrollmentResult,
+      };
+    });
+
+    console.log("Payment webhook processed:", {
+      paymentId: payment.id,
+      status: newStatus,
+      transactionId: transactionId,
+      success: isSuccess,
+      enrollmentCreated: transactionResult.enrollment?.success || false,
+      enrollmentId: transactionResult.enrollment?.enrollmentId,
+    });
+
+    return createSuccessResponse({
+      paymentId: payment.id,
+      status: newStatus,
+      transactionId: transactionId,
+      enrollment: {
+        created: transactionResult.enrollment?.success || false,
+        enrollmentId: transactionResult.enrollment?.enrollmentId,
+        requiresManualReview: transactionResult.enrollment?.requiresManualReview || false,
+      },
+    }, "Webhook processed successfully");
 
   } catch (error) {
-    console.error('Error in PayMob webhook handler:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("PayMob webhook processing error:", error);
+
+    return createErrorResponse(
+      "WEBHOOK_PROCESSING_ERROR",
+      "Webhook received but processing failed",
+      500,
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+        transactionId,
+      }
+    );
   }
+}
+
+// GET /api/payments/webhook - Health check for webhook endpoint
+export async function GET() {
+  return createSuccessResponse({
+    message: "PayMob webhook endpoint is active",
+    timestamp: new Date().toISOString(),
+  });
 }

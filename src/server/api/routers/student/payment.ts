@@ -43,6 +43,7 @@ export const paymentRouter = createTRPCRouter({
           courseId: course.id,
           amount: course.price,
           status: "PENDING",
+          paymentMethod: paymentMethod,
         },
       });
 

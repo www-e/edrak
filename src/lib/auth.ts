@@ -22,10 +22,21 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        // Find user by username
+        // Find user by username with required billing fields
         const user = await prisma.user.findUnique({
           where: {
             username: credentials.username,
+          },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            password: true,
+            firstName: true,
+            lastName: true,
+            phoneNumber: true,
+            role: true,
+            isActive: true,
           },
         });
 
@@ -58,21 +69,28 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        const userWithBilling = user as User & { firstName: string; lastName: string; phoneNumber: string };
         token.id = user.id;
-        token.role = (user as User).role;
+        token.role = userWithBilling.role;
         token.email = user.email; // Add email to the token
+        token.firstName = userWithBilling.firstName; // Add billing fields to token
+        token.lastName = userWithBilling.lastName;
+        token.phoneNumber = userWithBilling.phoneNumber;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        // Extend session user with custom properties
+        // Extend session user with custom properties including billing fields
         const extendedUser: SessionUser = {
           id: token.id as string,
           role: token.role as Role,
           name: session.user.name,
           email: token.email as string, // Ensure email is passed to the session
-          image: session.user.image
+          image: session.user.image,
+          firstName: (token as { firstName?: string }).firstName || null,
+          lastName: (token as { lastName?: string }).lastName || null,
+          phoneNumber: (token as { phoneNumber?: string }).phoneNumber || null,
         };
         session.user = extendedUser;
       }

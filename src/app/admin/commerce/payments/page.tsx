@@ -116,7 +116,6 @@ export default function PaymentsPage() {
         );
       }
     },
-    { key: "paymentGateway", title: "Gateway" },
     { 
       key: "createdAt", 
       title: "Date", 
