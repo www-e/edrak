@@ -9,8 +9,22 @@ export default withAuth(
     }
   },
   {
-    pages: {
-      signIn: "/auth/student/signin",
+    callbacks: {
+      authorized: ({ token, req }) => {
+        // Define routes that are always public (no authentication required)
+        const publicRoutes = ["/", "/auth", "/courses"];
+        const isPublicRoute = publicRoutes.some(route =>
+          req.nextUrl.pathname === route || req.nextUrl.pathname.startsWith(route + "/")
+        );
+
+        // Always allow access to public routes
+        if (isPublicRoute) {
+          return true;
+        }
+
+        // For all other routes, require authentication
+        return !!token;
+      },
     },
   }
 );

@@ -1,22 +1,29 @@
 // src/app/api/payments/iframe/[token]/route.ts
 import { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
 import { createErrorResponse, ApiErrors } from "@/lib/api-response";
-import { SessionUser } from "@/types/auth";
+import { type NextApiRequest, type NextApiResponse } from "next";
+
+// Type definitions
+interface AuthenticatedUser {
+  id: string;
+  role: string;
+  email?: string;
+  name?: string;
+}
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    // Get JWT token for App Router compatibility
-    const jwtToken = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+    const session = await getServerAuthSession({
+      req: request as unknown as NextApiRequest,
+      res: {} as unknown as NextApiResponse
     });
 
-    if (!jwtToken || !jwtToken.id) {
+    if (!session?.user || !('id' in session.user)) {
       return createErrorResponse(
         ApiErrors.UNAUTHORIZED.code,
         ApiErrors.UNAUTHORIZED.message,
@@ -24,25 +31,11 @@ export async function GET(
       );
     }
 
-    // Map token to session format
-    const session = {
-      user: {
-        id: jwtToken.id as string,
-        name: jwtToken.name as string,
-        email: jwtToken.email as string,
-        image: jwtToken.picture as string,
-        role: jwtToken.role as string,
-        firstName: (jwtToken as { firstName?: string }).firstName || null,
-        lastName: (jwtToken as { lastName?: string }).lastName || null,
-        phoneNumber: (jwtToken as { phoneNumber?: string }).phoneNumber || null,
-      } as SessionUser
-    };
-
-    const { token: paymentId } = await params;
+    const { token } = await params;
 
     // Find the payment record by ID (token is the payment ID)
     const payment = await db.payment.findUnique({
-      where: { id: paymentId },
+      where: { id: token },
       include: {
         course: true,
         user: true,
@@ -58,7 +51,7 @@ export async function GET(
     }
 
     // Security check: Ensure the payment belongs to the current user
-    if (payment.userId !== session.user.id) {
+    if (payment.userId !== (session.user as AuthenticatedUser).id) {
       return createErrorResponse(
         ApiErrors.FORBIDDEN.code,
         "لا يمكنك الوصول إلى هذه العملية",

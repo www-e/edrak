@@ -1,19 +1,25 @@
 // src/app/api/payments/check-status/route.ts
 import { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { getServerAuthSession } from '@/server/auth';
 import { db } from '@/server/db';
 import { createSuccessResponse, createErrorResponse, ApiErrors } from '@/lib/api-response';
-import { SessionUser } from '@/types/auth';
+import { type NextApiRequest, type NextApiResponse } from "next";
+
+// Type definitions
+interface AuthenticatedUser {
+  id: string;
+  role: string;
+  email?: string;
+  name?: string;
+}
 
 export async function GET(request: NextRequest) {
   try {
-    // Get JWT token for App Router compatibility
-    const jwtToken = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+    const session = await getServerAuthSession({
+      req: request as unknown as NextApiRequest,
+      res: {} as unknown as NextApiResponse
     });
-
-    if (!jwtToken || !jwtToken.id) {
+    if (!session?.user || !('id' in session.user)) {
       return createErrorResponse(
         ApiErrors.UNAUTHORIZED.code,
         ApiErrors.UNAUTHORIZED.message,
@@ -21,26 +27,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Map token to session format
-    const session = {
-      user: {
-        id: jwtToken.id!, // We already validated this exists
-        name: jwtToken.name || '',
-        email: jwtToken.email || '',
-        image: jwtToken.picture || '',
-        role: jwtToken.role || 'STUDENT',
-        firstName: (jwtToken as { firstName?: string }).firstName || null,
-        lastName: (jwtToken as { lastName?: string }).lastName || null,
-        phoneNumber: (jwtToken as { phoneNumber?: string }).phoneNumber || null,
-      } as SessionUser
-    };
-
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
     const merchantOrderId = searchParams.get('merchantOrderId');
     const transactionId = searchParams.get('transactionId');
 
-    const user = session.user;
+    const user = session.user as AuthenticatedUser;
     console.log('🔍 Check-status API called with:', {
       courseId,
       merchantOrderId,
