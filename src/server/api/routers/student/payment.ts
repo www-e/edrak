@@ -49,8 +49,22 @@ export const paymentRouter = createTRPCRouter({
 
       try {
         const result = await PayMobService.initiateCoursePayment(user as User, course, payment.id, paymentMethod, walletNumber);
+
         if (result.type === 'iframe') {
-          return { type: 'iframe', iframeUrlPath: `/student/pay/${result.token}` };
+          // Build complete iframe URL (matching working project)
+          const baseUrl = process.env.PAYMOB_BASE_URL || "https://accept.paymob.com/api";
+          const iframeId = process.env.PAYMOB_IFRAME_ID || process.env.NEXT_PUBLIC_PAYMOB_IFRAME_ID;
+
+          let iframeUrl = null;
+          if (iframeId && result.token) {
+            iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${result.token}`;
+          }
+
+          return {
+            type: 'iframe',
+            paymentId: payment.id,
+            iframeUrl,
+          };
         } else {
           return { type: 'redirect', redirectUrl: result.url };
         }

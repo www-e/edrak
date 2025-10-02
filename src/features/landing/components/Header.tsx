@@ -18,17 +18,12 @@ export const Header = () => {
   const { data: session, status } = useSession();
 
   const navLinks = [
-    { href: "/explore/?type=specialization", label: "Specializations" },
-    { href: "/explore/?type=course", label: "Courses" },
+    { href: "/courses", label: "Courses" },
     { href: "/partners/", label: "Partners" },
   ];
 
   const exploreLinks = [
-    { href: "/explore/?category=career-preparation", label: "Career Preparation" },
-    { href: "/explore/?category=technology", label: "Technology" },
-    { href: "/explore/?category=personal-development", label: "Personal Development" },
-    { href: "/explore/?category=business-and-entrepreneurship", label: "Business & Entrepreneurship" },
-    { href: "/explore/?category=languages", label: "Languages" },
+    { href: "/courses", label: "All Courses" },
   ];
 
   return (
@@ -62,8 +57,8 @@ export const Header = () => {
                     </Link>
                   ))}
                   <div className="border-t border-border my-2"></div>
-                  <Link href="/explore/" className="px-6 py-2 text-primary font-semibold hover:bg-muted transition-colors text-left">
-                    Explore All Areas
+                  <Link href="/courses" className="px-6 py-2 text-primary font-semibold hover:bg-muted transition-colors text-left">
+                    View All Courses
                   </Link>
                 </div>
               </div>
@@ -212,8 +207,8 @@ export const Header = () => {
                     </Link>
                   ))}
                   <div className="border-t border-border my-2"></div>
-                  <Link href="/explore/" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-primary">
-                    Explore All Areas
+                  <Link href="/courses" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-primary">
+                    View All Courses
                   </Link>
                 </div>
             </div>

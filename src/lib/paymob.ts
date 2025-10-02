@@ -139,10 +139,32 @@ export class PayMobService {
     const authToken = await this.getAuthToken();
     const paymobOrderId = await this.registerOrder(authToken, amountCents, paymentId);
 
-    await db.payment.update({ where: { id: paymentId }, data: { paymobOrderId: paymobOrderId.toString() } as Record<string, unknown> });
+    await db.payment.update({
+      where: { id: paymentId },
+      data: {
+        paymobOrderId: paymobOrderId.toString(),
+        paymobResponse: {
+          orderId: paymobOrderId,
+          initiatedAt: new Date().toISOString()
+        }
+      } as Record<string, unknown>
+    });
 
     if (paymentMethod === 'card') {
       const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
+
+      // Store payment key in database for later retrieval
+      await db.payment.update({
+        where: { id: paymentId },
+        data: {
+          paymobResponse: {
+            orderId: paymobOrderId,
+            paymentKey: paymentKey,
+            initiatedAt: new Date().toISOString()
+          }
+        } as Record<string, unknown>
+      });
+
       return { type: 'iframe', token: paymentKey };
     }
     
@@ -150,6 +172,20 @@ export class PayMobService {
       if (!walletNumber) throw new Error("Wallet number is required.");
       // CRITICAL FIX: Generate a payment key for the wallet integration first
       const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_MOBILE_WALLET);
+
+      // Store payment key in database for wallet payments too
+      await db.payment.update({
+        where: { id: paymentId },
+        data: {
+          paymobResponse: {
+            orderId: paymobOrderId,
+            paymentKey: paymentKey,
+            walletNumber: walletNumber,
+            initiatedAt: new Date().toISOString()
+          }
+        } as Record<string, unknown>
+      });
+
       const redirectUrl = await this.getWalletRedirectUrl(paymentKey, walletNumber);
       return { type: 'redirect', url: redirectUrl };
     }
@@ -205,11 +241,11 @@ export class PayMobService {
       // Generate our own HMAC
       const calculatedHmac = crypto
         .createHmac("sha512", env.PAYMOB_HMAC_SECRET)
-        .update(concatenatedString)
-        .digest("hex");
+        .update(concatenatedString, "utf8")
+        .digest();
 
-      // Compare safely
-      return crypto.timingSafeEqual(Buffer.from(calculatedHmac, 'hex'), Buffer.from(hmac, 'hex'));
+      // Compare safely using timingSafeEqual
+      return crypto.timingSafeEqual(calculatedHmac, Buffer.from(hmac, 'hex'));
     } catch (error) {
       console.error("HMAC verification error:", error);
       return false;

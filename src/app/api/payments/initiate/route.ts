@@ -1,6 +1,6 @@
 // src/app/api/payments/initiate/route.ts
 import { NextRequest } from "next/server";
-import { getServerAuthSession } from "@/server/auth";
+import { getServerSession } from "next-auth";
 import { db } from "@/server/db";
 import { PayMobService } from "@/lib/paymob";
 import {
@@ -9,7 +9,7 @@ import {
   ApiErrors,
 } from "@/lib/api-response";
 import { z } from "zod";
-import { type NextApiRequest, type NextApiResponse } from "next";
+import { authOptions } from "@/lib/auth";
 import { User } from "@prisma/client";
 
 // Type definitions for better type safety
@@ -36,10 +36,7 @@ const paymentInitiateSchema = z.object({
 // POST /api/payments/initiate - Initiate payment for a course
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerAuthSession({
-      req: request as unknown as NextApiRequest,
-      res: {} as unknown as NextApiResponse
-    });
+    const session = await getServerSession(authOptions);
 
     // Check authentication
     if (!session?.user || !('id' in session.user)) {
@@ -228,17 +225,28 @@ export async function POST(request: NextRequest) {
             paymobResponse: {
               paymentMethod,
               initiatedAt: new Date().toISOString(),
-              iframeUrl: paymentResult.type === 'iframe' ? `/student/pay/${paymentResult.token}` : undefined,
+              paymentKey: paymentResult.type === 'iframe' ? paymentResult.token : undefined,
             },
           },
         });
+      }
+
+      // Build the complete iframe URL for credit card payments (matching working project)
+      let iframeUrl = null;
+      if (paymentResult.type === 'iframe' && paymentResult.token) {
+        const baseUrl = process.env.PAYMOB_BASE_URL || "https://accept.paymob.com/api";
+        const iframeId = process.env.PAYMOB_IFRAME_ID || process.env.NEXT_PUBLIC_PAYMOB_IFRAME_ID;
+
+        if (iframeId) {
+          iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${paymentResult.token}`;
+        }
       }
 
       return createSuccessResponse(
         {
           paymentId: payment.id,
           type: paymentResult.type,
-          ...(paymentResult.type === 'iframe' && { iframeUrl: paymentResult.token }),
+          ...(paymentResult.type === 'iframe' && { iframeUrl }),
           ...(paymentResult.type === 'redirect' && { redirectUrl: paymentResult.url }),
           paymentMethod: paymentResult.type === 'redirect' ? 'wallet' : 'card',
           amount: Number(course.price),

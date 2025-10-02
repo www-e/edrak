@@ -28,8 +28,9 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
 
   const initiatePayment = api.student.payment.initiateCoursePayment.useMutation({
     onSuccess: (data) => {
-      if (data.type === 'iframe' && data.iframeUrlPath) {
-        router.push(data.iframeUrlPath);
+      if (data.type === 'iframe' && data.iframeUrl) {
+        // Open iframe URL directly in current window (matching working project)
+        window.location.href = data.iframeUrl;
       } else if (data.type === 'redirect' && data.redirectUrl) {
         window.location.href = data.redirectUrl;
       }

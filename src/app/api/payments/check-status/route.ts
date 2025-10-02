@@ -1,9 +1,9 @@
 // src/app/api/payments/check-status/route.ts
 import { NextRequest } from 'next/server';
-import { getServerAuthSession } from '@/server/auth';
+import { getServerSession } from 'next-auth';
 import { db } from '@/server/db';
 import { createSuccessResponse, createErrorResponse, ApiErrors } from '@/lib/api-response';
-import { type NextApiRequest, type NextApiResponse } from "next";
+import { authOptions } from '@/lib/auth';
 
 // Type definitions
 interface AuthenticatedUser {
@@ -15,10 +15,7 @@ interface AuthenticatedUser {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerAuthSession({
-      req: request as unknown as NextApiRequest,
-      res: {} as unknown as NextApiResponse
-    });
+    const session = await getServerSession(authOptions);
     if (!session?.user || !('id' in session.user)) {
       return createErrorResponse(
         ApiErrors.UNAUTHORIZED.code,

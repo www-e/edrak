@@ -20,6 +20,18 @@ export default function PaymentIframePage() {
 
   const token = params.token as string;
 
+  // Handle new dual-token format: paymentId/paymentKey
+  // For backward compatibility, handle single token as paymentId
+  let paymentId: string;
+  let paymentKey: string;
+
+  if (token.includes('/')) {
+    [paymentId, paymentKey] = token.split('/');
+  } else {
+    paymentId = token;
+    paymentKey = token; // Fallback for single token format
+  }
+
   useEffect(() => {
     // Listen for payment completion messages from the iframe
     const messageHandler = (event: MessageEvent) => {
@@ -71,7 +83,7 @@ export default function PaymentIframePage() {
     };
   }, [iframeLoaded, router]);
 
-  const iframeUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${token}`;
+  const iframeUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${paymentId}/${paymentKey}`;
 
   return (
     <div className="min-h-screen bg-muted/40 py-8">

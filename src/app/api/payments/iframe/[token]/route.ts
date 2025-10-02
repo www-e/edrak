@@ -1,9 +1,9 @@
 // src/app/api/payments/iframe/[token]/route.ts
 import { NextRequest } from "next/server";
-import { getServerAuthSession } from "@/server/auth";
+import { getServerSession } from "next-auth";
 import { db } from "@/server/db";
 import { createErrorResponse, ApiErrors } from "@/lib/api-response";
-import { type NextApiRequest, type NextApiResponse } from "next";
+import { authOptions } from "@/lib/auth";
 
 // Type definitions
 interface AuthenticatedUser {
@@ -18,10 +18,7 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const session = await getServerAuthSession({
-      req: request as unknown as NextApiRequest,
-      res: {} as unknown as NextApiResponse
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user || !('id' in session.user)) {
       return createErrorResponse(
@@ -33,9 +30,12 @@ export async function GET(
 
     const { token } = await params;
 
-    // Find the payment record by ID (token is the payment ID)
+    // Simplified: token is the payment ID
+    const paymentId = token;
+
+    // Find the payment record by ID
     const payment = await db.payment.findUnique({
-      where: { id: token },
+      where: { id: paymentId },
       include: {
         course: true,
         user: true,
@@ -68,12 +68,14 @@ export async function GET(
       );
     }
 
-    // Get the gateway response to extract the payment key
+    // Get payment key from stored response
     const gatewayResponse = payment.paymobResponse as Record<string, unknown> | null;
-    if (!gatewayResponse?.paymentKey) {
+    const paymentKeyToUse = gatewayResponse?.paymentKey;
+
+    if (!paymentKeyToUse) {
       return createErrorResponse(
         "PAYMENT_KEY_NOT_FOUND",
-        "مفتاح الدفع غير متوفر",
+        "مفتاح الدفع غير متوفر في قاعدة البيانات",
         400
       );
     }
@@ -90,7 +92,7 @@ export async function GET(
       );
     }
 
-    const iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${gatewayResponse.paymentKey}`;
+    const iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${paymentKeyToUse}`;
 
     // Return HTML that redirects to the iframe
     const html = `
