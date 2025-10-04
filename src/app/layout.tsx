@@ -6,6 +6,7 @@ import { TRPCProvider } from "@/components/admin/trpc-provider";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import "./globals.css";
 
 // Configure Space Grotesk for headings and IBM Plex Sans for body text
@@ -47,7 +48,9 @@ export default async function RootLayout({
           >
             <SnackbarProvider>
               <TRPCProvider>
-                {children}
+                <ErrorBoundary>
+                  {children}
+                </ErrorBoundary>
               </TRPCProvider>
             </SnackbarProvider>
           </ThemeProvider>

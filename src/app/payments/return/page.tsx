@@ -43,29 +43,69 @@ function PaymentStatusContent() {
     const currentStatus = messages[status];
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-            <Card className="w-full max-w-md text-center shadow-lg p-4 animate-in fade-in duration-500">
-                <CardHeader>
-                    <CardTitle className="flex justify-center">
-                        <currentStatus.Icon className={`h-16 w-16 ${currentStatus.color}`} />
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                        <h2 className="text-2xl font-bold">{currentStatus.title}</h2>
-                        <p className="text-muted-foreground px-4">{currentStatus.text}</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-                        <Button asChild size="lg">
-                            <Link href="/courses">Go to My Courses</Link>
-                        </Button>
-                        <Button asChild variant="outline" size="lg">
-                            <Link href="/courses">Explore More</Link>
-                        </Button>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-md text-center shadow-lg animate-in fade-in duration-500 mx-4">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex justify-center">
+              <currentStatus.Icon className={`h-12 w-12 sm:h-16 sm:w-16 ${currentStatus.color}`} />
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
+            <div className="space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold">{currentStatus.title}</h2>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                {currentStatus.text}
+              </p>
+            </div>
+  
+            {/* Enhanced action buttons for different scenarios */}
+            <div className="space-y-3 pt-4">
+              {status === 'failed' && (
+                <div className="space-y-3">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/courses">Try Again</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="w-full">
+                    <Link href="/student/payments">View Payment History</Link>
+                  </Button>
+                </div>
+              )}
+  
+              {status === 'success' && (
+                <div className="space-y-3">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/student/courses">Go to My Courses</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="w-full">
+                    <Link href="/courses">Browse More Courses</Link>
+                  </Button>
+                </div>
+              )}
+  
+              {status === 'pending' && (
+                <div className="space-y-3">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/student/courses">Check My Courses</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="w-full">
+                    <Link href="/student/payments">View Payments</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+  
+            {/* Help text for mobile */}
+            <div className="text-xs text-muted-foreground sm:hidden">
+              {status === 'failed' && (
+                <p>إذا استمرت المشكلة، تواصل مع الدعم الفني</p>
+              )}
+              {status === 'pending' && (
+                <p>قد يستغرق تأكيد الدفع بضع دقائق</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
 }
 

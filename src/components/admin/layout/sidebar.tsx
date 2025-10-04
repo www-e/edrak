@@ -4,12 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Users, 
-  BookOpen, 
-  CreditCard, 
-  LogOut 
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  CreditCard,
+  LogOut
 } from "lucide-react";
 
 const navigation = [
