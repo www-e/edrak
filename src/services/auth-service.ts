@@ -57,6 +57,25 @@ export class AuthService {
       }
 
       const user: SafeUser = await response.json();
+
+      // Auto-login after successful signup
+      try {
+        const signinResult = await signIn("credentials", {
+          username: data.username,
+          password: data.password,
+          role: "STUDENT",
+          redirect: false,
+        });
+
+        if (signinResult?.error) {
+          console.warn("Signup successful but auto-login failed:", signinResult.error);
+          // Don't throw error here - account was created successfully
+        }
+      } catch (signinError) {
+        console.warn("Auto-login after signup failed:", signinError);
+        // Account creation succeeded, login failure is not critical
+      }
+
       return { user };
     } catch (error) {
       // Re-throw the error to be caught and handled by the UI component.

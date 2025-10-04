@@ -8,8 +8,8 @@ export default function SignupPage() {
   const router = useRouter();
 
   const handleSignupComplete = () => {
-    // Redirect to sign in page after successful signup
-    router.push("/auth/signin");
+    // Redirect to welcome page after successful signup (auto-login will be handled by AuthService)
+    router.push("/welcome?new_user=true");
   };
 
   return (
