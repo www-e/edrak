@@ -5,13 +5,7 @@ import { db } from '@/server/db';
 import { createSuccessResponse, createErrorResponse, ApiErrors } from '@/lib/api-response';
 import { authOptions } from '@/lib/auth';
 
-// Type definitions
-interface AuthenticatedUser {
-  id: string;
-  role: string;
-  email?: string;
-  name?: string;
-}
+interface AuthenticatedUser { id: string; role: string; email?: string; name?: string; }
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,14 +24,7 @@ export async function GET(request: NextRequest) {
     const transactionId = searchParams.get('transactionId');
 
     const user = session.user as AuthenticatedUser;
-    console.log('🔍 Check-status API called with:', {
-      courseId,
-      merchantOrderId,
-      transactionId,
-      userId: user.id
-    });
 
-    // Build where conditions based on available parameters
     const whereConditions: Array<{
       userId: string;
       courseId?: string;
@@ -45,28 +32,9 @@ export async function GET(request: NextRequest) {
       paymobTransactionId?: bigint;
     }> = [];
 
-    if (courseId) {
-      whereConditions.push({
-        userId: user.id,
-        courseId: courseId,
-      });
-    }
-
-    if (merchantOrderId) {
-      whereConditions.push({
-        userId: user.id,
-        paymobOrderId: merchantOrderId,
-      });
-    }
-
-    if (transactionId) {
-      // Handle both string and BigInt transaction IDs
-      const transactionIdBigInt = BigInt(transactionId);
-      whereConditions.push({
-        userId: user.id,
-        paymobTransactionId: transactionIdBigInt,
-      });
-    }
+    if (courseId) whereConditions.push({ userId: user.id, courseId });
+    if (merchantOrderId) whereConditions.push({ userId: user.id, paymobOrderId: merchantOrderId });
+    if (transactionId) whereConditions.push({ userId: user.id, paymobTransactionId: BigInt(transactionId) });
 
     if (whereConditions.length === 0) {
       return createErrorResponse(
@@ -76,61 +44,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find the most recent payment using OR conditions
     const payment = await db.payment.findFirst({
-      where: {
-        OR: whereConditions,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-      },
+      where: { OR: whereConditions },
+      orderBy: { createdAt: 'desc' },
+      include: { course: { select: { id: true, title: true } } }
     });
 
     if (!payment) {
-      console.log('❌ Payment not found with provided parameters');
-      return createErrorResponse(
-        'PAYMENT_NOT_FOUND',
-        'لم يتم العثور على عملية دفع',
-        404
-      );
+      return createErrorResponse('PAYMENT_NOT_FOUND', 'لم يتم العثور على عملية دفع', 404);
     }
 
-    // Security check: Ensure the payment belongs to the current user
     if (payment.userId !== user.id) {
-      return createErrorResponse(
-        ApiErrors.FORBIDDEN.code,
-        'لا يمكنك عرض هذه المعاملة',
-        ApiErrors.FORBIDDEN.status
-      );
+      return createErrorResponse(ApiErrors.FORBIDDEN.code, 'لا يمكنك عرض هذه المعاملة', ApiErrors.FORBIDDEN.status);
     }
 
-    console.log('✅ Payment found:', {
-      paymentId: payment.id,
-      status: payment.status,
-      courseId: payment.courseId,
-      transactionId: payment.paymobOrderId,
-      createdAt: payment.createdAt,
-      timeSinceCreation: Date.now() - payment.createdAt.getTime()
-    });
-
-    // Handle race condition: if payment is very recent and still pending,
-    // add a flag to suggest polling
     const timeSinceCreation = Date.now() - payment.createdAt.getTime();
-    const isRecentPendingPayment = payment.status === 'PENDING' && timeSinceCreation < 60000; // Less than 1 minute
+    const isRecentPendingPayment = payment.status === 'PENDING' && timeSinceCreation < 60000;
 
-    // Transform the payment data to ensure Decimal values are converted
     const transformedPayment = {
       ...payment,
       amount: Number(payment.amount),
-      // Add metadata for frontend race condition handling
       _metadata: {
         timeSinceCreation,
         isRecentPending: isRecentPendingPayment,
@@ -140,9 +73,7 @@ export async function GET(request: NextRequest) {
     };
 
     return createSuccessResponse(transformedPayment);
-
   } catch (error) {
-    console.error('Payment status check error:', error);
     return createErrorResponse(
       ApiErrors.INTERNAL_ERROR.code,
       ApiErrors.INTERNAL_ERROR.message,

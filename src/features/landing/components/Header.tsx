@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronDown, Menu, X, ChevronLeft } from 'lucide-react';
+import { Search, ChevronDown, Menu, X, ChevronLeft, User } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -97,6 +97,10 @@ export const Header = () => {
                   {session.user?.name?.charAt(0).toUpperCase() || 'U'}
                 </div>
                 <span className="font-body font-semibold">{session.user?.name || 'User'}</span>
+                <Link href="/student/profile" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+                  <User size={16} className="inline mr-1" />
+                  Profile
+                </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
                   className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
@@ -147,12 +151,18 @@ export const Header = () => {
               <span className="ml-1">Loading...</span>
             </div>
           ) : session?.user ? (
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-sm font-semibold text-foreground"
-            >
-              Sign Out
-            </button>
+            <>
+              <Link href="/student/profile" className="text-sm font-semibold text-foreground">
+                <User size={16} className="inline mr-1" />
+                Profile
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-sm font-semibold text-foreground"
+              >
+                Sign Out
+              </button>
+            </>
           ) : (
             <Link href="/auth/student/signin" className="text-sm font-semibold text-foreground">
               Sign In

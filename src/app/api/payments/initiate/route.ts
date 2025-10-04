@@ -3,37 +3,20 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { db } from "@/server/db";
 import { PayMobService } from "@/lib/paymob";
-import {
-  createSuccessResponse,
-  createErrorResponse,
-  ApiErrors,
-} from "@/lib/api-response";
+import { createSuccessResponse, createErrorResponse, ApiErrors } from "@/lib/api-response";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { User } from "@prisma/client";
 
-// Type definitions for better type safety
-interface AuthenticatedUser {
-  id: string;
-  role: string;
-  email?: string;
-  name?: string;
-}
+interface AuthenticatedUser { id: string; role: string; email?: string; name?: string; }
+interface PaymentInitiationRequest { courseId: string; paymentMethod: 'card' | 'wallet'; walletNumber?: string; }
 
-interface PaymentInitiationRequest {
-  courseId: string;
-  paymentMethod: 'card' | 'wallet';
-  walletNumber?: string;
-}
-
-// Validation schema for payment initiation
 const paymentInitiateSchema = z.object({
   courseId: z.string().min(1, "معرف الدورة مطلوب"),
   paymentMethod: z.enum(["card", "wallet"]).default("card"),
-  walletNumber: z.string().optional(), // Required for wallet payments
+  walletNumber: z.string().optional(),
 });
 
-// POST /api/payments/initiate - Initiate payment for a course
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -261,14 +244,9 @@ export async function POST(request: NextRequest) {
         201
       );
     } catch (error) {
-      console.error("Payment initiation error:", error);
-
-      // Clean up failed payment
       await db.payment.update({
         where: { id: payment.id },
-        data: {
-          status: "FAILED",
-        },
+        data: { status: "FAILED" }
       });
 
       return createErrorResponse(
@@ -279,8 +257,6 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Payment initiation error:", error);
-
     return createErrorResponse(
       ApiErrors.INTERNAL_ERROR.code,
       ApiErrors.INTERNAL_ERROR.message,

@@ -18,8 +18,7 @@ function PaymentFrame() {
         );
     }
     
-    // Construct the PayMob iframe URL using the public environment variable
-    const iframeUrl = `https://accept.paymob.com/api/acceptance/iframes/${env.NEXT_PUBLIC_PAYMOB_IFRAME_ID}?payment_token=${paymentToken}`;
+    const iframeUrl = `${env.NEXT_PUBLIC_APP_URL}/api/payments/iframe/${paymentToken}`;
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">

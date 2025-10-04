@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { db } from "@/server/db";
-import { Course, User } from "@prisma/client";
+import { Course, User, EnrollmentStatus } from "@prisma/client";
 import crypto from "crypto";
 
 const PAYMOB_API_URL = env.PAYMOB_BASE_URL;
@@ -9,6 +9,7 @@ interface AuthTokenResponse { token: string; }
 interface OrderRegistrationResponse { id: number; }
 interface PaymentKeyResponse { token: string; }
 interface WalletPaymentResponse { redirect_url: string; }
+
 export interface PayMobWebhookData {
   amount_cents: number;
   created_at: string;
@@ -26,11 +27,7 @@ export interface PayMobWebhookData {
   order: { id: number; merchant_order_id: string };
   owner: number;
   pending: boolean;
-  source_data: {
-    pan: string;
-    sub_type: string;
-    type: string;
-  };
+  source_data: { pan: string; sub_type: string; type: string };
   success: boolean;
   hmac: string;
 }
@@ -82,40 +79,24 @@ export class PayMobService {
           last_name: user.lastName || 'User',
           email: user.email || 'noemail@example.com',
           phone_number: user.phoneNumber || '+201000000000',
-          country: 'EG',
-          state: 'Cairo',
-          city: 'Cairo',
-          street: 'N/A',
-          building: 'N/A',
-          floor: 'N/A',
-          apartment: 'N/A',
+          country: 'EG', state: 'Cairo', city: 'Cairo',
+          street: 'N/A', building: 'N/A', floor: 'N/A', apartment: 'N/A'
         },
         currency: "EGP",
         integration_id: integrationId,
-        lock_order_when_paid: true,
-      }),
+        lock_order_when_paid: true
+      })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("PayMob payment key request failed:", {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText,
-        authToken: authToken.substring(0, 10) + "...",
-        integrationId,
-        orderId,
-        amountCents
-      });
-      throw new Error(`Failed to get PayMob payment key. Status: ${response.status}, Error: ${errorText}`);
+      throw new Error(`PayMob payment key failed: ${response.status} - ${errorText}`);
     }
 
-    const responseData = await response.json();
-    if (!responseData.token) {
-      throw new Error("PayMob payment key response missing token field");
-    }
+    const { token } = await response.json();
+    if (!token) throw new Error("PayMob payment key response missing token");
 
-    return responseData.token;
+    return token;
   }
   
   private static async getWalletRedirectUrl(paymentKeyToken: string, walletNumber: string): Promise<string> {
@@ -139,50 +120,34 @@ export class PayMobService {
     const authToken = await this.getAuthToken();
     const paymobOrderId = await this.registerOrder(authToken, amountCents, paymentId);
 
-    await db.payment.update({
-      where: { id: paymentId },
-      data: {
-        paymobOrderId: paymobOrderId.toString(),
-        paymobResponse: {
-          orderId: paymobOrderId,
-          initiatedAt: new Date().toISOString()
-        }
-      } as Record<string, unknown>
-    });
+    const baseResponse = {
+      orderId: paymobOrderId,
+      initiatedAt: new Date().toISOString()
+    };
 
     if (paymentMethod === 'card') {
       const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
 
-      // Store payment key in database for later retrieval
       await db.payment.update({
         where: { id: paymentId },
         data: {
-          paymobResponse: {
-            orderId: paymobOrderId,
-            paymentKey: paymentKey,
-            initiatedAt: new Date().toISOString()
-          }
+          paymobOrderId: paymobOrderId.toString(),
+          paymobResponse: { ...baseResponse, paymentKey }
         } as Record<string, unknown>
       });
 
       return { type: 'iframe', token: paymentKey };
     }
-    
+
     if (paymentMethod === 'wallet') {
       if (!walletNumber) throw new Error("Wallet number is required.");
-      // CRITICAL FIX: Generate a payment key for the wallet integration first
       const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_MOBILE_WALLET);
 
-      // Store payment key in database for wallet payments too
       await db.payment.update({
         where: { id: paymentId },
         data: {
-          paymobResponse: {
-            orderId: paymobOrderId,
-            paymentKey: paymentKey,
-            walletNumber: walletNumber,
-            initiatedAt: new Date().toISOString()
-          }
+          paymobOrderId: paymobOrderId.toString(),
+          paymobResponse: { ...baseResponse, paymentKey, walletNumber }
         } as Record<string, unknown>
       });
 
@@ -197,58 +162,73 @@ export class PayMobService {
     try {
       const { hmac: receivedHmac, ...dataWithoutHmac } = data;
 
-      // The fields must be ordered alphabetically by key.
       const orderedKeys = [
-        "amount_cents",
-        "created_at",
-        "currency",
-        "error_occured",
-        "has_parent_transaction",
-        "id",
-        "integration_id",
-        "is_3d_secure",
-        "is_auth",
-        "is_capture",
-        "is_refunded",
-        "is_standalone_payment",
-        "is_voided",
-        "order",
-        "owner",
-        "pending",
-        "source_data.pan",
-        "source_data.sub_type",
-        "source_data.type",
-        "success",
+        "amount_cents", "created_at", "currency", "error_occured", "has_parent_transaction",
+        "id", "integration_id", "is_3d_secure", "is_auth", "is_capture", "is_refunded",
+        "is_standalone_payment", "is_voided", "order", "owner", "pending",
+        "source_data.pan", "source_data.sub_type", "source_data.type", "success"
       ];
 
-      // Build the concatenated string from the data object
       const concatenatedString = orderedKeys
-        .map((key) => {
-          if (key.startsWith("source_data.")) {
-            const subKey = key.split(".")[1];
-            return (
-              dataWithoutHmac.source_data?.[subKey as keyof typeof dataWithoutHmac.source_data] ??
-              "false"
-            );
-          }
-          if (key === "order") {
-            return dataWithoutHmac.order?.id;
-          }
-          return dataWithoutHmac[key as keyof typeof dataWithoutHmac];
-        })
-        .join("");
+        .map(key => key.startsWith("source_data.")
+          ? dataWithoutHmac.source_data?.[key.split(".")[1] as keyof typeof dataWithoutHmac.source_data] ?? "false"
+          : key === "order" ? dataWithoutHmac.order?.id : dataWithoutHmac[key as keyof typeof dataWithoutHmac]
+        ).join("");
 
-      // Generate our own HMAC
-      const calculatedHmac = crypto
-        .createHmac("sha512", env.PAYMOB_HMAC_SECRET)
-        .update(concatenatedString, "utf8")
-        .digest();
-
-      // Compare safely using timingSafeEqual
+      const calculatedHmac = crypto.createHmac("sha512", env.PAYMOB_HMAC_SECRET).update(concatenatedString, "utf8").digest();
       return crypto.timingSafeEqual(calculatedHmac, Buffer.from(hmac, 'hex'));
-    } catch (error) {
-      console.error("HMAC verification error:", error);
+    } catch {
       return false;
     }
+  }
+
+  public static async processPaymentUpdate(paymobOrderId: string, success: boolean, transactionId?: number) {
+    const payment = await db.payment.findFirst({
+      where: { paymobOrderId: paymobOrderId } as Record<string, unknown>,
+      include: { user: { select: { id: true, firstName: true, lastName: true } }, course: { select: { id: true, title: true } } }
+    });
+
+    if (!payment) return null;
+
+    const newStatus = success ? "COMPLETED" : "FAILED";
+
+    const result = await db.$transaction(async (tx) => {
+      const updatedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: newStatus }
+      });
+
+      let enrollmentResult = null;
+      if (success) {
+        const existingEnrollment = await tx.enrollment.findUnique({
+          where: { userId_courseId: { userId: payment.userId, courseId: payment.courseId! } }
+        });
+
+        if (!existingEnrollment) {
+          const newEnrollment = await tx.enrollment.create({
+            data: {
+              userId: payment.userId,
+              courseId: payment.courseId!,
+              status: EnrollmentStatus.ACTIVE,
+              completionPercentage: 0,
+              lastAccessedAt: null
+            }
+          });
+          enrollmentResult = { success: true, enrollmentId: newEnrollment.id, created: true };
+        } else {
+          enrollmentResult = { success: true, enrollmentId: existingEnrollment.id, created: false };
+        }
+      }
+
+      return { payment: updatedPayment, enrollment: enrollmentResult };
+    });
+
+    return {
+      paymentId: payment.id,
+      status: newStatus,
+      success,
+      enrollment: result.enrollment,
+      transactionId
+    };
   }
 }

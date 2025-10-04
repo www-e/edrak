@@ -5,18 +5,9 @@ import { db } from "@/server/db";
 import { createErrorResponse, ApiErrors } from "@/lib/api-response";
 import { authOptions } from "@/lib/auth";
 
-// Type definitions
-interface AuthenticatedUser {
-  id: string;
-  role: string;
-  email?: string;
-  name?: string;
-}
+interface AuthenticatedUser { id: string; role: string; email?: string; name?: string; }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ token: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -172,7 +163,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error("Payment iframe error:", error);
     return createErrorResponse(
       ApiErrors.INTERNAL_ERROR.code,
       "حدث خطأ في تحميل نموذج الدفع",

@@ -22,17 +22,7 @@ export default function PaymentIframePage() {
 
   const token = params.token as string;
 
-  // Handle new dual-token format: paymentId/paymentKey
-  // For backward compatibility, handle single token as paymentId
-  let paymentId: string;
-  let paymentKey: string;
-
-  if (token.includes('/')) {
-    [paymentId, paymentKey] = token.split('/');
-  } else {
-    paymentId = token;
-    paymentKey = token; // Fallback for single token format
-  }
+  const paymentId = token;
 
   useEffect(() => {
     // Listen for payment completion messages from the iframe
@@ -46,39 +36,29 @@ export default function PaymentIframePage() {
         // Try to parse the message data
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
-        // Handle different types of messages
         if (data.type === 'payment_success') {
-          console.log('Payment success message received from iframe.');
-          // Redirect to return page with success
           router.push('/payments/return?success=true');
         } else if (data.type === 'payment_error') {
-          console.error('Payment error message received from iframe.');
-          // Set specific error type for recovery component
           setPaymentError(data.errorType || 'unknown');
         } else if (data.message === 'transaction_processed') {
-          const success = data.success;
-          if (success) {
-            console.log('Payment success message received from iframe.');
+          if (data.success) {
             router.push('/payments/return?success=true');
           } else {
-            console.error('Payment failure message received from iframe.');
             setPaymentError('payment_failed');
           }
         }
       } catch (err) {
-        console.error('Error parsing message from iframe:', err);
+        setPaymentError('unknown');
       }
     };
 
     window.addEventListener('message', messageHandler);
 
-    // Set a timeout to show a fallback option if the iframe is slow to load
     const timeout = setTimeout(() => {
       if (!iframeLoaded) {
-        console.warn('PayMob iframe loading timeout reached. Showing fallback.');
         setShowFallback(true);
       }
-    }, 15000); // 15-second timeout
+    }, 15000);
 
     return () => {
       window.removeEventListener('message', messageHandler);
@@ -86,7 +66,7 @@ export default function PaymentIframePage() {
     };
   }, [iframeLoaded, router]);
 
-  const iframeUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${paymentId}/${paymentKey}`;
+  const iframeUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${paymentId}`;
 
   const handleRetryPayment = () => {
     setPaymentError(null);
