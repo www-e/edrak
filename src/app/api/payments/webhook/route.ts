@@ -1,8 +1,6 @@
 import { NextRequest } from "next/server";
-import { db } from '@/server/db';
 import { PayMobService, PayMobWebhookData } from '@/lib/paymob';
 import { createSuccessResponse, createErrorResponse } from '@/lib/api-response';
-import { EnrollmentStatus } from '@prisma/client';
 
 interface PayMobWebhookPayload {
   type: string;
@@ -71,5 +69,13 @@ export async function GET() {
     message: "PayMob webhook endpoint is active",
     timestamp: new Date().toISOString(),
     url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook`,
+    environment: process.env.NODE_ENV,
+    paymobConfigured: !!(
+      process.env.PAYMOB_API_KEY &&
+      process.env.PAYMOB_HMAC_SECRET &&
+      process.env.PAYMOB_WEBHOOK_URL
+    ),
+    middlewareEnabled: true,
+    turbopackMode: process.env.NODE_ENV === 'development',
   });
 }

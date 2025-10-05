@@ -22,11 +22,7 @@ function PaymentStatusContent() {
       try {
         const paramsObj = Object.fromEntries(searchParams.entries());
         const result = await processPaymentReturn(paramsObj);
-        if (result) {
-          setStatus(result.success ? 'success' : 'failed');
-        } else {
-          setStatus('failed');
-        }
+        setStatus(result?.success ? 'success' : 'failed');
       } catch (error) {
         setStatus('failed');
       } finally {
@@ -35,6 +31,7 @@ function PaymentStatusContent() {
     };
 
     if (searchParams.toString()) {
+      // Process payment immediately without delay
       processPayment();
     }
   }, [searchParams]);

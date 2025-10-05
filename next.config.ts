@@ -34,8 +34,25 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    qualities: [95],
+    formats: ['image/webp', 'image/avif'],
   },
+
+  // Enable Turbopack optimizations
+  turbopack: {
+    // Enable faster middleware compilation
+    resolveAlias: {},
+  },
+
+  // Performance optimizations for Next.js 15
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+
+  // Development optimizations
+  ...(process.env.NODE_ENV === 'development' && {
+    // Reduce memory usage in development
+    output: 'standalone',
+  }),
 };
 
 export default nextConfig;

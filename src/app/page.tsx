@@ -11,25 +11,14 @@ import { BlogSection } from "@/features/landing/components/BlogSection";
 import { CourseSearch } from "@/features/landing/components/CourseSearch";
 import { processPaymentReturn } from '@/lib/payment-return-processor';
 
-// This is the main entry point for your landing page.
-// We are composing the page from the sections we've built.
-// This approach keeps the page file clean and focuses on the structure.
 export default async function LandingPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedSearchParams = await searchParams;
 
-  // Check if this is a Paymob payment return request
   const isPaymobReturn = resolvedSearchParams.id && resolvedSearchParams.success !== undefined;
 
-  // If it's a Paymob return, process the payment and redirect to proper payment return page
   if (isPaymobReturn) {
-    console.log("=== PROCESSING PAYMOB RETURN ===");
-    console.log("Payment data received:", resolvedSearchParams);
-
     try {
-      // Process the payment data synchronously
       await processPaymentReturn(resolvedSearchParams);
-
-      // Redirect to proper payment return page with processed status
       const params = new URLSearchParams();
       Object.entries(resolvedSearchParams).forEach(([key, value]) => {
         if (value !== undefined) {
@@ -37,9 +26,7 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
         }
       });
       redirect(`/payments/return?${params.toString()}`);
-    } catch (error) {
-      console.error("Payment processing failed:", error);
-      // Still redirect to return page even if processing fails
+    } catch {
       const params = new URLSearchParams();
       Object.entries(resolvedSearchParams).forEach(([key, value]) => {
         if (value !== undefined) {

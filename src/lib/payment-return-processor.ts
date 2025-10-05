@@ -15,7 +15,11 @@ export async function processPaymentReturn(searchParams: { [key: string]: string
   const paymobOrderId = data.order;
   const success = data.success === 'true';
 
-  if (!paymobOrderId) return;
+  if (!paymobOrderId) return null;
 
-  return PayMobService.processPaymentUpdate(paymobOrderId, success);
+  try {
+    return await PayMobService.processPaymentUpdate(paymobOrderId, success);
+  } catch (error) {
+    return null;
+  }
 }
