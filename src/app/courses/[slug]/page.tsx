@@ -5,9 +5,9 @@ import { CourseCurriculum } from './CourseCurriculum';
 import { CourseEnroll } from './CourseEnroll';
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export default async function CourseDetailPage({ params }: Props) {
