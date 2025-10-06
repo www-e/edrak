@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'edrak-courses-cdn.b-cdn.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
     formats: ['image/webp', 'image/avif'],
   },
@@ -45,14 +51,11 @@ const nextConfig: NextConfig = {
 
   // Performance optimizations for Next.js 15
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: true, // Always remove console logs in production builds
   },
 
-  // Development optimizations
-  ...(process.env.NODE_ENV === 'development' && {
-    // Reduce memory usage in development
-    output: 'standalone',
-  }),
+  // Production optimizations
+  output: 'standalone',
 };
 
 export default nextConfig;
