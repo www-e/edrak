@@ -15,41 +15,28 @@ import { Button } from "@/components/ui/button";
 
 // Get the specific types for a payment from our tRPC router for full type safety
 type RouterOutput = inferRouterOutputs<AppRouter>;
-type PaymentForTable = RouterOutput["admin"]["commerce"]["getAllPayments"][number];
+type PaymentForTable = RouterOutput["admin"]["commerce"]["getAllPayments"]["payments"][number];
 
 export default function PaymentsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<keyof PaymentForTable>("createdAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [limit] = useState(20);
 
-  const { data: paymentsData, isLoading } = api.admin.commerce.getAllPayments.useQuery();
-  const payments = paymentsData ?? [];
+  const { data: paymentsData, isLoading } = api.admin.commerce.getAllPayments.useQuery(
+    {
+      page,
+      limit,
+      search: searchTerm
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false
+    }
+  );
 
-  const filteredPayments = payments.filter(payment => {
-    const userName = `${payment.user.firstName} ${payment.user.lastName}`.toLowerCase();
-    const courseTitle = payment.course?.title?.toLowerCase() ?? "";
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-
-    return userName.includes(lowerCaseSearchTerm) || courseTitle.includes(lowerCaseSearchTerm);
-  });
-
-  const sortedPayments = [...filteredPayments].sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
-
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-
-    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-    
-    return 0;
-  });
-
-  const pageSize = 15;
-  const paginatedPayments = sortedPayments.slice((page - 1) * pageSize, page * pageSize);
+  const payments = paymentsData?.payments ?? [];
+  const pagination = paymentsData?.pagination;
 
   const getStatusVariant = (status: PaymentStatus) => {
     switch (status) {
@@ -145,16 +132,16 @@ export default function PaymentsPage() {
       />
       
       <DataTable
-        data={paginatedPayments}
+        data={payments}
         columns={columns}
         loading={isLoading}
-        pagination={{ page, pageSize, total: filteredPayments.length, onPageChange: setPage }}
-        sorting={{ 
-          sortBy, 
-          sortOrder, 
-          onSortChange: (newSortBy, newSortOrder) => {
-            setSortBy(newSortBy as keyof PaymentForTable);
-            setSortOrder(newSortOrder);
+        pagination={{
+          page,
+          pageSize: limit,
+          total: pagination?.total ?? 0,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
         emptyState={

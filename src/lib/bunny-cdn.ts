@@ -6,10 +6,10 @@ class BunnyCdnServiceSingleton {
 
   static getInstance(): BunnyCDNStorage {
     if (!this.instance) {
-      // Corrected to use BUNNY_API_KEY and a placeholder for storage zone name
+      // Initialize BunnyCDN with proper credentials
       this.instance = new BunnyCDNStorage(
         env.BUNNY_API_KEY,
-        "your-storage-zone-name-here", // Replace with your actual storage zone name
+        env.BUNNY_STORAGE_ZONE_NAME,
         'de'
       );
     }
@@ -33,19 +33,46 @@ export class BunnyCdnService {
     folderPath?: string
   ): Promise<UploadResult> {
     try {
-      const uniqueFileName = `${Date.now()}-${fileName}`;
-      const fullPath = folderPath ? `${folderPath}/${uniqueFileName}` : uniqueFileName;
-      const bunnyCdn = BunnyCdnServiceSingleton.getInstance();
-      
-      const uploadResponse = await bunnyCdn.upload(fileBuffer, fullPath);
-      
-      if (uploadResponse.status !== 201) {
-        throw new Error(`Upload failed with status ${uploadResponse.status}`);
+      // Validate inputs
+      if (!fileBuffer || fileBuffer.length === 0) {
+        throw new Error('File buffer is empty');
       }
-      
-      // Corrected to use BUNNY_CDN_HOSTNAME
-      const publicUrl = `https://${env.BUNNY_CDN_HOSTNAME}/${fullPath}`;
-      
+
+      if (!fileName || fileName.trim() === '') {
+        throw new Error('File name is required');
+      }
+
+      // Generate unique filename to prevent conflicts
+      const timestamp = Date.now();
+      const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const uniqueFileName = `${timestamp}-${sanitizedFileName}`;
+
+      // Sanitize folder path to prevent path traversal
+      const sanitizedFolderPath = folderPath ? folderPath.replace(/[^a-zA-Z0-9/_-]/g, '').replace(/^\/+/, '').replace(/\/+$/, '') : '';
+      const fullPath = sanitizedFolderPath ? `${sanitizedFolderPath}/${uniqueFileName}` : uniqueFileName;
+
+      console.log(`Uploading file: ${fileName} to path: ${fullPath}`);
+
+      const bunnyCdn = BunnyCdnServiceSingleton.getInstance();
+
+      // Upload with timeout and retry logic
+      const uploadResponse = await Promise.race([
+        bunnyCdn.upload(fileBuffer, fullPath),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Upload timeout after 60 seconds')), 60000)
+        )
+      ]);
+
+      if (uploadResponse.status !== 201) {
+        console.error('Upload failed:', uploadResponse);
+        throw new Error(`Upload failed with status ${uploadResponse.status}: ${uploadResponse.statusText}`);
+      }
+
+      // Generate public URL using pull zone
+      const publicUrl = `https://${env.BUNNY_PULL_ZONE_URL}/${fullPath}`;
+
+      console.log(`File uploaded successfully. Public URL: ${publicUrl}`);
+
       return {
         bunnyCdnPath: fullPath,
         bunnyCdnUrl: publicUrl,
@@ -54,7 +81,9 @@ export class BunnyCdnService {
         fileSize: fileBuffer.length,
       };
     } catch (error) {
-      throw new Error(`Failed to upload file to Bunny.net: ${error instanceof Error ? error.message : String(error)}`);
+      console.error('BunnyCDN upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to upload file to Bunny.net: ${errorMessage}`);
     }
   }
 
@@ -75,5 +104,73 @@ export class BunnyCdnService {
       return `courses/${courseId}/lessons/${lessonId}`;
     }
     return `courses/${courseId}`;
+  }
+
+  // Specialized upload methods for different content types
+  static async uploadCourseVideo(
+    fileBuffer: Buffer,
+    courseId: string,
+    lessonId: string,
+    fileName: string
+  ): Promise<UploadResult> {
+    // Validate video file
+    if (!fileName.match(/\.(mp4|webm|mov|avi)$/i)) {
+      throw new Error('Invalid video format. Supported: mp4, webm, mov, avi');
+    }
+
+    const folderPath = `courses/${courseId}/videos`;
+    return this.uploadFile(fileBuffer, fileName, 'video/mp4', folderPath);
+  }
+
+  static async uploadCourseImage(
+    fileBuffer: Buffer,
+    courseId: string,
+    fileName: string,
+    isThumbnail: boolean = false
+  ): Promise<UploadResult> {
+    // Validate image file
+    if (!fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      throw new Error('Invalid image format. Supported: jpg, jpeg, png, gif, webp');
+    }
+
+    const folderPath = isThumbnail ? `courses/${courseId}/thumbnails` : `courses/${courseId}/images`;
+    return this.uploadFile(fileBuffer, fileName, 'image/jpeg', folderPath);
+  }
+
+  static async uploadCourseAttachment(
+    fileBuffer: Buffer,
+    courseId: string,
+    lessonId: string,
+    fileName: string
+  ): Promise<UploadResult> {
+    const folderPath = `courses/${courseId}/attachments`;
+    return this.uploadFile(fileBuffer, fileName, 'application/octet-stream', folderPath);
+  }
+
+  // Get public URL for any stored file
+  static getPublicUrl(filePath: string): string {
+    return `https://${env.BUNNY_PULL_ZONE_URL}/${filePath}`;
+  }
+
+  // Validate file size (50MB limit for videos, 10MB for images, 25MB for attachments)
+  static validateFileSize(fileSize: number, fileType: string): void {
+    const limits = {
+      video: 50 * 1024 * 1024,    // 50MB
+      image: 10 * 1024 * 1024,    // 10MB
+      attachment: 25 * 1024 * 1024 // 25MB
+    };
+
+    let limit = limits.attachment; // default
+
+    if (fileType.startsWith('video/')) {
+      limit = limits.video;
+    } else if (fileType.startsWith('image/')) {
+      limit = limits.image;
+    }
+
+    if (fileSize > limit) {
+      const limitMB = Math.round(limit / (1024 * 1024));
+      throw new Error(`File too large. Maximum size for this file type is ${limitMB}MB`);
+    }
   }
 }

@@ -14,33 +14,26 @@ import { Plus } from "lucide-react";
 
 // Get the specific types for a coupon from our tRPC router
 type RouterOutput = inferRouterOutputs<AppRouter>;
-type CouponForTable = RouterOutput["admin"]["commerce"]["getAllCoupons"][number];
+type CouponForTable = RouterOutput["admin"]["commerce"]["getAllCoupons"]["coupons"][number];
 
 export default function CouponsPage() {
   const router = useRouter();
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<keyof CouponForTable>("createdAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [limit] = useState(20);
 
-  const { data: couponsData, isLoading } = api.admin.commerce.getAllCoupons.useQuery();
-  const coupons = couponsData ?? [];
+  const { data: couponsData, isLoading } = api.admin.commerce.getAllCoupons.useQuery(
+    {
+      page,
+      limit
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false
+    }
+  );
 
-  // Basic sorting logic
-  const sortedCoupons = [...coupons].sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
-
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-    
-    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
-    
-    return 0;
-  });
-
-  const pageSize = 10;
-  const paginatedCoupons = sortedCoupons.slice((page - 1) * pageSize, page * pageSize);
+  const coupons = couponsData?.coupons ?? [];
+  const pagination = couponsData?.pagination;
 
   const columns: DataTableColumn<CouponForTable>[] = [
     { key: "code", title: "Code" },
@@ -92,16 +85,16 @@ export default function CouponsPage() {
       />
       
       <DataTable
-        data={paginatedCoupons}
+        data={coupons}
         columns={columns}
         loading={isLoading}
-        pagination={{ page, pageSize, total: coupons.length, onPageChange: setPage }}
-        sorting={{ 
-          sortBy, 
-          sortOrder, 
-          onSortChange: (newSortBy, newSortOrder) => {
-            setSortBy(newSortBy as keyof CouponForTable);
-            setSortOrder(newSortOrder);
+        pagination={{
+          page,
+          pageSize: limit,
+          total: pagination?.total ?? 0,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         }}
         onRowClick={(coupon) => router.push(`/admin/commerce/coupons/${coupon.id}/edit`)}

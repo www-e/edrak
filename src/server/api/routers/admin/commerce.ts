@@ -18,11 +18,17 @@ const CouponInputSchema = z.object({
 
 export const adminCommerceRouter = createTRPCRouter({
   /**
-   * Get a list of all payments for reconciliation.
-   */
-  getAllPayments: adminProcedure.query(async () => {
-    return AdminCommerceService.getAllPayments();
-  }),
+    * Get a list of all payments for reconciliation with pagination and search.
+    */
+   getAllPayments: adminProcedure
+     .input(z.object({
+       page: z.number().min(1).optional(),
+       limit: z.number().min(1).max(100).optional(),
+       search: z.string().optional(),
+     }).optional())
+     .query(async ({ input }) => {
+       return AdminCommerceService.getAllPayments(input);
+     }),
 
   /**
    * Create a new coupon.
@@ -61,11 +67,17 @@ export const adminCommerceRouter = createTRPCRouter({
   }),
 
   /**
-   * Get a list of all coupons.
-   */
-  getAllCoupons: adminProcedure.query(async () => {
-    return AdminCommerceService.getAllCoupons();
-  }),
+    * Get a list of all coupons with pagination support.
+    */
+   getAllCoupons: adminProcedure
+     .input(z.object({
+       page: z.number().min(1).optional(),
+       limit: z.number().min(1).max(100).optional(),
+       search: z.string().optional(),
+     }).optional())
+     .query(async ({ input }) => {
+       return AdminCommerceService.getAllCoupons(input);
+     }),
 
   /**
    * Get a single coupon by ID.

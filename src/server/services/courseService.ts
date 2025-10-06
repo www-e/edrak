@@ -25,25 +25,63 @@ export class AdminCourseService {
     });
   }
 
-  static async getAllCourses() {
-    return db.course.findMany({
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        price: true,
-        language: true,
-        visibility: true,
-        createdAt: true,
-        professor: {
-          select: {
-            firstName: true,
-            lastName: true,
+  static async getAllCourses(options?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) {
+    const { page = 1, limit = 20, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+    const skip = (page - 1) * limit;
+
+    // Build search conditions
+    const where: Prisma.CourseWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    // Execute queries in parallel for better performance
+    const [courses, total] = await Promise.all([
+      db.course.findMany({
+        where,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          language: true,
+          visibility: true,
+          createdAt: true,
+          professor: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: limit,
+      }),
+      db.course.count({ where })
+    ]);
+
+    return {
+      courses,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page * limit < total,
+        hasPrev: page > 1
+      }
+    };
   }
 
   static async getCourseById(id: string) {

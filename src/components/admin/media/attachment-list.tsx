@@ -4,18 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { File, Download, Trash2, Video, FileText, Image } from "lucide-react";
+import { Attachment } from "@/types/admin";
 
-interface Attachment {
-  id: string;
-  name: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-  bunnyCdnPath: string;
-  bunnyCdnUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 interface AttachmentListProps {
   attachments: Attachment[];

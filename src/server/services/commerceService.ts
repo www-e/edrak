@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { CacheService } from "./cacheService";
 
 // Placeholder for Zod schemas
@@ -36,26 +36,61 @@ export class AdminCommerceService {
   }
 
   /**
-   * Retrieves a list of all payments with their related user and course info.
-   */
-  static async getAllPayments() {
-    return prisma.payment.findMany({
-      include: {
-        user: {
-          select: { id: true, username: true, firstName: true, lastName: true },
-        },
-        course: {
-          select: { id: true, title: true },
-        },
-        coupon: {
-          select: { id: true, code: true },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-  }
+    * Retrieves a list of all payments with their related user and course info.
+    */
+   static async getAllPayments(options?: {
+     page?: number;
+     limit?: number;
+     search?: string;
+   }) {
+     const { page = 1, limit = 50, search } = options || {};
+     const skip = (page - 1) * limit;
+
+     const where: Prisma.PaymentWhereInput = {};
+     if (search) {
+       where.OR = [
+         { user: { username: { contains: search, mode: 'insensitive' } } },
+         { user: { firstName: { contains: search, mode: 'insensitive' } } },
+         { user: { lastName: { contains: search, mode: 'insensitive' } } },
+         { course: { title: { contains: search, mode: 'insensitive' } } }
+       ];
+     }
+
+     const [payments, total] = await Promise.all([
+       prisma.payment.findMany({
+         where,
+         include: {
+           user: {
+             select: { id: true, username: true, firstName: true, lastName: true },
+           },
+           course: {
+             select: { id: true, title: true },
+           },
+           coupon: {
+             select: { id: true, code: true },
+           },
+         },
+         orderBy: {
+           createdAt: "desc",
+         },
+         skip,
+         take: limit,
+       }),
+       prisma.payment.count({ where })
+     ]);
+
+     return {
+       payments,
+       pagination: {
+         page,
+         limit,
+         total,
+         totalPages: Math.ceil(total / limit),
+         hasNext: page * limit < total,
+         hasPrev: page > 1
+       }
+     };
+   }
   /**
    * Retrieves key metrics for the admin dashboard with optimized parallel queries and caching.
    */
@@ -112,15 +147,47 @@ export class AdminCommerceService {
   }
 
   /**
-   * Retrieves all coupons.
-   */
-  static async getAllCoupons() {
-    return prisma.coupon.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-  }
+    * Retrieves all coupons with pagination support.
+    */
+   static async getAllCoupons(options?: {
+     page?: number;
+     limit?: number;
+     search?: string;
+   }) {
+     const { page = 1, limit = 50, search } = options || {};
+     const skip = (page - 1) * limit;
+
+     const where: Prisma.CouponWhereInput = {};
+     if (search) {
+       where.OR = [
+         { code: { contains: search, mode: 'insensitive' } }
+       ];
+     }
+
+     const [coupons, total] = await Promise.all([
+       prisma.coupon.findMany({
+         where,
+         orderBy: {
+           createdAt: "desc",
+         },
+         skip,
+         take: limit,
+       }),
+       prisma.coupon.count({ where })
+     ]);
+
+     return {
+       coupons,
+       pagination: {
+         page,
+         limit,
+         total,
+         totalPages: Math.ceil(total / limit),
+         hasNext: page * limit < total,
+         hasPrev: page > 1
+       }
+     };
+   }
 
   /**
    * Retrieves a single coupon by its ID.

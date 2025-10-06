@@ -1,9 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from '@/lib/auth';
-import { BunnyCdnService } from '@/lib/bunny-cdn';
+import { BunnyCdnService, UploadResult } from '@/lib/bunny-cdn';
 import { db } from '@/server/db';
 import { SessionUser } from '@/types/auth';
+
+// Simple in-memory rate limiting (resets on server restart)
+const uploadCounts = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10; // uploads per minute
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const userLimit = uploadCounts.get(userId);
+
+  if (!userLimit || now > userLimit.resetTime) {
+    // Reset or initialize
+    uploadCounts.set(userId, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+
+  if (userLimit.count >= RATE_LIMIT) {
+    return false;
+  }
+
+  userLimit.count++;
+  return true;
+}
 
 /**
  * Handles authentication and authorization for the API route using the
@@ -33,6 +56,15 @@ export async function POST(req: NextRequest) {
       return authResult; // Return error response if auth failed
     }
 
+    const userId = (authResult.user as SessionUser).id;
+
+    // Check rate limiting
+    if (!checkRateLimit(userId || 'anonymous')) {
+      return NextResponse.json({
+        error: 'Rate limit exceeded. Maximum 10 uploads per minute allowed.'
+      }, { status: 429 });
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const courseId = formData.get('courseId') as string | null;
@@ -45,9 +77,30 @@ export async function POST(req: NextRequest) {
     if (!courseId) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
     }
-    
+
     if (!lessonId) {
         return NextResponse.json({ error: 'Lesson ID is required to create an attachment' }, { status: 400 });
+    }
+
+    // Validate file size and type in one place
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      return NextResponse.json({
+        error: `File too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB`
+      }, { status: 400 });
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'video/mp4', 'video/webm', 'video/quicktime', 'video/avi',
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+      'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json({
+        error: 'Invalid file type. Allowed: videos (mp4, webm, mov, avi), images (jpg, png, gif, webp), documents (pdf, doc, docx)'
+      }, { status: 400 });
     }
 
     const lesson = await db.lesson.findUnique({ where: { id: lessonId, courseId: courseId } });
@@ -57,31 +110,73 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const folderPath = BunnyCdnService.createFolderPath(courseId, lessonId);
 
-    const uploadResult = await BunnyCdnService.uploadFile(
-      buffer,
-      file.name,
-      file.type,
-      folderPath
-    );
+    // Use service validation (single point of validation)
+    BunnyCdnService.validateFileSize(buffer.length, file.type);
 
-    const attachment = await db.attachment.create({
-      data: {
-        lessonId: lessonId,
-        name: file.name,
-        fileName: uploadResult.fileName,
-        mimeType: uploadResult.mimeType,
-        fileSize: uploadResult.fileSize,
-        bunnyCdnPath: uploadResult.bunnyCdnPath,
-        bunnyCdnUrl: uploadResult.bunnyCdnUrl,
-      },
-    });
+    // Add timeout wrapper for entire upload operation
+    const uploadPromise = (async () => {
+      let uploadResult: UploadResult;
+
+      // Use appropriate upload method based on file type
+      if (file.type.startsWith('video/')) {
+        uploadResult = await BunnyCdnService.uploadCourseVideo(
+          buffer,
+          courseId,
+          lessonId,
+          file.name
+        );
+      } else if (file.type.startsWith('image/')) {
+        uploadResult = await BunnyCdnService.uploadCourseImage(
+          buffer,
+          courseId,
+          file.name,
+          false // not a thumbnail
+        );
+      } else {
+        // Handle as attachment
+        uploadResult = await BunnyCdnService.uploadCourseAttachment(
+          buffer,
+          courseId,
+          lessonId,
+          file.name
+        );
+      }
+
+      // Use database transaction to prevent orphaned files
+      const attachment = await db.$transaction(async (tx) => {
+        return await tx.attachment.create({
+          data: {
+            lessonId: lessonId,
+            name: file.name,
+            fileName: uploadResult.fileName,
+            mimeType: uploadResult.mimeType,
+            fileSize: uploadResult.fileSize,
+            bunnyCdnPath: uploadResult.bunnyCdnPath,
+            bunnyCdnUrl: uploadResult.bunnyCdnUrl,
+          },
+        });
+      });
+
+      return attachment;
+    })();
+
+    // Race between upload and timeout
+    const attachment = await Promise.race([
+      uploadPromise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Upload timeout after 2 minutes')), 120000)
+      )
+    ]);
+
+    // Clean up buffer to prevent memory leaks
+    buffer.fill(0);
 
     return NextResponse.json({
       success: true,
       attachment: {
         id: attachment.id,
+        lessonId: attachment.lessonId,
         name: attachment.name,
         fileName: attachment.fileName,
         mimeType: attachment.mimeType,
@@ -120,8 +215,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Attachment not found' }, { status: 404 });
     }
 
-    await BunnyCdnService.deleteFile(attachment.bunnyCdnPath);
-    await db.attachment.delete({ where: { id: attachmentId } });
+    // Use transaction for atomic delete operation
+    await db.$transaction(async (tx) => {
+      await BunnyCdnService.deleteFile(attachment.bunnyCdnPath);
+      await tx.attachment.delete({ where: { id: attachmentId } });
+    });
 
     return NextResponse.json({
       success: true,

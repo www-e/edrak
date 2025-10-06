@@ -12,6 +12,7 @@ import { api } from "@/trpc/react";
 import { z } from "zod";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
+import { Attachment } from "@/types/admin";
 
 const createLessonSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -23,17 +24,6 @@ const createLessonSchema = z.object({
 
 type CreateLessonInput = z.infer<typeof createLessonSchema>;
 
-interface Attachment {
-  id: string;
-  name: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-  bunnyCdnPath: string;
-  bunnyCdnUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 export default function CreateLessonPage({ courseId }: { courseId: string }) {
   const router = useRouter();

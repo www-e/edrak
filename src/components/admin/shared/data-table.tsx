@@ -1,21 +1,23 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * ENHANCEMENT: By using TypeScript generics (<TData>), we create a fully type-safe component.
- * 'key' is now strictly typed as keyof TData, ensuring it's a valid property of our data objects.
- * This eliminates all "implicit any" and "index signature" errors.
+ * Type-safe data table column definition
  */
 export type DataTableColumn<TData> = {
   key: keyof TData;
   title: string;
   render?: (value: TData[keyof TData], row: TData) => React.ReactNode;
-}
+};
 
+/**
+ * Data table props interface
+ */
 interface DataTableProps<TData> {
   data: TData[];
   columns: DataTableColumn<TData>[];
@@ -35,14 +37,17 @@ interface DataTableProps<TData> {
   emptyState?: React.ReactNode;
 }
 
-export function DataTable<TData>({ 
-  data, 
-  columns, 
-  loading = false, 
+/**
+ * Optimized, memoized data table component
+ */
+export function DataTable<TData>({
+  data,
+  columns,
+  loading = false,
   pagination,
   sorting,
   onRowClick,
-  emptyState 
+  emptyState
 }: DataTableProps<TData>) {
 
   const handleSort = (key: keyof TData) => {
@@ -68,56 +73,104 @@ export function DataTable<TData>({
   }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead 
-                key={String(column.key)} 
-                className={cn(sorting && "cursor-pointer hover:bg-muted")}
-                onClick={() => handleSort(column.key)}
-              >
-                <div className="flex items-center gap-2">
-                  {column.title}
-                  {sorting?.sortBy === column.key ? (
-                    sorting.sortOrder === 'asc' ? ' ▲' : ' ▼'
-                  ) : sorting ? <ArrowUpDown className="h-4 w-4 text-muted-foreground" /> : null}
-                </div>
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row, index) => (
-            <TableRow 
-              key={index} 
-              className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
-              onClick={() => onRowClick?.(row)}
-            >
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
               {columns.map((column) => (
-                <TableCell key={String(column.key)}>
-                  {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? '')}
-                </TableCell>
+                <TableHead
+                  key={String(column.key)}
+                  className={cn(sorting && "cursor-pointer hover:bg-muted")}
+                  onClick={() => handleSort(column.key)}
+                >
+                  <div className="flex items-center gap-2">
+                    {column.title}
+                    {sorting?.sortBy === column.key ? (
+                      sorting.sortOrder === 'asc' ? ' ▲' : ' ▼'
+                    ) : sorting ? (
+                      <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    ) : null}
+                  </div>
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      
-      {pagination && (
-         <div className="flex items-center justify-between border-t px-4 py-3">
-          <div className="text-sm text-muted-foreground">
-            Page {pagination.page} of {Math.ceil(pagination.total / pagination.pageSize)}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={() => pagination.onPageChange(1)} disabled={pagination.page === 1}><ChevronsLeft className="h-4 w-4" /></Button>
-            <Button variant="outline" size="sm" onClick={() => pagination.onPageChange(pagination.page - 1)} disabled={pagination.page === 1}><ChevronLeft className="h-4 w-4" /></Button>
-            <Button variant="outline" size="sm" onClick={() => pagination.onPageChange(pagination.page + 1)} disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)}><ChevronRight className="h-4 w-4" /></Button>
-            <Button variant="outline" size="sm" onClick={() => pagination.onPageChange(Math.ceil(pagination.total / pagination.pageSize))} disabled={pagination.page >= Math.ceil(pagination.total / pagination.pageSize)}><ChevronsRight className="h-4 w-4" /></Button>
-          </div>
-        </div>
-      )}
+          </TableHeader>
+          <TableBody>
+            {data.map((row, index) => (
+              <TableRow
+                key={`row-${index}`}
+                className={cn(onRowClick && "cursor-pointer hover:bg-muted/50")}
+                onClick={() => onRowClick?.(row)}
+              >
+                {columns.map((column) => (
+                  <TableCell key={String(column.key)}>
+                    {column.render ? column.render(row[column.key], row) : String(row[column.key] ?? '')}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {pagination && <DataTablePagination {...pagination} />}
+    </div>
+  );
+}
+
+/**
+ * Shared pagination component for data tables
+ */
+interface DataTablePaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+}
+
+function DataTablePagination({ page, pageSize, total, onPageChange }: DataTablePaginationProps) {
+  const totalPages = Math.ceil(total / pageSize);
+
+  return (
+    <div className="flex items-center justify-between border-t px-4 py-3">
+      <div className="text-sm text-muted-foreground">
+        Page {page} of {totalPages} ({total} total items)
+      </div>
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(1)}
+          disabled={page === 1}
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(page - 1)}
+          disabled={page === 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(totalPages)}
+          disabled={page >= totalPages}
+        >
+          <ChevronsRight className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

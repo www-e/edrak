@@ -1,6 +1,21 @@
 import { z } from 'zod';
 import { Role, CourseVisibility, CouponType } from '@prisma/client';
 
+// ATTACHMENT TYPE DEFINITION
+// Centralized type for Attachment to ensure consistency across components
+export interface Attachment {
+  id: string;
+  lessonId: string; // Added missing field from database schema
+  name: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number; // Using number for JavaScript compatibility (Prisma Int maps to number)
+  bunnyCdnPath: string;
+  bunnyCdnUrl: string;
+  createdAt: Date; // Using Date for JavaScript compatibility (Prisma DateTime maps to Date)
+  updatedAt: Date;
+}
+
 // USER SCHEMAS
 export const CreateUserInputSchema = z.object({
    username: z.string().min(3, "Username must be at least 3 characters"),

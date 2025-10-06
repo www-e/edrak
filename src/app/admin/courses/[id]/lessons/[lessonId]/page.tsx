@@ -7,18 +7,8 @@ import { PageHeader } from "@/components/admin/shared/page-header";
 import { api } from "@/trpc/react";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
+import { Attachment } from "@/types/admin";
 
-interface Attachment {
-  id: string;
-  name: string;
-  fileName: string;
-  mimeType: string;
-  fileSize: number;
-  bunnyCdnPath: string;
-  bunnyCdnUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 
 
 
@@ -43,6 +33,7 @@ export default function LessonDetailPage({
       // Map the database attachment data to our Attachment interface
       const mappedAttachments = attachmentData.map((att) => ({
         id: att.id,
+        lessonId: att.lessonId,
         name: att.name,
         fileName: att.fileName,
         mimeType: att.mimeType,

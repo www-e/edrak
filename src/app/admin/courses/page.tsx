@@ -16,48 +16,32 @@ import { CourseVisibility } from "@prisma/client";
 
 // This is the robust, correct way to get the type from the tRPC router.
 type RouterOutput = inferRouterOutputs<AppRouter>;
-type CourseForTable = RouterOutput["admin"]["course"]["getAll"][number];
+type CourseForTable = RouterOutput["admin"]["course"]["getAll"]["courses"][number];
 
 export default function CoursesPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<keyof CourseForTable>("createdAt");
+  const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [limit] = useState(20);
 
-  const { data: coursesData, isLoading } = api.admin.course.getAll.useQuery();
-  const courses = coursesData ?? [];
-
-  const filteredCourses = courses.filter(course => {
-    const professorName = `${course.professor.firstName || ''} ${course.professor.lastName || ''}`.trim();
-    return (
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (course.description && course.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      professorName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
-  
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    const aValue = a[sortBy];
-    const bValue = b[sortBy];
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+  const { data: coursesData, isLoading, refetch } = api.admin.course.getAll.useQuery(
+    {
+      page,
+      limit,
+      search: searchTerm,
+      sortBy,
+      sortOrder
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false
     }
-    
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-    }
+  );
 
-    if (aValue instanceof Date && bValue instanceof Date) {
-      return sortOrder === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
-    }
-    
-    return 0;
-  });
-
-  const pageSize = 10;
-  const paginatedCourses = sortedCourses.slice((page - 1) * pageSize, page * pageSize);
+  const courses = coursesData?.courses ?? [];
+  const pagination = coursesData?.pagination;
   
   const columns: DataTableColumn<CourseForTable>[] = [
     { key: "title", title: "Title" },
@@ -108,16 +92,25 @@ export default function CoursesPage() {
       />
       <SearchFilter value={searchTerm} onChange={setSearchTerm} placeholder="Search courses..." className="w-full md:w-80"/>
       <DataTable
-        data={paginatedCourses}
+        data={courses}
         columns={columns}
         loading={isLoading}
-        pagination={{ page, pageSize, total: filteredCourses.length, onPageChange: setPage }}
-        sorting={{ 
-          sortBy, 
-          sortOrder, 
+        pagination={{
+          page,
+          pageSize: limit,
+          total: pagination?.total ?? 0,
+          onPageChange: (newPage) => {
+            setPage(newPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+        sorting={{
+          sortBy: sortBy as keyof CourseForTable,
+          sortOrder,
           onSortChange: (newSortBy, newSortOrder) => {
-            setSortBy(newSortBy);
+            setSortBy(newSortBy as string);
             setSortOrder(newSortOrder);
+            setPage(1); // Reset to first page when sorting changes
           }
         }}
         onRowClick={(course) => router.push(`/admin/courses/${course.id}`)}

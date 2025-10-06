@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronDown, Menu, X, ChevronLeft, User } from 'lucide-react';
+import { Search, ChevronDown, Menu, X, ChevronLeft, User, LogOut } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -94,19 +94,24 @@ export const Header = () => {
             ) : session?.user ? (
               <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
                 <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                  {session.user?.name?.charAt(0).toUpperCase() || ''}
                 </div>
-                <span className="font-body font-semibold">{session.user?.name || 'User'}</span>
-                <Link href="/student/profile" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
-                  <User size={16} className="inline mr-1" />
-                  Profile
+                <span className="font-body font-semibold">{session.user?.name || ''}</span>
+                <Link href="/student/profile">
+                  <Button variant="outline" size="sm" className="bg-background border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold shadow-sm">
+                    <User size={16} className="mr-2" />
+                    Profile
+                  </Button>
                 </Link>
-                <button
+                <Button
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                  variant="destructive"
+                  size="sm"
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold shadow-sm"
                 >
+                  <LogOut size={16} className="mr-2" />
                   Sign Out
-                </button>
+                </Button>
               </div>
             ) : (
               <Link href="/auth/student/signin" className="text-base font-semibold text-foreground hover:text-primary transition-colors">
@@ -119,11 +124,6 @@ export const Header = () => {
               </Button>
             </Link>
             
-            <div className="relative">
-              <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors">
-                <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24}/>
-              </button>
-            </div>
           </div>
         </div>
       </nav>
@@ -152,16 +152,21 @@ export const Header = () => {
             </div>
           ) : session?.user ? (
             <>
-              <Link href="/student/profile" className="text-sm font-semibold text-foreground">
-                <User size={16} className="inline mr-1" />
-                Profile
+              <Link href="/student/profile">
+                <Button variant="outline" size="sm" className="bg-background border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold">
+                  <User size={14} className="mr-1" />
+                  Profile
+                </Button>
               </Link>
-              <button
+              <Button
                 onClick={() => signOut({ callbackUrl: '/' })}
-                className="text-sm font-semibold text-foreground"
+                variant="destructive"
+                size="sm"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
               >
+                <LogOut size={14} className="mr-1" />
                 Sign Out
-              </button>
+              </Button>
             </>
           ) : (
             <Link href="/auth/student/signin" className="text-sm font-semibold text-foreground">
@@ -181,9 +186,6 @@ export const Header = () => {
             {/* Main Menu */}
             <div className={`flex flex-col h-full ${mobileMenuPage === 'main' ? '' : 'hidden'}`}>
               <div className="flex items-center justify-between p-4 border-b border-border">
-                <button onClick={() => setMobileMenuPage('languages')}>
-                  <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24}/>
-                </button>
                 <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
                   <X size={24} className="text-muted-foreground" />
                 </button>
@@ -231,10 +233,7 @@ export const Header = () => {
                   <h6 className="flex-grow text-center font-bold text-xl">Languages</h6>
                 </div>
                  <div className="flex flex-col p-4 font-semibold text-foreground">
-                  <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-x-3 py-3">
-                    <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/english.c170a2cfaa28-2.svg?" alt="English" width={24} height={24} />
-                    <span>English</span>
-                  </Link>
+                  <span className="py-3 text-muted-foreground">Language selection coming soon</span>
                 </div>
             </div>
           </div>

@@ -85,11 +85,19 @@ export const adminCourseRouter = createTRPCRouter({
     }),
     
   /**
-   * Get a list of all courses.
-   */
-  getAll: adminProcedure.query(async () => {
-    return AdminCourseService.getAllCourses();
-  }),
+    * Get a list of all courses with pagination and search support.
+    */
+   getAll: adminProcedure
+     .input(z.object({
+       page: z.number().min(1).optional(),
+       limit: z.number().min(1).max(100).optional(),
+       search: z.string().optional(),
+       sortBy: z.string().optional(),
+       sortOrder: z.enum(['asc', 'desc']).optional(),
+     }).optional())
+     .query(async ({ input }) => {
+       return AdminCourseService.getAllCourses(input);
+     }),
 
   /**
    * Get a single course by ID.
