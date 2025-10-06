@@ -1,13 +1,12 @@
-import { env } from "@/env";
+import { serverEnv } from "@/lib/env-server";
 import { db } from "@/server/db";
 import { Course, User, EnrollmentStatus } from "@prisma/client";
 import crypto from "crypto";
 
-const PAYMOB_API_URL = env.PAYMOB_BASE_URL;
+const PAYMOB_API_URL = serverEnv.PAYMOB_BASE_URL;
 
 interface AuthTokenResponse { token: string; }
 interface OrderRegistrationResponse { id: number; }
-interface PaymentKeyResponse { token: string; }
 interface WalletPaymentResponse { redirect_url: string; }
 
 export interface PayMobWebhookData {
@@ -43,7 +42,7 @@ export class PayMobService {
     const response = await fetch(`${PAYMOB_API_URL}/auth/tokens`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ api_key: env.PAYMOB_API_KEY }),
+      body: JSON.stringify({ api_key: serverEnv.PAYMOB_API_KEY }),
     });
     if (!response.ok) throw new Error("PayMob authentication failed.");
     return ((await response.json()) as AuthTokenResponse).token;
@@ -126,7 +125,7 @@ export class PayMobService {
     };
 
     if (paymentMethod === 'card') {
-      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
+      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, serverEnv.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
 
       await db.payment.update({
         where: { id: paymentId },
@@ -141,7 +140,7 @@ export class PayMobService {
 
     if (paymentMethod === 'wallet') {
       if (!walletNumber) throw new Error("Wallet number is required.");
-      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, env.PAYMOB_INTEGRATION_ID_MOBILE_WALLET);
+      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, serverEnv.PAYMOB_INTEGRATION_ID_MOBILE_WALLET);
 
       await db.payment.update({
         where: { id: paymentId },
@@ -175,7 +174,7 @@ export class PayMobService {
           : key === "order" ? dataWithoutHmac.order?.id : dataWithoutHmac[key as keyof typeof dataWithoutHmac]
         ).join("");
 
-      const calculatedHmac = crypto.createHmac("sha512", env.PAYMOB_HMAC_SECRET).update(concatenatedString, "utf8").digest();
+      const calculatedHmac = crypto.createHmac("sha512", serverEnv.PAYMOB_HMAC_SECRET).update(concatenatedString, "utf8").digest();
       return crypto.timingSafeEqual(calculatedHmac, Buffer.from(hmac, 'hex'));
     } catch {
       return false;

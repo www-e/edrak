@@ -1,5 +1,5 @@
 import BunnyCDNStorage from 'bunnycdn-storage-ts';
-import { env } from '@/env';
+import { serverEnv } from '@/lib/env-server';
 
 class BunnyCdnServiceSingleton {
   private static instance: BunnyCDNStorage | null = null;
@@ -8,8 +8,8 @@ class BunnyCdnServiceSingleton {
     if (!this.instance) {
       // Initialize BunnyCDN with proper credentials
       this.instance = new BunnyCDNStorage(
-        env.BUNNY_API_KEY,
-        env.BUNNY_STORAGE_ZONE_NAME,
+        serverEnv.BUNNY_API_KEY,
+        serverEnv.BUNNY_STORAGE_ZONE_NAME,
         'de'
       );
     }
@@ -69,7 +69,7 @@ export class BunnyCdnService {
       }
 
       // Generate public URL using pull zone
-      const publicUrl = `https://${env.BUNNY_PULL_ZONE_URL}/${fullPath}`;
+      const publicUrl = `https://${serverEnv.BUNNY_PULL_ZONE_URL}/${fullPath}`;
 
       console.log(`File uploaded successfully. Public URL: ${publicUrl}`);
 
@@ -149,7 +149,7 @@ export class BunnyCdnService {
 
   // Get public URL for any stored file
   static getPublicUrl(filePath: string): string {
-    return `https://${env.BUNNY_PULL_ZONE_URL}/${filePath}`;
+    return `https://${serverEnv.BUNNY_PULL_ZONE_URL}/${filePath}`;
   }
 
   // Validate file size (50MB limit for videos, 10MB for images, 25MB for attachments)

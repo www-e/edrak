@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +24,9 @@ const createLessonSchema = z.object({
 
 type CreateLessonInput = z.infer<typeof createLessonSchema>;
 
-
-export default function CreateLessonPage({ courseId }: { courseId: string }) {
+export default function CreateLessonPage() {
+  const params = useParams();
+  const courseId = params.id as string;
   const router = useRouter();
   const { showSnackbar } = useSnackbar();
   const [formData, setFormData] = useState<CreateLessonInput>({

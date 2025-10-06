@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ShieldCheck } from 'lucide-react';
 import { Suspense } from 'react';
-import { env } from '@/env';
+import { clientEnv } from '@/lib/env-client';
 
 function PaymentFrame() {
     const params = useParams();
@@ -18,7 +18,7 @@ function PaymentFrame() {
         );
     }
     
-    const iframeUrl = `${env.NEXT_PUBLIC_APP_URL}/api/payments/iframe/${paymentToken}`;
+    const iframeUrl = `${clientEnv.NEXT_PUBLIC_APP_URL}/api/payments/iframe/${paymentToken}`;
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">

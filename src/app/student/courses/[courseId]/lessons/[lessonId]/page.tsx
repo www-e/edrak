@@ -1,14 +1,16 @@
 import { LessonViewer } from "@/components/lesson/LessonViewer";
 
 interface Props {
-  params: {
+  params: Promise<{
     courseId: string;
     lessonId: string;
-  };
+  }>;
 }
 
-export default function LessonPage({ params }: Props) {
+export default async function LessonPage({ params }: Props) {
+  const { courseId, lessonId } = await params;
+
   return (
-    <LessonViewer courseId={params.courseId} lessonId={params.lessonId} />
+    <LessonViewer courseId={courseId} lessonId={lessonId} />
   );
 }

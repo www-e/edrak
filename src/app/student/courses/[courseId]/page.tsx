@@ -3,13 +3,14 @@ import { AdminCourseService } from "@/server/services/courseService";
 import { LessonList } from "@/components/lesson/LessonList";
 
 interface Props {
-  params: {
+  params: Promise<{
     courseId: string;
-  };
+  }>;
 }
 
 export default async function CoursePage({ params }: Props) {
-  const course = await AdminCourseService.getCourseById(params.courseId);
+  const { courseId } = await params;
+  const course = await AdminCourseService.getCourseById(courseId);
 
   if (!course) {
     notFound();
@@ -41,7 +42,7 @@ export default async function CoursePage({ params }: Props) {
       </div>
 
       {/* Course Content */}
-      <LessonList courseId={params.courseId} lessons={course.lessons} />
+      <LessonList courseId={courseId} lessons={course.lessons} />
     </div>
   );
 }

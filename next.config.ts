@@ -43,18 +43,12 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
 
-  // Enable Turbopack optimizations
-  turbopack: {
-    // Enable faster middleware compilation
-    resolveAlias: {},
-  },
-
   // Performance optimizations for Next.js 15
   compiler: {
-    removeConsole: true, // Always remove console logs in production builds
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // Production optimizations
+  // Standalone output for Vercel deployment
   output: 'standalone',
 };
 

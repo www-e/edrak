@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { api } from "@/trpc/react";
@@ -9,16 +9,10 @@ import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
 import { Attachment } from "@/types/admin";
 
-
-
-
-export default function LessonDetailPage({ 
-  courseId,
-  lessonId 
-}: { 
-  courseId: string;
-  lessonId: string;
-}) {
+export default function LessonDetailPage() {
+  const params = useParams();
+  const courseId = params.id as string;
+  const lessonId = params.lessonId as string;
   const router = useRouter();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
@@ -75,7 +69,7 @@ export default function LessonDetailPage({
     <div className="space-y-6">
       <PageHeader
         title={lesson.title}
-        description={`Lesson in course ${courseId}`}
+        description={`Lesson in course`}
         actions={
           <div className="flex gap-2">
             <Button 

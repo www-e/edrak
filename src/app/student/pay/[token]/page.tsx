@@ -12,6 +12,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { PaymentRecovery } from "@/components/payment/PaymentRecovery";
+import { clientEnv } from "@/lib/env-client";
 
 export default function PaymentIframePage() {
   const params = useParams();
@@ -47,7 +48,7 @@ export default function PaymentIframePage() {
             setPaymentError('payment_failed');
           }
         }
-      } catch (err) {
+      } catch {
         setPaymentError('unknown');
       }
     };
@@ -66,7 +67,7 @@ export default function PaymentIframePage() {
     };
   }, [iframeLoaded, router]);
 
-  const iframeUrl = `${process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${paymentId}`;
+  const iframeUrl = `${clientEnv.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '')}/api/payments/iframe/${paymentId}`;
 
   const handleRetryPayment = () => {
     setPaymentError(null);
