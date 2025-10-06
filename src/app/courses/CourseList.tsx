@@ -166,7 +166,7 @@ export function CourseList() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground">
-              {pagination?.totalCount || 0} {pagination?.totalCount === 1 ? "Course" : "Courses"}
+              {pagination?.total || 0} {pagination?.total === 1 ? "Course" : "Courses"}
             </h2>
             {selectedCategory && (
               <p className="text-muted-foreground mt-1">
@@ -212,7 +212,7 @@ export function CourseList() {
         {pagination && pagination.totalPages > 1 && (
           <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount} courses
+              Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} courses
             </div>
 
             <div className="flex items-center gap-2">

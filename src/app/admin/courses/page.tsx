@@ -10,9 +10,8 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { SearchFilter } from "@/components/admin/shared/search-filter";
 import { DataTable, type DataTableColumn } from "@/components/admin/shared/data-table";
-import { StatusBadge } from "@/components/admin/shared/status-badge";
 import { Plus } from "lucide-react";
-import { CourseVisibility } from "@prisma/client";
+import { courseColumns } from "@/lib/admin-table-helpers";
 
 // This is the robust, correct way to get the type from the tRPC router.
 type RouterOutput = inferRouterOutputs<AppRouter>;
@@ -43,41 +42,7 @@ export default function CoursesPage() {
   const courses = coursesData?.courses ?? [];
   const pagination = coursesData?.pagination;
   
-  const columns: DataTableColumn<CourseForTable>[] = [
-    { key: "title", title: "Title" },
-    { 
-      key: "professor", 
-      title: "Professor",
-      // FIX: Assert the type of 'value' to the specific professor object shape.
-      render: (value) => {
-        const professor = value as { firstName: string; lastName: string; };
-        return `${professor.firstName || ''} ${professor.lastName || ''}`.trim();
-      }
-    },
-    { 
-      key: "price", 
-      title: "Price", 
-      // FIX: Assert the type of 'value' to be a number.
-      render: (value) => `EGP ${(value as number).toFixed(2)}` 
-    },
-    { key: "language", title: "Language" },
-    { 
-      key: "visibility", 
-      title: "Status",
-      // FIX: Assert the type of 'value' to be CourseVisibility enum.
-      render: (value) => (
-        <StatusBadge variant={(value as CourseVisibility) === "PUBLISHED" ? "success" : (value as CourseVisibility) === "DRAFT" ? "warning" : "secondary"}>
-          {value as React.ReactNode}
-        </StatusBadge>
-      )
-    },
-    { 
-      key: "createdAt", 
-      title: "Created", 
-      // FIX: Assert the type of 'value' to be a Date object.
-      render: (value) => new Date(value as Date).toLocaleDateString() 
-    },
-  ];
+  const columns: DataTableColumn<CourseForTable>[] = courseColumns;
 
   return (
     <div className="space-y-6">

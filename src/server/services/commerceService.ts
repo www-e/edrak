@@ -1,5 +1,8 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { CacheService } from "./cacheService";
+import {  createPaginationResult } from "@/lib/pagination";
+import { createUserSearchConditions, createCouponSearchConditions } from "@/lib/search";
+import { couponDataTransformer } from "@/lib/data-transform";
 
 // Placeholder for Zod schemas
 import { Coupon } from "@prisma/client";
@@ -17,7 +20,8 @@ export class AdminCommerceService {
   static async createCoupon(
     data: Omit<Coupon, "id" | "createdAt" | "updatedAt" | "usedCount">
   ) {
-    return prisma.coupon.create({ data });
+    const transformedData = couponDataTransformer(data) as Omit<Coupon, "id" | "createdAt" | "updatedAt" | "usedCount">;
+    return prisma.coupon.create({ data: transformedData });
   }
 
   /**
@@ -44,17 +48,8 @@ export class AdminCommerceService {
      search?: string;
    }) {
      const { page = 1, limit = 50, search } = options || {};
-     const skip = (page - 1) * limit;
 
-     const where: Prisma.PaymentWhereInput = {};
-     if (search) {
-       where.OR = [
-         { user: { username: { contains: search, mode: 'insensitive' } } },
-         { user: { firstName: { contains: search, mode: 'insensitive' } } },
-         { user: { lastName: { contains: search, mode: 'insensitive' } } },
-         { course: { title: { contains: search, mode: 'insensitive' } } }
-       ];
-     }
+     const where = createUserSearchConditions(search) as Prisma.PaymentWhereInput;
 
      const [payments, total] = await Promise.all([
        prisma.payment.findMany({
@@ -73,7 +68,7 @@ export class AdminCommerceService {
          orderBy: {
            createdAt: "desc",
          },
-         skip,
+         skip: (page - 1) * limit,
          take: limit,
        }),
        prisma.payment.count({ where })
@@ -81,14 +76,7 @@ export class AdminCommerceService {
 
      return {
        payments,
-       pagination: {
-         page,
-         limit,
-         total,
-         totalPages: Math.ceil(total / limit),
-         hasNext: page * limit < total,
-         hasPrev: page > 1
-       }
+       pagination: createPaginationResult(page, limit, total)
      };
    }
   /**
@@ -155,14 +143,8 @@ export class AdminCommerceService {
      search?: string;
    }) {
      const { page = 1, limit = 50, search } = options || {};
-     const skip = (page - 1) * limit;
 
-     const where: Prisma.CouponWhereInput = {};
-     if (search) {
-       where.OR = [
-         { code: { contains: search, mode: 'insensitive' } }
-       ];
-     }
+     const where = createCouponSearchConditions(search) as Prisma.CouponWhereInput;
 
      const [coupons, total] = await Promise.all([
        prisma.coupon.findMany({
@@ -170,7 +152,7 @@ export class AdminCommerceService {
          orderBy: {
            createdAt: "desc",
          },
-         skip,
+         skip: (page - 1) * limit,
          take: limit,
        }),
        prisma.coupon.count({ where })
@@ -178,14 +160,7 @@ export class AdminCommerceService {
 
      return {
        coupons,
-       pagination: {
-         page,
-         limit,
-         total,
-         totalPages: Math.ceil(total / limit),
-         hasNext: page * limit < total,
-         hasPrev: page > 1
-       }
+       pagination: createPaginationResult(page, limit, total)
      };
    }
 

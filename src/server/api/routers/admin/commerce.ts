@@ -1,31 +1,21 @@
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminCommerceService } from "@/server/services/commerceService";
-import { z } from "zod";
 import { UpdateCouponInputSchema } from "@/types/admin";
+import {
+  createCouponSchema,
+  listQuerySchema,
+  idParamSchema
+} from "@/lib/validation-schemas";
 
-// Placeholder for coupon creation/update schemas. For now, we use a generic object.
-// We would replace this with strong Zod schemas in a real implementation.
-const CouponInputSchema = z.object({
-  code: z.string(),
-  type: z.enum(["PERCENTAGE", "FIXED"]),
-  amount: z.number(),
-  maxUses: z.number().nullable().optional(),
-  maxUsesPerUser: z.number().default(1),
-  startDate: z.date(),
-  endDate: z.date().nullable().optional(),
-  isActive: z.boolean().default(true),
-});
+// Use shared schemas
+const CouponInputSchema = createCouponSchema;
 
 export const adminCommerceRouter = createTRPCRouter({
   /**
     * Get a list of all payments for reconciliation with pagination and search.
     */
    getAllPayments: adminProcedure
-     .input(z.object({
-       page: z.number().min(1).optional(),
-       limit: z.number().min(1).max(100).optional(),
-       search: z.string().optional(),
-     }).optional())
+     .input(listQuerySchema.optional())
      .query(async ({ input }) => {
        return AdminCommerceService.getAllPayments(input);
      }),
@@ -70,11 +60,7 @@ export const adminCommerceRouter = createTRPCRouter({
     * Get a list of all coupons with pagination support.
     */
    getAllCoupons: adminProcedure
-     .input(z.object({
-       page: z.number().min(1).optional(),
-       limit: z.number().min(1).max(100).optional(),
-       search: z.string().optional(),
-     }).optional())
+     .input(listQuerySchema.optional())
      .query(async ({ input }) => {
        return AdminCommerceService.getAllCoupons(input);
      }),
@@ -83,7 +69,7 @@ export const adminCommerceRouter = createTRPCRouter({
    * Get a single coupon by ID.
    */
   getCouponById: adminProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(idParamSchema)
     .query(async ({ input }) => {
       return AdminCommerceService.getCouponById(input.id);
     }),

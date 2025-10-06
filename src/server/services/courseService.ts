@@ -1,5 +1,8 @@
 import { db } from "@/server/db";
 import { CourseVisibility, Prisma } from "@prisma/client";
+import { createPaginationResult } from "@/lib/pagination";
+import { createSearchConditions } from "@/lib/search";
+import { courseDataTransformer } from "@/lib/data-transform";
 import type {
   CreateCourseInput,
   CreateLessonInput,
@@ -9,11 +12,9 @@ import type {
 
 export class AdminCourseService {
   static async createCourse(data: CreateCourseInput) {
+    const transformedData = courseDataTransformer(data) as CreateCourseInput;
     return db.course.create({
-      data: {
-        ...data,
-        categoryId: data.categoryId ?? null,
-      },
+      data: transformedData,
     });
   }
 
@@ -33,17 +34,11 @@ export class AdminCourseService {
     sortOrder?: 'asc' | 'desc';
   }) {
     const { page = 1, limit = 20, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+
+    // Build search conditions using utility
+    const where = createSearchConditions(search, ['title', 'description']) as Prisma.CourseWhereInput;
+
     const skip = (page - 1) * limit;
-
-    // Build search conditions
-    const where: Prisma.CourseWhereInput = {};
-
-    if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
-      ];
-    }
 
     // Execute queries in parallel for better performance
     const [courses, total] = await Promise.all([
@@ -73,14 +68,7 @@ export class AdminCourseService {
 
     return {
       courses,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        hasNext: page * limit < total,
-        hasPrev: page > 1
-      }
+      pagination: createPaginationResult(page, limit, total)
     };
   }
 
@@ -96,11 +84,9 @@ export class AdminCourseService {
   }
 
   static async createLesson(data: CreateLessonInput) {
+    const transformedData = courseDataTransformer(data) as CreateLessonInput;
     return db.lesson.create({
-      data: {
-        ...data,
-        videoUrl: data.videoUrl ?? null,
-      },
+      data: transformedData,
     });
   }
     static async updateLesson(data: UpdateLessonInput) {
@@ -173,7 +159,7 @@ export class CourseService {
       where.price = { gt: 0 };
     }
 
-    // Add search filter
+    // Add search filter using utility
     if (filters?.search) {
       where.OR = [
         { title: { contains: filters.search, mode: 'insensitive' } },
@@ -226,14 +212,7 @@ export class CourseService {
 
     return {
       courses,
-      pagination: {
-        page,
-        limit,
-        totalCount,
-        totalPages: Math.ceil(totalCount / limit),
-        hasNext: page * limit < totalCount,
-        hasPrev: page > 1
-      }
+      pagination: createPaginationResult(page, limit, totalCount)
     };
   }
 

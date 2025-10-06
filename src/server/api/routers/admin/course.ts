@@ -1,43 +1,24 @@
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { AdminCourseService } from "@/server/services/courseService";
 import { z } from "zod";
-import { CourseVisibility } from "@prisma/client";
 import { UpdateCourseInputSchema, UpdateLessonInputSchema } from "@/types/admin";
-// Schema for creating a course
-const CreateCourseInputSchema = z.object({
-  title: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase with dashes only"),
-  description: z.string().min(1),
-  price: z.number().min(0),
-  language: z.string().min(1),
-  visibility: z.nativeEnum(CourseVisibility).default('DRAFT'),
-  categoryId: z.string().uuid().nullable().optional(),
-  professorId: z.string().uuid(),
-});
+import {
+  createCourseSchema,
+  createLessonSchema,
+  listQuerySchema,
+  idParamSchema,
+  lessonParamSchema,
+  courseParamSchema
+} from "@/lib/validation-schemas";
 
-// Schema for creating a lesson
-const CreateLessonInputSchema = z.object({
-    courseId: z.string().uuid(),
-    title: z.string().min(1),
-    order: z.number().int().min(1),
-    content: z.string(),
-    videoUrl: z.string().url().nullable().optional(),
-    isVisible: z.boolean().default(true),
-});
+// Use shared schemas
+const CreateCourseInputSchema = createCourseSchema;
+const CreateLessonInputSchema = createLessonSchema;
 
-// Schema for getting a lesson
-const GetLessonInputSchema = z.object({
-    id: z.string().uuid(),
-});
-
-// Schema for getting lesson attachments
-const GetLessonAttachmentsInputSchema = z.object({
-    lessonId: z.string().uuid(),
-});
-
-const GetCourseByIdInputSchema = z.object({
-  id: z.string().uuid(),
-});
+// Use shared schemas for parameters
+const GetLessonInputSchema = idParamSchema;
+const GetLessonAttachmentsInputSchema = lessonParamSchema;
+const GetCourseByIdInputSchema = courseParamSchema;
 
 export const adminCourseRouter = createTRPCRouter({
   /**
@@ -88,13 +69,7 @@ export const adminCourseRouter = createTRPCRouter({
     * Get a list of all courses with pagination and search support.
     */
    getAll: adminProcedure
-     .input(z.object({
-       page: z.number().min(1).optional(),
-       limit: z.number().min(1).max(100).optional(),
-       search: z.string().optional(),
-       sortBy: z.string().optional(),
-       sortOrder: z.enum(['asc', 'desc']).optional(),
-     }).optional())
+     .input(listQuerySchema.optional())
      .query(async ({ input }) => {
        return AdminCourseService.getAllCourses(input);
      }),

@@ -39,12 +39,12 @@ try {
 } catch (error) {
   if (error instanceof z.ZodError) {
     console.error('❌ Environment validation failed:');
-    error.errors.forEach((err) => {
+    error.issues.forEach((err) => {
       console.error(`  ${err.path.join('.')}: ${err.message}`);
     });
 
     // Check if the error is due to missing Bunny.net configuration
-    const bunnyErrors = error.errors.filter(err =>
+    const bunnyErrors = error.issues.filter(err =>
       err.path.some(path => path.toString().includes('BUNNY'))
     );
 
