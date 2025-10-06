@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Clock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { processPaymentReturn } from '@/lib/payment-return-processor';
+import { processPaymentReturnAction } from '@/lib/payment-server-actions';
 
 type PaymentStatus = 'success' | 'failed' | 'pending' | 'processing';
 
@@ -21,8 +21,8 @@ function PaymentStatusContent() {
     const processPayment = async () => {
       try {
         const paramsObj = Object.fromEntries(searchParams.entries());
-        const result = await processPaymentReturn(paramsObj);
-        setStatus(result?.success ? 'success' : 'failed');
+        const result = await processPaymentReturnAction(paramsObj);
+        setStatus(result.success && result.data?.success ? 'success' : 'failed');
       } catch (error) {
         setStatus('failed');
       } finally {
