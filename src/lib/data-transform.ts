@@ -33,8 +33,7 @@ export function createOptionalFieldTransformer<T extends Record<string, unknown>
  * Common transformers for specific entity types
  */
 export const courseDataTransformer = createOptionalFieldTransformer(
-  'categoryId',
-  'videoUrl'
+  'categoryId'
 );
 
 export const couponDataTransformer = createOptionalFieldTransformer(

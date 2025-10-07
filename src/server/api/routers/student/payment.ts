@@ -4,19 +4,39 @@ import { db } from "@/server/db";
 import { TRPCError } from "@trpc/server";
 import { PayMobService } from "@/lib/paymob";
 import { User } from "@prisma/client";
+import { CouponService } from "@/lib/coupon-service";
 
 export const paymentRouter = createTRPCRouter({
+  validateCoupon: protectedProcedure
+    .input(
+      z.object({
+        couponCode: z.string().min(1, "Coupon code is required"),
+        coursePrice: z.number().positive("Course price must be positive"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      const { couponCode, coursePrice } = input;
+
+      if (!user?.id) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Session is invalid." });
+      }
+
+      return await CouponService.validateCoupon(couponCode, coursePrice, user.id);
+    }),
+
   initiateCoursePayment: protectedProcedure
     .input(
       z.object({
         courseId: z.string().uuid(),
         paymentMethod: z.enum(["card", "wallet"]),
         walletNumber: z.string().optional(),
+        couponCode: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const { user } = ctx.session;
-      const { courseId, paymentMethod, walletNumber } = input;
+      const { courseId, paymentMethod, walletNumber, couponCode } = input;
 
       // Type guard to ensure user.id exists
       if (!user?.id) {
@@ -37,15 +57,37 @@ export const paymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this course." });
       }
 
+      // Handle coupon validation if provided
+      let finalAmount = course.price;
+      let couponId: string | undefined;
+
+      if (couponCode) {
+        const couponValidation = await CouponService.validateCoupon(couponCode, course.price, user.id);
+        if (!couponValidation.isValid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: couponValidation.error || "Invalid coupon code"
+          });
+        }
+        finalAmount = couponValidation.finalAmount;
+        couponId = couponValidation.coupon?.id;
+      }
+
       const payment = await db.payment.create({
         data: {
           userId: user.id, // This is now guaranteed to be a string
           courseId: course.id,
-          amount: course.price,
+          amount: finalAmount,
           status: "PENDING",
           paymentMethod: paymentMethod,
+          ...(couponId && { couponId }),
         },
       });
+
+      // Apply coupon usage if coupon was used
+      if (couponId) {
+        await CouponService.applyCouponToPayment(couponId);
+      }
 
       try {
         const result = await PayMobService.initiateCoursePayment(user as User, course, payment.id, paymentMethod, walletNumber);

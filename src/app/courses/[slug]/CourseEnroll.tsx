@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Course } from '@/features/courses/types';
-import { Zap, CheckCircle, Loader2, CreditCard, Smartphone, Award, BookOpen, Users } from 'lucide-react';
+import { Zap, CheckCircle, Loader2, CreditCard, Smartphone, Award, BookOpen, Users, Tag, X } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { useSnackbar } from '@/components/shared/snackbar-context';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,14 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
 
    const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
    const [walletNumber, setWalletNumber] = useState('');
+   const [couponCode, setCouponCode] = useState('');
+   const [appliedCoupon, setAppliedCoupon] = useState<{
+     code: string;
+     discount: number;
+     discountType: 'PERCENTAGE' | 'FIXED';
+     finalAmount: number;
+   } | null>(null);
+   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
    // Check if user is already enrolled in this course
    const { data: enrollmentData } = api.student.courses.checkEnrollment.useQuery(
@@ -52,6 +60,47 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
     },
   });
 
+  const validateCouponMutation = api.student.payment.validateCoupon.useMutation();
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) {
+      showSnackbar('Please enter a coupon code', 'error');
+      return;
+    }
+
+    setIsValidatingCoupon(true);
+    try {
+      const result = await validateCouponMutation.mutateAsync({
+        couponCode: couponCode.trim(),
+        coursePrice: course.price,
+      });
+
+      if (result.isValid) {
+        setAppliedCoupon({
+          code: result.coupon!.code,
+          discount: result.discount,
+          discountType: result.discountType as 'PERCENTAGE' | 'FIXED',
+          finalAmount: result.finalAmount,
+        });
+        showSnackbar(`Coupon applied! You saved ${result.discount.toFixed(2)} EGP`, 'success');
+      } else {
+        showSnackbar(result.error || 'Invalid coupon code', 'error');
+        setAppliedCoupon(null);
+      }
+    } catch (error) {
+      showSnackbar('Error validating coupon', 'error');
+      setAppliedCoupon(null);
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCouponCode('');
+    setAppliedCoupon(null);
+    showSnackbar('Coupon removed');
+  };
+
   const handleEnroll = () => {
     if (isFree) {
       // Logic for free courses can be added here
@@ -68,6 +117,7 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
       courseId: course.id,
       paymentMethod,
       walletNumber: paymentMethod === 'wallet' ? walletNumber : undefined,
+      couponCode: appliedCoupon ? couponCode : undefined,
     });
   };
 
@@ -173,10 +223,15 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
                   <Zap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-3xl md:text-4xl font-bold mb-2">
-                  {isFree ? 'Enroll for FREE' : `Just ${course.price.toFixed(2)} EGP`}
+                  {isFree ? 'Enroll for FREE' : `Just ${appliedCoupon ? appliedCoupon.finalAmount.toFixed(2) : course.price.toFixed(2)} EGP`}
                 </h3>
                 <p className="text-primary-foreground/90 text-lg">
                   One-time payment for lifetime access
+                  {appliedCoupon && (
+                    <span className="block text-sm text-green-200 mt-1">
+                      You saved {appliedCoupon.discount.toFixed(2)} EGP with coupon {appliedCoupon.code}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -246,6 +301,79 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
                       </p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Coupon Section */}
+              {!isFree && session && (
+                <div className="space-y-4 p-6 bg-muted/20 rounded-xl border border-border/50">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Tag className="w-5 h-5 text-primary" />
+                    <Label className="text-lg font-semibold text-foreground">
+                      Have a coupon code?
+                    </Label>
+                  </div>
+
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                          <Tag className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <div className="font-semibold text-green-800 dark:text-green-200">
+                            {appliedCoupon.code}
+                          </div>
+                          <div className="text-sm text-green-600 dark:text-green-300">
+                            {appliedCoupon.discountType === 'PERCENTAGE'
+                              ? `${appliedCoupon.discount}% discount`
+                              : `${appliedCoupon.discount.toFixed(2)} EGP discount`
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removeCoupon}
+                        className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-3">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="flex-1 h-12 text-base bg-background"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            validateCoupon();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={validateCoupon}
+                        disabled={isValidatingCoupon || !couponCode.trim()}
+                        className="px-6 h-12"
+                      >
+                        {isValidatingCoupon ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Validating...
+                          </>
+                        ) : (
+                          'Apply'
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  <p className="text-sm text-muted-foreground">
+                    Enter a valid coupon code to get a discount on this course
+                  </p>
                 </div>
               )}
 

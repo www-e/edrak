@@ -1,270 +1,246 @@
-# sportschool - Educational Platform Landing Page
-
-READ THE RULES DIRECTORY FIRST!
-sportologyacademy.vercel.app
+# Edraak E-Learning Platform - Developer Guide
 
 ## Project Overview
 
-This is a Next.js 15.5.2 application that implements a landing page for an educational platform inspired by "sportschool" (Arabic for "understanding" or "comprehension"). The platform focuses on providing high-quality educational content in Arabic, with features for course discovery, learning paths, and professional development.
+Edraak (also called "sportschool") is a Next.js 15 e-learning platform built with modern technologies to provide an online learning experience. The platform enables users to sign up, enroll in courses, access course content, and earn certificates upon completion. It includes payment integration via PayMob for course purchases and uses a PostgreSQL database for data storage.
 
-### Key Technologies
+## Key Technologies
 
-- **Framework**: Next.js 15.5.2 with App Router and Turbopack
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 with custom theme configuration
-- **UI Components**: shadcn/ui components with Radix UI primitives
-- **State Management**: React Context API and useState hooks
-- **Icons**: Lucide React icons
-- **Build Tools**: ESLint, TypeScript compiler
+- **Framework**: Next.js 15 (with Turbopack)
+- **Language**: TypeScript with strict mode
+- **Database**: PostgreSQL via Prisma ORM
+- **Authentication**: NextAuth.js with Prisma adapter
+- **UI Components**: Radix UI primitives with Tailwind CSS
+- **API**: tRPC for type-safe API calls
+- **State Management**: React Query (TanStack Query)
+- **Payment Gateway**: PayMob integration
+- **File Storage**: Bunny.net for assets and content
+- **Styling**: Tailwind CSS with custom components
 
-### Architecture
-
-The project follows a feature-based architecture with the following structure:
+## Project Structure
 
 ```
 src/
-├── app/                 # Next.js App Router pages and layouts
-│   ├── (marketing)/     # Marketing pages (landing page)
-│   ├── globals.css      # Global styles and Tailwind configuration
-│   └── layout.tsx       # Root layout with theme provider
-├── components/          # Shared UI components
-│   ├── ui/              # shadcn/ui components (button, card, etc.)
-│   ├── aceternity/      # Custom animated components
-│   └── theme-provider.tsx # Theme management
-├── features/            # Feature modules
-│   └── landing/         # Landing page components
-├── lib/                 # Utility functions
-└── public/              # Static assets
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/             # Authentication routes
+│   ├── (protected)/        # Protected routes
+│   ├── api/                # API routes
+│   ├── student/            # Student-specific pages
+│   └── ...                 # Other pages
+├── components/            # Reusable UI components
+├── features/              # Feature-specific components
+├── lib/                   # Utility functions and libraries
+├── server/                # Server-side logic and API routes
+├── services/              # Business logic services
+├── trpc/                  # tRPC configuration and routers
+├── types/                 # TypeScript type definitions
+├── env.ts                 # Environment variable validation
+├── middleware.ts          # Next.js middleware
 ```
 
-## Development Setup
+## Database Schema
+
+The platform uses a PostgreSQL database with the following key entities:
+
+- **User**: Student, Professor, or Admin accounts with profile information
+- **Course**: Educational content organized by professors
+- **Lesson**: Individual course content items (videos, text, etc.)
+- **Enrollment**: Links users to courses they're enrolled in
+- **Payment**: Records payment transactions via PayMob
+- **Certificate**: Completion certificates for courses
+- **LessonProgress**: Tracks student progress through lessons
+- **Category**: Course categorization system
+- **Coupon**: Discount codes for courses
+
+## Building and Running
 
 ### Prerequisites
+- Node.js 18+ 
+- PostgreSQL database
+- Environment variables configured
 
-- Node.js (version specified in package.json)
-- npm, yarn, pnpm, or bun package manager
-
-### Installation
-
+### Setup Commands
 ```bash
+# Install dependencies
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
-```
 
-### Development Commands
+# Set up environment variables (copy from .env.example)
+cp .env.example .env
 
-```bash
-# Start development server
+# Initialize database
+npm run db:init
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 
 # Build for production
 npm run build
-# or
-yarn build
-# or
-pnpm build
-# or
-bun build
 
-# Start production server
+# Run production server
 npm run start
-# or
-yarn start
-# or
-pnpm start
-# or
-bun start
-
-# Run linting
-npm run lint
-# or
-yarn lint
-# or
-pnpm lint
-# or
-bun lint
 ```
 
-### Development Conventions
+### Additional Scripts
+```bash
+# Generate Prisma client
+npx prisma generate
 
-1. **Component Structure**:
+# Run database migrations
+npx prisma migrate dev
 
-   - Components are organized by feature or shared use
-   - Each component is a self-contained .tsx file
-   - Components use Tailwind CSS for styling with cn() utility for class merging
+# View database in Prisma Studio
+npm run db:studio
 
-2. **Styling**:
+# Create admin user
+npm run admin:create
 
-   - Uses Tailwind CSS v4 with custom color palette
-   - Custom utilities defined in globals.css (@utility directives)
-   - RTL (right-to-left) layout for Arabic content
-
-3. **State Management**:
-
-   - React Context API for global state (theme management)
-   - useState and useEffect hooks for local component state
-   - Custom hooks where appropriate
-
-4. **Routing**:
-
-   - App Router structure with route groups
-   - Marketing pages in `(marketing)` directory
-
-5. **Type Safety**:
-
-   - Strict TypeScript configuration
-   - Type definitions for all props and state
-   - Zod for schema validation where needed
-
-6. **Code Quality**:
-   - ESLint with Next.js recommended rules
-   - Strict TypeScript settings
-   - Component composition over inheritance
-
-### Key Features
-
-1. **Dark/Light Theme Support**:
-
-   - Toggle between themes using the theme button
-   - System-aware default theme
-   - Persists user preference
-
-2. **Responsive Design**:
-
-   - Mobile-first approach
-   - Responsive navigation and layout
-   - Adaptive components for different screen sizes
-
-3. **Educational Platform Components**:
-
-   - Hero section with call-to-action
-   - Featured courses display
-   - Company partnerships showcase
-   - Learning categories navigation
-   - Professional footer with app downloads
-
-4. **Performance Optimizations**:
-   - Next.js Image component for optimized images
-   - Code splitting and lazy loading
-   - Font optimization with next/font
-
-### Important Configuration Files
-
-1. **next.config.ts**:
-
-   - Image optimization settings
-   - Remote pattern configuration for external images
-
-2. **tsconfig.json**:
-
-   - Strict TypeScript settings
-   - Path aliases configuration (@/\*)
-
-3. **tailwind.config.js** (implied):
-
-   - Custom color palette in globals.css using @theme
-   - Plugin configuration in globals.css
-
-4. **components.json**:
-   - shadcn/ui configuration
-   - Path aliases and style preferences
-
-### Directory Structure
-
-```
-.
-├── .vscode/             # VS Code configuration
-├── prisma/              # Database schema (Prisma)
-├── public/              # Static assets
-│   ├── images/          # Placeholder images
-│   └── [static files]   # Favicons, etc.
-├── rules/               # Development rules and best practices
-├── src/
-│   ├── app/             # App Router structure
-│   │   ├── (marketing)/ # Marketing pages
-│   │   ├── globals.css  # Global styles
-│   │   └── layout.tsx   # Root layout
-│   ├── components/      # Shared components
-│   │   ├── ui/          # shadcn/ui components
-│   │   ├── aceternity/  # Animated components
-│   │   └── theme-provider.tsx
-│   ├── features/        # Feature modules
-│   │   └── landing/     # Landing page components
-│   ├── lib/             # Utility functions
-│   └── [other dirs]     # Additional directories
-├── [config files]       # next.config.ts, tsconfig.json, etc.
-└── README.md
+# Setup environment variables
+npm run env:setup
 ```
 
-### Development Rules & Best Practices
+## Development Conventions
 
-The project includes a comprehensive set of development rules in the `rules/` directory that guide all aspects of development:
+### Code Quality
+- TypeScript strict mode is enforced
+- ESLint and Prettier for consistent formatting
+- All code must pass type checking before committing
+- Component reusability and minimal duplication prioritized
 
-1. **AI-Assisted Development Workflow** (`ai-workflow-rules.md`):
+### File Organization
+- Use the `@/*` alias for absolute imports (e.g., `@/components/ui/button`)
+- Feature components in the `features/` directory
+- Shared UI components in the `components/ui/` directory
+- Server logic in the `server/` directory
+- Type definitions in the `types/` directory
 
-   - APCE methodology (Analyze, Plan, Confirm, Execute)
-   - AI partnership framework and quality control
-   - Error handling and problem resolution protocols
+### API Design
+- tRPC for type-safe API calls between client and server
+- React Query for client-side state management and caching
+- Security headers and validation on all endpoints
+- Authentication and authorization checks on protected routes
 
-2. **Architecture & Separation of Concerns** (`architecture-rules.md`):
+## Authentication Flow
 
-   - Feature-based architecture principles
-   - Frontend-backend separation guidelines
-   - Component separation patterns
-   - State management architecture
+The platform implements a comprehensive authentication system:
 
-3. **Implementation & Development Workflow** (`implementation-rules.md`):
+### Sign-up Process
+- Multi-step form with validation (personal info → interests → credentials)
+- Auto-login after successful account creation
+- Redirects to the `/welcome` page after sign-up completion
 
-   - Code quality standards and TypeScript best practices
-   - File naming conventions and data management rules
-   - Testing strategies and code review processes
+### Login Process
+- Role-based authentication (STUDENT, PROFESSOR, ADMIN)
+- Protected routes using NextAuth middleware
+- Session management with role-based access control
 
-4. **Next.js Performance & Optimization** (`nextjs-optimization.md`):
+### Current Authentication Routes
+- `/auth/signup` - Multi-step sign-up form with validation
+- `/auth/student/signin` - Student login page
+- `/auth/professor/signin` - Professor login page
+- `/auth/admin/signin` - Admin login page
+- `/welcome` - Post-signup welcome page
 
-   - Rendering strategies (PPR, SSG, SSR, ISR)
-   - Built-in optimizations and caching strategies
-   - Bundle optimization and performance monitoring
+## Student Experience
 
-5. **UI Development Rules** (`ui-development-rules.md`):
-   - Component architecture and design principles
-   - Performance optimization techniques
-   - Styling and design system management
-   - Accessibility requirements
+### Student Dashboard (`/student`)
+- Overview of user's learning journey
+- Statistics including active courses, completed courses, and payment history
+- Quick access to continue learning or discover new courses
 
-These rules ensure consistent, high-quality development practices across the project and should be followed for all new implementations.
+### My Courses (`/student/courses`)
+- Displays all enrolled courses with progress tracking
+- Shows completion percentage for each course
+- Cards with progress bars and action buttons to continue learning
+- Statistics for active courses, completed courses, and total progress
 
-### Recent Improvements
+### Course Access
+- The curriculum is split into preview (first 3 lessons) and premium content
+- Premium content requires enrollment to access
+- Middleware protects student routes (`/student`) requiring `STUDENT` role
+- Admin routes (`/admin`) require `ADMIN` role
 
-1. **Fixed Image Configuration**:
+## Payment Integration
 
-   - Configured remotePatterns in next.config.ts for external images
-   - Replaced external image URLs with local placeholder images
-   - Added image quality configuration
+The platform integrates with PayMob for payment processing with:
+- Online card payments
+- Mobile wallet payments
+- Webhook verification for payment status updates
+- HMAC signature validation for security
+- Payment return handling with success/failure redirects
 
-2. **Resolved Tailwind CSS Issues**:
+## Current Implementation Status
 
-   - Fixed CSS variable references for Tailwind v4
-   - Removed problematic global border styles
-   - Properly defined custom utilities
+### Critical Issues Being Addressed
+Per the implementation roadmap in `new-implants/`, the platform is currently focused on:
 
-3. **Eliminated Build Warnings**:
+1. **Fixing Authentication Flow** - Signup should auto-login users (this appears to already be implemented)
+2. **Creating Student Dashboard** - `/student/courses` page to see enrolled courses (this appears to be implemented)
+3. **Implementing Course Access** - Lesson viewing pages for students (needs implementation)
+4. **Adding Access Control** - Middleware to protect course content (partially implemented)
 
-   - Fixed unused variable warnings in components
-   - Resolved React Hook dependency issues
-   - Improved useEffect and useCallback usage
+### Course Access Implementation
+- The curriculum page shows free preview lessons and locked premium content
+- Enrollment is required to access premium content
+- Students are redirected to sign-in if not authenticated when trying to access premium content
 
-4. **Enhanced Developer Experience**:
-   - Added VS Code configuration for error detection
-   - Configured recommended extensions
-   - Set up debugging configurations
+## Environment Variables
+
+The application requires the following environment variables (see `.env.example`):
+
+- **Database**: `DATABASE_URL` - PostgreSQL connection string
+- **Authentication**: `NEXTAUTH_SECRET`, `NEXTAUTH_URL` - NextAuth configuration
+- **PayMob**: Multiple variables for payment processing
+- **Bunny.net**: Variables for file storage and CDN
+- **Public URLs**: `NEXT_PUBLIC_APP_URL` and others
+
+## API Structure
+
+The platform uses tRPC for server-side API endpoints with a well-organized router structure:
+- Student-specific endpoints are in `src/server/api/routers/student/`
+- The `studentCoursesRouter` handles enrolled course queries
+- Protected procedures ensure authentication before accessing data
+- Input validation using Zod schemas
+
+## Testing Strategy
+
+The project follows a comprehensive testing approach across multiple phases:
+1. Unit testing for components and utilities
+2. Integration testing for API routes and database operations
+3. End-to-end testing for complete user journeys
+4. Performance testing for load times and responsiveness
+
+## Deployment
+
+- Standalone output configured for Vercel deployment
+- Production environment variables must be configured in deployment platform
+- Database migrations need to be run in production environment
+- CDN patterns defined for image optimization
+
+## Important Files and Components
+
+### Authentication
+- `src/services/auth-service.ts` - Handles sign-in, sign-up, and sign-out logic
+- `src/components/auth/signup-form.tsx` - Multi-step registration form
+- `src/app/api/signup/route.ts` - API route for user registration
+- `src/lib/signup.ts` - Server-side user creation logic
+
+### Student Dashboard
+- `src/app/student/page.tsx` - Main dashboard with statistics
+- `src/app/student/courses/page.tsx` - Courses list with progress indicators
+- `src/server/api/routers/student/courses.ts` - TRPC router for course-related queries
+
+### Course Structure
+- `src/app/courses/[slug]/page.tsx` - Main course detail page
+- `src/app/courses/[slug]/CourseCurriculum.tsx` - Displays course lessons with preview/locked sections
+
+### Security
+- `src/middleware.ts` - Route protection middleware with role-based access control
+- API endpoints include authentication checks via `protectedProcedure`
+
+## Known Issues & Current Focus
+
+Based on the roadmap files in `new-implants/`:
+1. The authentication flow has been improved to auto-login users after signup
+2. Student dashboard and course access pages are implemented
+3. Still needs proper lesson viewing functionality for enrolled students
+4. Need to ensure proper access control to course content based on enrollment status
