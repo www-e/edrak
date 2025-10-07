@@ -90,7 +90,7 @@ export default function StudentPaymentsPage() {
                 </Badge>
               </TableCell>
               <TableCell className="text-right font-medium">
-                {payment.amount.toFixed(2)} {payment.currency}
+                {Number(payment.amount).toFixed(2)} {payment.currency}
               </TableCell>
             </TableRow>
           ))}

@@ -135,7 +135,7 @@ export default function CreateUserPage() {
                 <FormItem>
                   <FormLabel>Phone Number *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter phone number" {...field} />
+                    <Input placeholder="01xxxxxxxxx" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

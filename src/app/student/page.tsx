@@ -65,7 +65,7 @@ export default function StudentDashboardPage() {
                 <StatCard title="Active Courses" value={stats?.activeCourses ?? 0} icon={BookOpen} />
                 <StatCard title="Completed Courses" value={stats?.completedCourses ?? 0} icon={Award} />
                 <StatCard title="Total Payments" value={stats?.totalPayments ?? 0} icon={CreditCard} />
-                <StatCard title="Total Spent (EGP)" value={stats?.totalSpent.toFixed(2) ?? '0.00'} icon={TrendingUp} />
+                <StatCard title="Total Spent (EGP)" value={stats?.totalSpent ? Number(stats.totalSpent).toFixed(2) : '0.00'} icon={TrendingUp} />
             </>
         )}
       </div>

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Role, CourseVisibility, CouponType } from '@prisma/client';
+import { egyptianPhoneNumberSchema, optionalEgyptianPhoneNumberSchema } from '@/lib/validation-schemas';
 
 // ATTACHMENT TYPE DEFINITION
 // Centralized type for Attachment to ensure consistency across components
@@ -18,27 +19,27 @@ export interface Attachment {
 
 // USER SCHEMAS
 export const CreateUserInputSchema = z.object({
-   username: z.string().min(3, "Username must be at least 3 characters"),
-   email: z.string().email("Invalid email address"),
-   password: z.string().min(6, "Password must be at least 6 characters"),
-   firstName: z.string().min(1, "First name is required"),
-   lastName: z.string().min(1, "Last name is required"),
-   phoneNumber: z.string().min(1, "Phone number is required"),
-   role: z.nativeEnum(Role),
-   isActive: z.boolean(), // Default will be set in the form's defaultValues
- });
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    phoneNumber: egyptianPhoneNumberSchema,
+    role: z.nativeEnum(Role),
+    isActive: z.boolean(), // Default will be set in the form's defaultValues
+  });
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 
 export const UpdateUserInputSchema = z.object({
-   id: z.string().uuid(),
-   username: z.string().min(3, "Username must be at least 3 characters").optional(),
-   email: z.string().email("Invalid email address").optional(),
-   firstName: z.string().min(1).optional(),
-   lastName: z.string().min(1).optional(),
-   phoneNumber: z.string().min(1).optional(),
-   role: z.nativeEnum(Role).optional(),
-   isActive: z.boolean().optional(),
- });
+    id: z.string().uuid(),
+    username: z.string().min(3, "Username must be at least 3 characters").optional(),
+    email: z.string().email("Invalid email address").optional(),
+    firstName: z.string().min(1).optional(),
+    lastName: z.string().min(1).optional(),
+    phoneNumber: egyptianPhoneNumberSchema.optional(),
+    role: z.nativeEnum(Role).optional(),
+    isActive: z.boolean().optional(),
+  });
 export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
 
 export const ResetPasswordInputSchema = z.object({

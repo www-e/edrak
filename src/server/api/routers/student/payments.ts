@@ -26,6 +26,10 @@ export const studentPaymentsRouter = createTRPCRouter({
       },
     });
 
-    return payments;
+    // Convert Decimal amounts to numbers for JSON serialization
+    return payments.map(payment => ({
+      ...payment,
+      amount: Number(payment.amount),
+    }));
   }),
 });

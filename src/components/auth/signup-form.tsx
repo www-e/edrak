@@ -17,13 +17,14 @@ import { Input } from "@/components/ui/input";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { AuthService } from "@/services/auth-service";
 import { SignupData } from "@/types/auth";
+import { egyptianPhoneNumberSchema, optionalEgyptianPhoneNumberSchema } from "@/lib/validation-schemas";
 import { User,  Lock, Phone, Heart, ChevronLeft, ChevronRight, Check, Eye, EyeOff, Loader2 } from "lucide-react";
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  secondPhoneNumber: z.string().optional(),
+  phoneNumber: egyptianPhoneNumberSchema,
+  secondPhoneNumber: optionalEgyptianPhoneNumberSchema,
 });
 
 const interestsSchema = z.object({
@@ -253,7 +254,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                           <Input
-                            placeholder="Enter your phone number"
+                            placeholder="01xxxxxxxxx"
                             className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20"
                             {...field}
                           />
@@ -274,7 +275,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                           <Input
-                            placeholder="Enter second phone number"
+                            placeholder="01xxxxxxxxx (Optional)"
                             className="pl-10 h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20"
                             {...field}
                           />

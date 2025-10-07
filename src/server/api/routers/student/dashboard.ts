@@ -36,7 +36,7 @@ export const studentDashboardRouter = createTRPCRouter({
       activeCourses,
       completedCourses,
       totalPayments: paymentStats._count.id,
-      totalSpent: paymentStats._sum.amount || 0,
+      totalSpent: Number(paymentStats._sum.amount || 0),
     };
   }),
 });

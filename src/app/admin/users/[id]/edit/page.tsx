@@ -138,7 +138,7 @@ export default function UserEditPage() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="User's phone number" {...field} />
+                    <Input placeholder="01xxxxxxxxx" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

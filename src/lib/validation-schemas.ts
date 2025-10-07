@@ -6,6 +6,20 @@ import { z } from "zod";
 import { CourseVisibility } from "@prisma/client";
 
 /**
+ * Egyptian phone number validation schema
+ * Supports formats like: 01111111111, 01211111111, 01011111111
+ */
+export const egyptianPhoneNumberSchema = z.string()
+  .min(11, "Phone number must be exactly 11 digits")
+  .max(11, "Phone number must be exactly 11 digits")
+  .regex(/^01[0-2,5,9]\d{8}$/, "Please enter a valid Egyptian phone number (01xxxxxxxxx)");
+
+/**
+ * Optional Egyptian phone number validation schema
+ */
+export const optionalEgyptianPhoneNumberSchema = egyptianPhoneNumberSchema.optional();
+
+/**
  * Common pagination schema used across multiple endpoints
  */
 export const paginationSchema = z.object({
