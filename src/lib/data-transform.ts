@@ -36,6 +36,10 @@ export const courseDataTransformer = createOptionalFieldTransformer(
   'categoryId'
 );
 
+export const lessonDataTransformer = createOptionalFieldTransformer(
+  // Lesson-specific optional fields
+);
+
 export const couponDataTransformer = createOptionalFieldTransformer(
   'maxUses',
   'endDate'

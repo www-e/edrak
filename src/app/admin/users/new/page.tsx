@@ -32,6 +32,7 @@ export default function CreateUserPage() {
     resolver: zodResolver(CreateUserInputSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: "",
       firstName: "",
       lastName: "",
@@ -85,7 +86,21 @@ export default function CreateUserPage() {
                 </FormItem>
               )}
             />
-            
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email *</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="Enter email address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="password"

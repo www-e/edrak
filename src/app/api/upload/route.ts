@@ -78,8 +78,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
     }
 
+    // For now, make lessonId optional to support lesson creation workflow
+    // TODO: Implement a proper temporary attachment system or modify workflow
     if (!lessonId) {
-        return NextResponse.json({ error: 'Lesson ID is required to create an attachment' }, { status: 400 });
+        return NextResponse.json({
+            error: 'Lesson must be created first before uploading attachments. Please create the lesson and then upload attachments from the lesson edit page.'
+        }, { status: 400 });
     }
 
     // Validate file size and type in one place

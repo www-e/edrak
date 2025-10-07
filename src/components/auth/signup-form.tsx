@@ -85,6 +85,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
     resolver: zodResolver(credentialsSchema),
     defaultValues: {
       username: formData.username,
+      email: formData.email,
       password: formData.password,
     },
   });

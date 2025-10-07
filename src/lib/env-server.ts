@@ -27,6 +27,7 @@ const serverEnvSchema = z.object({
   // Bunny.net Configuration (Server-side only)
   BUNNY_API_KEY: z.string().min(1, "BUNNY_API_KEY is required for Bunny.net operations"),
   BUNNY_STORAGE_ZONE_NAME: z.string().min(1, "BUNNY_STORAGE_ZONE_NAME is required for file storage"),
+  BUNNY_STORAGE_REGION: z.string().min(1, "BUNNY_STORAGE_REGION is required for Bunny.net storage region"),
   BUNNY_CDN_HOSTNAME: z.string().min(1, "BUNNY_CDN_HOSTNAME is required for file access"),
   BUNNY_PULL_ZONE_URL: z.string().url("BUNNY_PULL_ZONE_URL must be a valid URL"),
 

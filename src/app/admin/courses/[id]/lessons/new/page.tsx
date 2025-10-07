@@ -10,16 +10,12 @@ import { PageHeader } from "@/components/admin/shared/page-header";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { api } from "@/trpc/react";
 import { z } from "zod";
-import { FileUpload } from "@/components/admin/media/file-upload";
-import { AttachmentList } from "@/components/admin/media/attachment-list";
-import { Attachment } from "@/types/admin";
 
 const createLessonSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
   order: z.number().int().min(1, "Order must be at least 1"),
   isVisible: z.boolean().default(true),
-  videoUrl: z.string().url().nullable().optional(),
 });
 
 type CreateLessonInput = z.infer<typeof createLessonSchema>;
@@ -34,10 +30,8 @@ export default function CreateLessonPage() {
     content: "",
     order: 1,
     isVisible: true,
-    videoUrl: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const createLesson = api.admin.course.createLesson.useMutation({
     onSuccess: () => {
@@ -88,18 +82,10 @@ export default function CreateLessonPage() {
       createLesson.mutate({
         ...formData,
         courseId,
-        videoUrl: formData.videoUrl || null,
       });
     }
   };
 
-  const handleAttachmentUpload = (attachment: Attachment) => {
-    setAttachments(prev => [...prev, attachment]);
-  };
-
-  const handleAttachmentDelete = (attachmentId: string) => {
-    setAttachments(prev => prev.filter(att => att.id !== attachmentId));
-  };
 
   return (
     <div className="space-y-6">
@@ -159,60 +145,31 @@ export default function CreateLessonPage() {
             )}
           </div>
           
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="videoUrl">Video URL (Optional)</Label>
-            <Input
-              id="videoUrl"
-              type="url"
-              value={formData.videoUrl || ""}
-              onChange={(e) => handleChange("videoUrl", e.target.value)}
-              placeholder="https://example.com/video.mp4"
-              className={errors.videoUrl ? "border-destructive" : ""}
-            />
-            {errors.videoUrl && (
-              <p className="text-sm text-destructive">{errors.videoUrl}</p>
-            )}
-          </div>
           
-          <div className="space-y-2 md:col-span-2">
-            <div className="flex items-center justify-between">
-              <Label>Attachments</Label>
-              <span className="text-sm text-muted-foreground">
-                {attachments.length} file(s) uploaded
-              </span>
-            </div>
-            
-            <FileUpload
-              courseId={courseId}
-              onUploadComplete={handleAttachmentUpload}
-            />
-            
-            {attachments.length > 0 && (
-              <div className="mt-4">
-                <AttachmentList
-                  attachments={attachments}
-                  courseId={courseId}
-                  onAttachmentDelete={handleAttachmentDelete}
-                />
-              </div>
-            )}
-          </div>
         </div>
         
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={createLesson.isPending}
-          >
-            {createLesson.isPending ? "Creating..." : "Create Lesson"}
-          </Button>
+        <div className="space-y-4">
+          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>Note:</strong> After creating this lesson, you can upload attachments (videos, images, documents) from the lesson edit page.
+            </p>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createLesson.isPending}
+            >
+              {createLesson.isPending ? "Creating..." : "Create Lesson"}
+            </Button>
+          </div>
         </div>
       </form>
     </div>

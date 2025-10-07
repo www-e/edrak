@@ -10,7 +10,7 @@ class BunnyCdnServiceSingleton {
       this.instance = new BunnyCDNStorage(
         serverEnv.BUNNY_API_KEY,
         serverEnv.BUNNY_STORAGE_ZONE_NAME,
-        'de'
+        serverEnv.BUNNY_STORAGE_REGION
       );
     }
     return this.instance;

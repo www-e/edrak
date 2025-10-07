@@ -2,7 +2,7 @@ import { db } from "@/server/db";
 import { CourseVisibility, Prisma } from "@prisma/client";
 import { createPaginationResult } from "@/lib/pagination";
 import { createSearchConditions } from "@/lib/search";
-import { courseDataTransformer } from "@/lib/data-transform";
+import { courseDataTransformer, lessonDataTransformer } from "@/lib/data-transform";
 import type {
   CreateCourseInput,
   CreateLessonInput,
@@ -84,7 +84,7 @@ export class AdminCourseService {
   }
 
   static async createLesson(data: CreateLessonInput) {
-    const transformedData = courseDataTransformer(data) as CreateLessonInput;
+    const transformedData = lessonDataTransformer(data) as CreateLessonInput;
     return db.lesson.create({
       data: transformedData,
     });
