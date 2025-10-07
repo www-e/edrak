@@ -217,16 +217,30 @@ export class CourseService {
   }
 
   /**
-   * Get a specific course by its slug
+   * Get a specific course by its slug (PUBLIC - No lesson details)
+   * Only returns basic course information for preview/marketing
    */
   static async getCourseBySlug(slug: string) {
     return db.course.findUnique({
-      where: { 
+      where: {
         slug,
         visibility: CourseVisibility.PUBLISHED
       },
-      include: {
-        category: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        language: true,
+        slug: true,
+        rating: true,
+        ratingCount: true,
+        createdAt: true,
+        category: {
+          select: {
+            name: true
+          }
+        },
         professor: {
           select: {
             id: true,
@@ -235,26 +249,13 @@ export class CourseService {
             username: true
           }
         },
-        lessons: {
-          where: { 
-            isDeleted: false 
-          },
-          orderBy: { 
-            order: "asc" 
-          },
-          select: {
-            id: true,
-            title: true,
-            order: true,
-            isVisible: true
-          }
-        },
         _count: {
           select: {
             enrollments: true,
             lessons: {
               where: {
-                isDeleted: false
+                isDeleted: false,
+                isVisible: true
               }
             }
           }
