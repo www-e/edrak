@@ -78,19 +78,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Course ID is required' }, { status: 400 });
     }
 
-    // For now, make lessonId optional to support lesson creation workflow
-    // TODO: Implement a proper temporary attachment system or modify workflow
-    if (!lessonId) {
-        return NextResponse.json({
-            error: 'Lesson must be created first before uploading attachments. Please create the lesson and then upload attachments from the lesson edit page.'
-        }, { status: 400 });
-    }
+    // Ultra-efficient: Allow uploads without lessonId for maximum flexibility
+    // This enables uploads during lesson creation and editing workflows
+    // lessonId is still preferred but not mandatory for better UX
 
-    // Validate file size and type in one place
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    // Validate file size and type in one place - Support for large video files
+    const maxSize = 3 * 1024 * 1024 * 1024; // 3GB for large video files
     if (file.size > maxSize) {
       return NextResponse.json({
-        error: `File too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB`
+        error: `File too large. Maximum size is ${Math.round(maxSize / (1024 * 1024 * 1024))}GB`
       }, { status: 400 });
     }
 
@@ -107,9 +103,12 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const lesson = await db.lesson.findUnique({ where: { id: lessonId, courseId: courseId } });
-    if (!lesson) {
-      return NextResponse.json({ error: 'Lesson not found or does not belong to the specified course' }, { status: 404 });
+    // Ultra-efficient: Only validate lesson if lessonId is provided
+    if (lessonId) {
+      const lesson = await db.lesson.findUnique({ where: { id: lessonId, courseId: courseId } });
+      if (!lesson) {
+        return NextResponse.json({ error: 'Lesson not found or does not belong to the specified course' }, { status: 404 });
+      }
     }
 
     const bytes = await file.arrayBuffer();
@@ -122,12 +121,12 @@ export async function POST(req: NextRequest) {
     const uploadPromise = (async () => {
       let uploadResult: UploadResult;
 
-      // Use appropriate upload method based on file type
+      // Use appropriate upload method based on file type - ultra efficient routing
       if (file.type.startsWith('video/')) {
         uploadResult = await BunnyCdnService.uploadCourseVideo(
           buffer,
           courseId,
-          lessonId,
+          lessonId || '', // Handle null case efficiently
           file.name
         );
       } else if (file.type.startsWith('image/')) {
@@ -138,38 +137,55 @@ export async function POST(req: NextRequest) {
           false // not a thumbnail
         );
       } else {
-        // Handle as attachment
+        // Handle as attachment - ultra efficient null handling
         uploadResult = await BunnyCdnService.uploadCourseAttachment(
           buffer,
           courseId,
-          lessonId,
+          lessonId || '', // Handle null case efficiently
           file.name
         );
       }
 
-      // Use database transaction to prevent orphaned files
-      const attachment = await db.$transaction(async (tx) => {
-        return await tx.attachment.create({
-          data: {
-            lessonId: lessonId,
-            name: file.name,
-            fileName: uploadResult.fileName,
-            mimeType: uploadResult.mimeType,
-            fileSize: uploadResult.fileSize,
-            bunnyCdnPath: uploadResult.bunnyCdnPath,
-            bunnyCdnUrl: uploadResult.bunnyCdnUrl,
-          },
+      // Ultra-efficient: Only create attachment record if lessonId exists
+      let attachment;
+      if (lessonId) {
+        attachment = await db.$transaction(async (tx) => {
+          return await tx.attachment.create({
+            data: {
+              lessonId: lessonId,
+              name: file.name,
+              fileName: uploadResult.fileName,
+              mimeType: uploadResult.mimeType,
+              fileSize: uploadResult.fileSize,
+              bunnyCdnPath: uploadResult.bunnyCdnPath,
+              bunnyCdnUrl: uploadResult.bunnyCdnUrl,
+            },
+          });
         });
-      });
+      } else {
+        // For uploads without lessonId, return minimal attachment info
+        attachment = {
+          id: 'temp-' + Date.now(),
+          lessonId: null,
+          name: file.name,
+          fileName: uploadResult.fileName,
+          mimeType: uploadResult.mimeType,
+          fileSize: uploadResult.fileSize,
+          bunnyCdnPath: uploadResult.bunnyCdnPath,
+          bunnyCdnUrl: uploadResult.bunnyCdnUrl,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
 
       return attachment;
     })();
 
-    // Race between upload and timeout
+    // Ultra-efficient timeout handling for Vercel - Extended for large video files (3GB+)
     const attachment = await Promise.race([
       uploadPromise,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Upload timeout after 2 minutes')), 120000)
+        setTimeout(() => reject(new Error('Upload timeout after 5 minutes for large files')), 300000)
       )
     ]);
 

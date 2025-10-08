@@ -89,14 +89,12 @@ export class AdminCourseService {
       data: transformedData,
     });
   }
-    static async updateLesson(data: UpdateLessonInput) {
+
+  static async updateLesson(data: UpdateLessonInput) {
     const { id, ...updateData } = data;
     return db.lesson.update({
       where: { id },
-      data: {
-        ...updateData,
-        videoUrl: updateData.videoUrl, // Handles setting to null or a new value
-      },
+      data: updateData,
     });
   }
 

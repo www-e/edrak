@@ -23,7 +23,7 @@ export function FileUpload({
   onUploadComplete,
   onUploadError,
   acceptedFileTypes = ['video/*', 'image/*', 'application/pdf', '.doc', '.docx', '.ppt', '.pptx'],
-  maxFileSize = 50
+  maxFileSize = 3072 // 3GB for large video files
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -288,7 +288,7 @@ export function FileUpload({
               <div className="flex flex-wrap gap-2 justify-center">
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs">
                   <Video className="h-3 w-3" />
-                  Videos (MP4, WebM)
+                  Videos (MP4, WebM) - up to 3GB
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
                   <Image className="h-3 w-3" />
@@ -302,7 +302,7 @@ export function FileUpload({
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Maximum file size: {maxFileSize}MB
+              Maximum file size: {maxFileSize >= 1024 ? `${Math.round(maxFileSize / 1024)}GB` : `${maxFileSize}MB`}
             </p>
           </div>
         )}

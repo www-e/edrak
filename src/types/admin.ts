@@ -67,7 +67,6 @@ export const CreateLessonInputSchema = z.object({
   order: z.number().int().min(1),
   content: z.string(),
   isVisible: z.boolean().default(true),
-  videoUrl: z.string().url().nullable().optional(), // Prisma: String? => nullable and optional
 });
 export type CreateLessonInput = z.infer<typeof CreateLessonInputSchema>;
 
@@ -101,7 +100,6 @@ export const UpdateLessonInputSchema = z.object({
   order: z.number().int().min(1).optional(),
   content: z.string().optional(),
   isVisible: z.boolean().optional(),
-  videoUrl: z.string().url().nullable().optional(),
 });
 export type UpdateLessonInput = z.infer<typeof UpdateLessonInputSchema>;
 export const UpdateCouponInputSchema = CouponInputSchema.extend({

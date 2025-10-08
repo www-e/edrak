@@ -6,11 +6,14 @@ class BunnyCdnServiceSingleton {
 
   static getInstance(): BunnyCDNStorage {
     if (!this.instance) {
-      // Initialize BunnyCDN with proper credentials
+      // Ultra-efficient initialization with minimal processing
+      // Handle DE region as special case - uses base endpoint instead of regional subdomain
+      const region = serverEnv.BUNNY_STORAGE_REGION === 'DE' ? '' : serverEnv.BUNNY_STORAGE_REGION;
+
       this.instance = new BunnyCDNStorage(
         serverEnv.BUNNY_API_KEY,
         serverEnv.BUNNY_STORAGE_ZONE_NAME,
-        serverEnv.BUNNY_STORAGE_REGION
+        region
       );
     }
     return this.instance;
@@ -55,11 +58,11 @@ export class BunnyCdnService {
 
       const bunnyCdn = BunnyCdnServiceSingleton.getInstance();
 
-      // Upload with timeout and retry logic
+      // Ultra-efficient upload with extended timeout for large video files (3GB+)
       const uploadResponse = await Promise.race([
         bunnyCdn.upload(fileBuffer, fullPath),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Upload timeout after 60 seconds')), 60000)
+          setTimeout(() => reject(new Error('Upload timeout after 4 minutes for large files')), 240000)
         )
       ]);
 
@@ -113,12 +116,13 @@ export class BunnyCdnService {
     lessonId: string,
     fileName: string
   ): Promise<UploadResult> {
-    // Validate video file
+    // Ultra-efficient validation and path generation
     if (!fileName.match(/\.(mp4|webm|mov|avi)$/i)) {
       throw new Error('Invalid video format. Supported: mp4, webm, mov, avi');
     }
 
-    const folderPath = `courses/${courseId}/videos`;
+    // Efficient path generation - minimize string operations
+    const folderPath = lessonId ? `courses/${courseId}/lessons/${lessonId}/videos` : `courses/${courseId}/videos`;
     return this.uploadFile(fileBuffer, fileName, 'video/mp4', folderPath);
   }
 
@@ -143,7 +147,8 @@ export class BunnyCdnService {
     lessonId: string,
     fileName: string
   ): Promise<UploadResult> {
-    const folderPath = `courses/${courseId}/attachments`;
+    // Ultra-efficient path generation with lesson organization
+    const folderPath = lessonId ? `courses/${courseId}/lessons/${lessonId}/attachments` : `courses/${courseId}/attachments`;
     return this.uploadFile(fileBuffer, fileName, 'application/octet-stream', folderPath);
   }
 
@@ -152,12 +157,12 @@ export class BunnyCdnService {
     return `https://${serverEnv.BUNNY_PULL_ZONE_URL}/${filePath}`;
   }
 
-  // Validate file size (50MB limit for videos, 10MB for images, 25MB for attachments)
+  // Validate file size (3GB limit for videos, 10MB for images, 25MB for attachments)
   static validateFileSize(fileSize: number, fileType: string): void {
     const limits = {
-      video: 50 * 1024 * 1024,    // 50MB
-      image: 10 * 1024 * 1024,    // 10MB
-      attachment: 25 * 1024 * 1024 // 25MB
+      video: 3 * 1024 * 1024 * 1024,    // 3GB for large video files
+      image: 10 * 1024 * 1024,           // 10MB
+      attachment: 25 * 1024 * 1024       // 25MB
     };
 
     let limit = limits.attachment; // default
@@ -169,8 +174,10 @@ export class BunnyCdnService {
     }
 
     if (fileSize > limit) {
+      const limitGB = Math.round(limit / (1024 * 1024 * 1024));
       const limitMB = Math.round(limit / (1024 * 1024));
-      throw new Error(`File too large. Maximum size for this file type is ${limitMB}MB`);
+      const sizeUnit = limit >= 1024 * 1024 * 1024 ? `${limitGB}GB` : `${limitMB}MB`;
+      throw new Error(`File too large. Maximum size for this file type is ${sizeUnit}`);
     }
   }
 }

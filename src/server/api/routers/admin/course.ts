@@ -40,11 +40,7 @@ export const adminCourseRouter = createTRPCRouter({
   createLesson: adminProcedure
     .input(CreateLessonInputSchema)
     .mutation(async ({ input }) => {
-        const data = {
-          ...input,
-          videoUrl: input.videoUrl ?? null,
-        };
-        return AdminCourseService.createLesson(data);
+        return AdminCourseService.createLesson(input);
     }),
     
   /**

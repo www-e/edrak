@@ -63,7 +63,6 @@ export const createLessonSchema = z.object({
   title: z.string().min(1),
   order: z.number().int().min(1),
   content: z.string(),
-  videoUrl: z.string().url().nullable().optional(),
   isVisible: z.boolean().default(true),
 });
 
