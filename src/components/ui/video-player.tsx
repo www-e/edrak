@@ -24,8 +24,9 @@ export function VideoPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [showControls, setShowControls] = useState(false);
 
-  // Handle video loading
+  // Handle video loading with performance optimizations
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -39,8 +40,27 @@ export function VideoPlayer({
       setCurrentTime(video.currentTime);
     };
 
-    const handleError = () => {
-      setError("Failed to load video. Please check your internet connection.");
+    const handleError = (e: Event) => {
+      const videoElement = e.target as HTMLVideoElement;
+      let errorMessage = "Failed to load video. ";
+
+      if (videoElement.error) {
+        switch (videoElement.error.code) {
+          case MediaError.MEDIA_ERR_NETWORK:
+            errorMessage += "Network error. Please check your internet connection.";
+            break;
+          case MediaError.MEDIA_ERR_DECODE:
+            errorMessage += "Video format not supported or corrupted.";
+            break;
+          case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage += "Video format not supported by your browser.";
+            break;
+          default:
+            errorMessage += "Please try again or contact support.";
+        }
+      }
+
+      setError(errorMessage);
       setIsLoading(false);
     };
 
@@ -49,16 +69,22 @@ export function VideoPlayer({
       setError(null);
     };
 
+    const handleCanPlay = () => {
+      setIsLoading(false);
+    };
+
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('error', handleError);
     video.addEventListener('loadstart', handleLoadStart);
+    video.addEventListener('canplay', handleCanPlay);
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('error', handleError);
       video.removeEventListener('loadstart', handleLoadStart);
+      video.removeEventListener('canplay', handleCanPlay);
     };
   }, []);
 
@@ -103,7 +129,7 @@ export function VideoPlayer({
   }
 
   return (
-    <Card className={`relative overflow-hidden ${className}`}>
+    <Card className={`relative overflow-hidden group ${className}`}>
       <video
         ref={videoRef}
         src={src}
@@ -111,6 +137,10 @@ export function VideoPlayer({
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
+        onMouseEnter={() => setShowControls(true)}
+        onMouseLeave={() => setShowControls(false)}
+        preload="metadata"
+        playsInline
       />
 
       {/* Loading overlay */}
@@ -121,7 +151,9 @@ export function VideoPlayer({
       )}
 
       {/* Video controls */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+      <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${
+        showControls || isPlaying ? 'opacity-100' : 'opacity-0'
+      }`}>
         {/* Controls */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

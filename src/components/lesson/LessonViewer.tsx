@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play } from "lucide-react";
+import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Video, Download, FileText, Image } from "lucide-react";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/ui/video-player";
 import { getFileIcon, formatFileSize } from "@/lib/file-utils";
@@ -18,7 +18,6 @@ interface LessonData {
   id: string;
   title: string;
   content: string;
-  videoUrl: string | null;
   duration: number | null;
   order: number;
   isVisible: boolean;
@@ -37,6 +36,26 @@ interface LessonData {
     title: string;
     slug: string;
   };
+}
+
+// Smart content type detection
+type AttachmentType = 'VIDEO_PLAYER' | 'PDF_PREVIEW' | 'IMAGE_GALLERY' | 'DOCUMENT_PREVIEW' | 'DOWNLOAD_ONLY';
+
+function getAttachmentType(attachment: LessonData['attachments'][0]): AttachmentType {
+  const { mimeType, fileName } = attachment;
+
+  if (mimeType.startsWith('video/')) {
+    return 'VIDEO_PLAYER';
+  } else if (mimeType.startsWith('image/')) {
+    return 'IMAGE_GALLERY';
+  } else if (mimeType === 'application/pdf') {
+    return 'PDF_PREVIEW';
+  } else if (mimeType.includes('document') ||
+             fileName.match(/\.(doc|docx|ppt|pptx|txt|md)$/i)) {
+    return 'DOCUMENT_PREVIEW';
+  } else {
+    return 'DOWNLOAD_ONLY';
+  }
 }
 
 export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
@@ -193,49 +212,70 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
         </p>
       </div>
 
-      {/* Video Player */}
-      {lesson.videoUrl ? (
-        <div className="space-y-4">
-          <VideoPlayer
-            src={lesson.videoUrl}
-            title={lesson.title}
-          />
+      {/* Smart Video Detection & Display */}
+      {(() => {
+        // Find the first video attachment to display as the main lesson video
+        const mainVideoAttachment = lesson.attachments.find(att => att.mimeType.startsWith('video/'));
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Previous Lesson
-              </Button>
-              <Button variant="outline" size="sm">
-                Next Lesson
-              </Button>
-            </div>
-
-            <Button
-              onClick={handleMarkComplete}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Mark as Complete
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <Play className="w-8 h-8 text-gray-400" />
+        if (mainVideoAttachment) {
+          return (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    <Play className="w-3 h-3 mr-1" />
+                    Main Lesson Video
+                  </Badge>
+                  <Badge variant="outline">
+                    {formatFileSize(mainVideoAttachment.fileSize)}
+                  </Badge>
+                </div>
+                <VideoPlayer
+                  src={mainVideoAttachment.bunnyCdnUrl}
+                  title={`${lesson.title} - ${mainVideoAttachment.name}`}
+                />
               </div>
-              <p className="text-lg font-semibold mb-2">No Video Available</p>
-              <p className="text-sm text-muted-foreground">
-                This lesson does not have a video yet.
-              </p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Previous Lesson
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Next Lesson
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={handleMarkComplete}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Mark as Complete
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          );
+        }
+
+        // Fallback: Show placeholder if no video found
+        return (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Play className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-lg font-semibold mb-2">No Video Available</p>
+                <p className="text-sm text-muted-foreground">
+                  This lesson does not have a video yet. Upload a video file to get started.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Lesson Content */}
       <Card>
@@ -253,53 +293,133 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
         </CardContent>
       </Card>
 
-      {/* Lesson Attachments */}
-       {lesson.attachments && lesson.attachments.length > 0 && (
+     {/* Smart Attachments Display - Filter out videos since they're shown above */}
+     {(() => {
+       // Filter out video attachments since they're displayed in the main video section
+       const nonVideoAttachments = lesson.attachments.filter(att => !att.mimeType.startsWith('video/'));
+
+       if (nonVideoAttachments.length === 0) {
+         return null; // Don't show the section if no non-video attachments
+       }
+
+       return (
          <Card>
            <CardHeader>
-             <CardTitle>Lesson Resources</CardTitle>
+             <CardTitle className="flex items-center gap-2">
+               <File className="w-5 h-5" />
+               Lesson Resources
+               <Badge variant="outline" className="ml-auto">
+                 {nonVideoAttachments.length} file{nonVideoAttachments.length !== 1 ? 's' : ''}
+               </Badge>
+             </CardTitle>
            </CardHeader>
            <CardContent>
-             <div className="space-y-3">
-               {lesson.attachments.map((attachment) => {
-                 const fileIcon = getFileIcon(attachment.fileName, attachment.mimeType);
+             <div className="space-y-4">
+               {nonVideoAttachments.map((attachment) => {
+                 const attachmentType = getAttachmentType(attachment);
+                 const fileIcon = getFileIcon(attachment.mimeType);
                  const formattedSize = formatFileSize(attachment.fileSize);
 
                  return (
-                   <div key={attachment.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                     <div className="flex items-center gap-3">
-                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                         <span className="text-lg">{fileIcon}</span>
+                   <div key={attachment.id} className="group">
+                     {attachmentType === 'PDF_PREVIEW' ? (
+                       // PDF attachments - Show preview option
+                       <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-red-50/50 transition-colors">
+                         <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                             <FileText className="w-5 h-5 text-red-600" />
+                           </div>
+                           <div>
+                             <p className="font-medium">{attachment.name}</p>
+                             <p className="text-sm text-muted-foreground">
+                               📄 PDF Document • {formattedSize}
+                             </p>
+                           </div>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+                           >
+                             <Eye className="w-4 h-4 mr-2" />
+                             Preview
+                           </Button>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+                           >
+                             <Download className="w-4 h-4 mr-2" />
+                             Download
+                           </Button>
+                         </div>
                        </div>
-                       <div className="flex-1">
-                         <p className="font-medium">{attachment.name}</p>
-                         <p className="text-sm text-muted-foreground">
-                           {formattedSize} • {attachment.mimeType}
-                         </p>
+                     ) : attachmentType === 'IMAGE_GALLERY' ? (
+                       // Image attachments - Show thumbnail with preview
+                       <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-blue-50/50 transition-colors">
+                         <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                             <Image className="w-5 h-5 text-blue-600" />
+                           </div>
+                           <div>
+                             <p className="font-medium">{attachment.name}</p>
+                             <p className="text-sm text-muted-foreground">
+                               🖼️ Image • {formattedSize}
+                             </p>
+                           </div>
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+                           >
+                             <Eye className="w-4 h-4 mr-2" />
+                             View
+                           </Button>
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+                           >
+                             <Download className="w-4 h-4 mr-2" />
+                             Download
+                           </Button>
+                         </div>
                        </div>
-                     </div>
-                     <div className="flex items-center gap-2">
-                       {/* Preview button for viewable files */}
-                       {(attachment.mimeType.startsWith('image/') ||
-                         attachment.mimeType === 'application/pdf' ||
-                         attachment.fileName.match(/\.(txt|md)$/i)) && (
+                     ) : (
+                       // Generic files - Show download only
+                       <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                         <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                             {fileIcon}
+                           </div>
+                           <div>
+                             <p className="font-medium">{attachment.name}</p>
+                             <p className="text-sm text-muted-foreground">
+                               📎 {attachment.mimeType} • {formattedSize}
+                             </p>
+                           </div>
+                         </div>
                          <Button
-                           variant="ghost"
+                           variant="outline"
                            size="sm"
                            onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
                          >
-                           <Eye className="w-4 h-4 mr-2" />
-                           Preview
+                           <Download className="w-4 h-4 mr-2" />
+                           Download
                          </Button>
-                       )}
-                     </div>
+                       </div>
+                     )}
                    </div>
                  );
                })}
              </div>
            </CardContent>
          </Card>
-       )}
+       );
+     })()}
     </div>
   );
 }

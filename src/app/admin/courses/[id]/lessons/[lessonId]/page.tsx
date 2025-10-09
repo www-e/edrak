@@ -91,20 +91,7 @@ export default function LessonDetailPage() {
           className="rounded-lg border p-4"
         />
       </div>
-      
-      {lesson.videoUrl && (
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Video Content</h3>
-          <div className="aspect-video rounded-lg border bg-muted">
-            <video 
-              src={lesson.videoUrl} 
-              controls 
-              className="h-full w-full rounded-lg object-cover"
-            />
-          </div>
-        </div>
-      )}
-      
+            
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">Attachments</h3>

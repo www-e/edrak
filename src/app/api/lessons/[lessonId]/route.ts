@@ -98,12 +98,9 @@ export async function GET(
       );
     }
 
-    // Generate signed URLs for video content (if using Bunny CDN)
+    // Generate signed URLs for attachments (if using Bunny CDN)
     const lessonWithSignedUrls = {
       ...lesson,
-      // Note: In production, implement proper signed URL generation here
-      // For now, return the URLs as-is but log access for monitoring
-      videoUrl: lesson.videoUrl,
       attachments: lesson.attachments.map(attachment => ({
         ...attachment,
         // Implement signed URL generation in production

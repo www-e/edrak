@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
@@ -194,13 +195,29 @@ export default function EditLessonPage() {
             />
           </div>
 
-          {/* Ultra-efficient attachment management section */}
+          {/* Enhanced attachment management section */}
           <Card>
             <CardHeader>
-              <CardTitle>Lesson Attachments</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Upload and manage files for this lesson. Videos up to 3GB, images up to 10MB, documents up to 25MB
-              </p>
+              <CardTitle className="flex items-center gap-2">
+                📎 Lesson Materials
+                <Badge variant="outline">Smart Upload</Badge>
+              </CardTitle>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Upload videos, PDFs, images, and documents. Videos will be automatically detected and displayed with a player.
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    🎥 Videos: Auto-playable with controls
+                  </Badge>
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">
+                    📄 PDFs: Preview available
+                  </Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    🖼️ Images: Gallery view
+                  </Badge>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* File Upload Component - Ultra efficient */}

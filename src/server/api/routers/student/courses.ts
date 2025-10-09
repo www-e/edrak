@@ -113,7 +113,6 @@ export const studentCoursesRouter = createTRPCRouter({
               order: true,
               isVisible: true,
               duration: true,
-              videoUrl: true,
               createdAt: true,
               // Include attachments for each lesson
               attachments: {
@@ -174,7 +173,6 @@ export const studentCoursesRouter = createTRPCRouter({
             content: lesson.content,
             order: lesson.order,
             duration: lesson.duration,
-            videoUrl: lesson.videoUrl,
             isVisible: lesson.isVisible,
             createdAt: lesson.createdAt,
             attachments: lesson.attachments

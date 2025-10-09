@@ -114,8 +114,8 @@ export class PayMobService {
     return ((await response.json()) as WalletPaymentResponse).redirect_url;
   }
 
-  public static async initiateCoursePayment(user: User, course: Course, paymentId: string, paymentMethod: PaymentMethod, walletNumber?: string): Promise<PaymentInitiationResult> {
-    const amountCents = Math.round(course.price * 100);
+  public static async initiateCoursePayment(user: User, course: Course, paymentId: string, paymentMethod: PaymentMethod, walletNumber?: string, finalAmount?: number): Promise<PaymentInitiationResult> {
+    const amountCents = Math.round((finalAmount || course.price) * 100);
     const authToken = await this.getAuthToken();
     const paymobOrderId = await this.registerOrder(authToken, amountCents, paymentId);
 

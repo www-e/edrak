@@ -90,7 +90,7 @@ export const paymentRouter = createTRPCRouter({
       }
 
       try {
-        const result = await PayMobService.initiateCoursePayment(user as User, course, payment.id, paymentMethod, walletNumber);
+        const result = await PayMobService.initiateCoursePayment(user as User, course, payment.id, paymentMethod, walletNumber, finalAmount);
 
         if (result.type === 'iframe') {
           // Build complete iframe URL (matching working project)

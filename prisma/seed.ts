@@ -1,10 +1,10 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, CourseVisibility } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding with test users...');
+  console.log('🌱 Starting database seeding with complete data structure...');
 
   // Create admin user with complete profile
   const adminPassword = await bcrypt.hash('admin123', 10);
@@ -83,6 +83,8 @@ async function main() {
     },
   ];
 
+  const createdStudents = [];
+
   for (const studentData of studentUsers) {
     const student = await prisma.user.upsert({
       where: { username: studentData.username },
@@ -95,9 +97,142 @@ async function main() {
       },
     });
     console.log('✅ Created student user:', student.username);
+    createdStudents.push(student);
   }
-
-  console.log('🎉 Database seeding completed successfully!');
+  
+    // Create categories
+    const categories = [
+      {
+        name: 'Programming',
+        slug: 'programming',
+        description: 'Learn programming languages and software development'
+      },
+      {
+        name: 'Data Science',
+        slug: 'data-science',
+        description: 'Master data analysis, machine learning, and AI'
+      },
+      {
+        name: 'Business',
+        slug: 'business',
+        description: 'Business management, entrepreneurship, and leadership'
+      },
+      {
+        name: 'Design',
+        slug: 'design',
+        description: 'Graphic design, UI/UX, and creative skills'
+      },
+      {
+        name: 'Marketing',
+        slug: 'marketing',
+        description: 'Digital marketing, SEO, and social media strategies'
+      }
+    ];
+  
+    for (const categoryData of categories) {
+      const category = await prisma.category.upsert({
+        where: { slug: categoryData.slug },
+        update: {},
+        create: categoryData,
+      });
+      console.log('✅ Created category:', category.name);
+    }
+  
+    // Create sample courses
+    const programmingCategory = await prisma.category.findUnique({ where: { slug: 'programming' } });
+  
+    const courses = [
+      {
+        title: 'Complete Web Development Bootcamp',
+        slug: 'complete-web-development-bootcamp',
+        description: 'Learn HTML, CSS, JavaScript, React, Node.js, and MongoDB to become a full-stack web developer. This comprehensive course covers everything from basic web development to advanced topics.',
+        price: 299.99,
+        language: 'English',
+        visibility: CourseVisibility.PUBLISHED,
+        professorId: professorUser.id,
+        categoryId: programmingCategory?.id,
+      },
+      {
+        title: 'Python for Data Science',
+        slug: 'python-for-data-science',
+        description: 'Master Python programming for data analysis, visualization, and machine learning. Learn pandas, NumPy, Matplotlib, and scikit-learn.',
+        price: 199.99,
+        language: 'English',
+        visibility: CourseVisibility.PUBLISHED,
+        professorId: professorUser.id,
+        categoryId: programmingCategory?.id,
+      }
+    ];
+  
+    for (const courseData of courses) {
+      const course = await prisma.course.upsert({
+        where: { slug: courseData.slug },
+        update: {},
+        create: courseData,
+      });
+      console.log('✅ Created course:', course.title);
+  
+      // Create sample lessons for each course
+      const lessons = [
+        {
+          title: 'Introduction and Setup',
+          order: 1,
+          content: 'Welcome to the course! In this lesson, we will cover the basics and help you set up your development environment.',
+          isVisible: true,
+        },
+        {
+          title: 'Core Concepts',
+          order: 2,
+          content: 'Let\'s dive into the core concepts that form the foundation of this topic. We\'ll explore key principles and best practices.',
+          isVisible: true,
+        },
+        {
+          title: 'Hands-on Practice',
+          order: 3,
+          content: 'Time to apply what you\'ve learned! This lesson includes practical exercises and real-world examples.',
+          isVisible: true,
+        }
+      ];
+  
+      for (const lessonData of lessons) {
+        const lesson = await prisma.lesson.upsert({
+          where: {
+            id: `${course.id}-lesson-${lessonData.order}`
+          },
+          update: {},
+          create: {
+            ...lessonData,
+            courseId: course.id,
+          },
+        });
+        console.log('  ✅ Created lesson:', lesson.title);
+      }
+    }
+  
+    // Enroll students in courses
+    const course = await prisma.course.findFirst({ where: { slug: 'complete-web-development-bootcamp' } });
+  
+    if (course) {
+      for (const student of [adminUser, ...createdStudents]) {
+        const enrollment = await prisma.enrollment.upsert({
+          where: {
+            userId_courseId: {
+              userId: student.id,
+              courseId: course.id
+            }
+          },
+          update: {},
+          create: {
+            userId: student.id,
+            courseId: course.id,
+            status: 'ACTIVE',
+          },
+        });
+        console.log('✅ Enrolled student:', student.username, 'in course:', course.title);
+      }
+    }
+  
+    console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test User Credentials:');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('👑 Admin User:');

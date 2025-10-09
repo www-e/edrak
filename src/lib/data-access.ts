@@ -58,7 +58,6 @@ export class DataAccess {
       order: true,
       isVisible: true,
       duration: true,
-      videoUrl: true,
       createdAt: true,
     };
   }
