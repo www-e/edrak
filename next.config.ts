@@ -21,15 +21,10 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Consolidate edraak domains with wildcard
       {
         protocol: 'https',
-        hostname: 'www.edraak.org',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'blog.edraak.org',
+        hostname: '**.edraak.org',
         port: '',
         pathname: '/**',
       },

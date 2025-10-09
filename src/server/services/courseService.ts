@@ -1,8 +1,8 @@
 import { db } from "@/server/db";
 import { CourseVisibility, Prisma } from "@prisma/client";
-import { createPaginationResult } from "@/lib/pagination";
 import { createSearchConditions } from "@/lib/search";
 import { courseDataTransformer, lessonDataTransformer } from "@/lib/data-transform";
+import { DataAccess } from "@/lib/data-access";
 import type {
   CreateCourseInput,
   CreateLessonInput,
@@ -38,11 +38,8 @@ export class AdminCourseService {
     // Build search conditions using utility
     const where = createSearchConditions(search, ['title', 'description']) as Prisma.CourseWhereInput;
 
-    const skip = (page - 1) * limit;
-
-    // Execute queries in parallel for better performance
-    const [courses, total] = await Promise.all([
-      db.course.findMany({
+    const { data: courses, pagination } = await DataAccess.executeParallelQuery(
+      () => db.course.findMany({
         where,
         select: {
           id: true,
@@ -60,15 +57,17 @@ export class AdminCourseService {
           },
         },
         orderBy: { [sortBy]: sortOrder },
-        skip,
+        skip: (page - 1) * limit,
         take: limit,
       }),
-      db.course.count({ where })
-    ]);
+      () => db.course.count({ where }),
+      page,
+      limit
+    );
 
     return {
       courses,
-      pagination: createPaginationResult(page, limit, total)
+      pagination
     };
   }
 
@@ -78,7 +77,17 @@ export class AdminCourseService {
       include: {
         professor: { select: { id: true, firstName: true, lastName: true } },
         category: true,
-        lessons: { where: { isDeleted: false }, orderBy: { order: "asc" } },
+        lessons: {
+          where: { isDeleted: false },
+          orderBy: { order: "asc" },
+          select: {
+            ...DataAccess.getLessonSelect(),
+            attachments: {
+              select: DataAccess.getAttachmentSelect(),
+              orderBy: { createdAt: 'asc' }
+            }
+          }
+        },
       },
     });
   }
@@ -167,10 +176,9 @@ export class CourseService {
 
     const page = filters?.page || 1;
     const limit = filters?.limit || 12;
-    const skip = (page - 1) * limit;
 
-    const [courses, totalCount] = await Promise.all([
-      db.course.findMany({
+    const { data: courses, pagination } = await DataAccess.executeParallelQuery(
+      () => db.course.findMany({
         where,
         select: {
           id: true,
@@ -202,15 +210,17 @@ export class CourseService {
         orderBy: {
           createdAt: "desc"
         },
-        skip,
+        skip: (page - 1) * limit,
         take: limit
       }),
-      db.course.count({ where })
-    ]);
+      () => db.course.count({ where }),
+      page,
+      limit
+    );
 
     return {
       courses,
-      pagination: createPaginationResult(page, limit, totalCount)
+      pagination
     };
   }
 

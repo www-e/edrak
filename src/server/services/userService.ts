@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { db } from "@/server/db";
 import bcrypt from 'bcryptjs';
 import { CreateUserInput, UpdateUserInput, ResetPasswordInput } from '@/types/admin';
-
-const prisma = new PrismaClient();
+import { DataAccess } from '@/lib/data-access';
 
 /**
  * Service class for admin-related user management.
@@ -17,7 +16,7 @@ export class AdminUserService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    const user = await db.user.create({
       data: {
         ...rest,
         password: hashedPassword,
@@ -41,42 +40,25 @@ export class AdminUserService {
   }) {
     const { page = 1, limit = 50, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
 
-    const skip = (page - 1) * limit;
+    const searchFields = ['username', 'email', 'firstName', 'lastName'];
+    const where = DataAccess.buildSearchQuery(search, searchFields);
 
-    const where = search ? {
-       OR: [
-         { username: { contains: search, mode: 'insensitive' as const } },
-         { email: { contains: search, mode: 'insensitive' as const } },
-         { firstName: { contains: search, mode: 'insensitive' as const } },
-         { lastName: { contains: search, mode: 'insensitive' as const } }
-       ]
-     } : {};
-
-    const [users, total] = await Promise.all([
-      prisma.user.findMany({
+    const { data: users, pagination } = await DataAccess.executeParallelQuery(
+      () => db.user.findMany({
         where,
-        select: {
-          id: true,
-          username: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-        },
+        select: DataAccess.getUserSelect(),
         orderBy: { [sortBy]: sortOrder },
-        skip,
+        skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.user.count({ where })
-    ]);
+      () => db.user.count({ where }),
+      page,
+      limit
+    );
 
     return {
       users,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
+      ...pagination
     };
   }
     /**
@@ -84,21 +66,15 @@ export class AdminUserService {
    * @param id - The ID of the user.
    */
   static async getUserById(id: string) {
-    return prisma.user.findUnique({
+    return db.user.findUnique({
       where: { id },
       select: {
-        id: true,
-        username: true,
+        ...DataAccess.getUserSelect(),
         email: true,
-        firstName: true,
-        lastName: true,
         phoneNumber: true,
         secondPhoneNumber: true,
         categoryPreference: true,
         referralSource: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
         updatedAt: true,
       },
     });
@@ -110,7 +86,7 @@ export class AdminUserService {
    */
   static async updateUser(data: UpdateUserInput) {
     const { id, ...rest } = data;
-    return prisma.user.update({
+    return db.user.update({
       where: { id },
       data: rest,
       select: {
@@ -132,7 +108,7 @@ export class AdminUserService {
   static async resetPassword(data: ResetPasswordInput) {
     const { id, newPassword } = data;
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
+    await db.user.update({
       where: { id },
       data: { password: hashedPassword },
     });

@@ -1,13 +1,12 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { db } from "@/server/db";
+import { Prisma } from "@prisma/client";
 import { CacheService } from "./cacheService";
-import {  createPaginationResult } from "@/lib/pagination";
 import { createUserSearchConditions, createCouponSearchConditions } from "@/lib/search";
 import { couponDataTransformer } from "@/lib/data-transform";
+import { DataAccess } from "@/lib/data-access";
 
 // Placeholder for Zod schemas
 import { Coupon } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 /**
  * Service class for admin-related commerce (coupons, payments) management.
@@ -21,7 +20,10 @@ export class AdminCommerceService {
     data: Omit<Coupon, "id" | "createdAt" | "updatedAt" | "usedCount">
   ) {
     const transformedData = couponDataTransformer(data) as Omit<Coupon, "id" | "createdAt" | "updatedAt" | "usedCount">;
-    return prisma.coupon.create({ data: transformedData });
+    return db.coupon.create({
+      data: transformedData,
+      select: DataAccess.getCouponSelect()
+    });
   }
 
   /**
@@ -33,9 +35,10 @@ export class AdminCommerceService {
     couponId: string,
     data: Partial<Omit<Coupon, "id" | "createdAt" | "updatedAt">>
   ) {
-    return prisma.coupon.update({
+    return db.coupon.update({
       where: { id: couponId },
       data,
+      select: DataAccess.getCouponSelect()
     });
   }
 
@@ -51,8 +54,8 @@ export class AdminCommerceService {
 
      const where = createUserSearchConditions(search) as Prisma.PaymentWhereInput;
 
-     const [payments, total] = await Promise.all([
-       prisma.payment.findMany({
+     const { data: payments, pagination } = await DataAccess.executeParallelQuery(
+       () => db.payment.findMany({
          where,
          include: {
            user: {
@@ -71,12 +74,14 @@ export class AdminCommerceService {
          skip: (page - 1) * limit,
          take: limit,
        }),
-       prisma.payment.count({ where })
-     ]);
+       () => db.payment.count({ where }),
+       page,
+       limit
+     );
 
      return {
        payments,
-       pagination: createPaginationResult(page, limit, total)
+       pagination
      };
    }
   /**
@@ -103,19 +108,19 @@ export class AdminCommerceService {
 
     // Execute all queries in parallel for maximum performance
     const [userStats, courseStats, enrollmentStats, revenueStats] = await Promise.all([
-      prisma.user.aggregate({
+      db.user.aggregate({
         _count: { id: true },
         where: { isActive: true }
       }),
-      prisma.course.aggregate({
+      db.course.aggregate({
         _count: { id: true },
         where: { visibility: 'PUBLISHED' }
       }),
-      prisma.enrollment.aggregate({
+      db.enrollment.aggregate({
         _count: { id: true },
         where: { status: 'ACTIVE' }
       }),
-      prisma.payment.aggregate({
+      db.payment.aggregate({
         _sum: { amount: true },
         where: { status: 'COMPLETED' }
       })
@@ -146,8 +151,8 @@ export class AdminCommerceService {
 
      const where = createCouponSearchConditions(search) as Prisma.CouponWhereInput;
 
-     const [coupons, total] = await Promise.all([
-       prisma.coupon.findMany({
+     const { data: coupons, pagination } = await DataAccess.executeParallelQuery(
+       () => db.coupon.findMany({
          where,
          orderBy: {
            createdAt: "desc",
@@ -155,12 +160,14 @@ export class AdminCommerceService {
          skip: (page - 1) * limit,
          take: limit,
        }),
-       prisma.coupon.count({ where })
-     ]);
+       () => db.coupon.count({ where }),
+       page,
+       limit
+     );
 
      return {
        coupons,
-       pagination: createPaginationResult(page, limit, total)
+       pagination
      };
    }
 
@@ -169,7 +176,7 @@ export class AdminCommerceService {
    * @param id - The ID of the coupon.
    */
   static async getCouponById(id: string) {
-    return prisma.coupon.findUnique({
+    return db.coupon.findUnique({
       where: { id },
     });
   }

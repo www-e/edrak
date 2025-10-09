@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/server/db";
 import bcrypt from "bcryptjs";
 import { SignupData } from "@/types/auth";
 
-const prisma = new PrismaClient();
-
 export async function signupUser(data: SignupData) {
    // Check if username already exists
-   const existingUser = await prisma.user.findUnique({
+   const existingUser = await db.user.findUnique({
      where: { username: data.username },
    });
 
@@ -15,7 +13,7 @@ export async function signupUser(data: SignupData) {
    }
 
    // Check if email already exists
-   const existingEmail = await prisma.user.findUnique({
+   const existingEmail = await db.user.findUnique({
      where: { email: data.email },
    });
 
@@ -27,7 +25,7 @@ export async function signupUser(data: SignupData) {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
   // Create user
-  const user = await prisma.user.create({
+  const user = await db.user.create({
     data: {
       username: data.username,
       email: data.email,

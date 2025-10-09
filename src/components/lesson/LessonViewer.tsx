@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Pause, Volume2, Maximize, CheckCircle, ArrowLeft, AlertCircle } from "lucide-react";
+import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play } from "lucide-react";
 import Link from "next/link";
+import { VideoPlayer } from "@/components/ui/video-player";
+import { getFileIcon, formatFileSize } from "@/lib/file-utils";
 
 interface LessonViewerProps {
   courseId: string;
@@ -38,8 +40,6 @@ interface LessonData {
 }
 
 export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,11 +50,8 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
       try {
         setLoading(true);
 
-        // Fetch lesson data and progress in parallel for better performance
-        const [lessonResponse, progressResponse] = await Promise.all([
-          fetch(`/api/lessons/${lessonId}?courseId=${courseId}`),
-          fetch(`/api/lessons/${lessonId}/progress?courseId=${courseId}`)
-        ]);
+        // Fetch lesson data
+        const lessonResponse = await fetch(`/api/lessons/${lessonId}?courseId=${courseId}`);
 
         // Handle lesson response
         if (!lessonResponse.ok) {
@@ -71,13 +68,10 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
         const lessonData = await lessonResponse.json();
         if (lessonData.success) {
           setLesson(lessonData.lesson);
-          setProgress(lessonData.lesson.videoWatchedPercentage || 0);
         } else {
           setError(lessonData.error || "Failed to load lesson.");
           return;
         }
-
-        // Progress tracking removed for simplicity
       } catch (err) {
         console.error("Error fetching lesson:", err);
         setError("Network error occurred while loading the lesson.");
@@ -99,9 +93,10 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
     return `${hours}:${mins.toString().padStart(2, '0')}`;
   };
 
-  // Handle lesson completion (simplified)
+  // Handle lesson completion - just mark as complete locally
   const handleMarkComplete = () => {
-    setProgress(100);
+    // Mark lesson as completed (no API call needed as per requirements)
+    console.log('Lesson marked as complete');
   };
 
   if (loading) {
@@ -199,76 +194,48 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
       </div>
 
       {/* Video Player */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="relative bg-black rounded-t-lg aspect-video">
-            {/* Video Placeholder */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white">
-                <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
-                  <Play className="w-8 h-8 ml-1" />
-                </div>
-                <p className="text-lg font-semibold mb-2">Video Player</p>
-                <p className="text-sm opacity-75">Click to start playing</p>
-              </div>
-            </div>
+      {lesson.videoUrl ? (
+        <div className="space-y-4">
+          <VideoPlayer
+            src={lesson.videoUrl}
+            title={lesson.title}
+          />
 
-            {/* Video Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setIsPlaying(!isPlaying)}
-                >
-                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                </Button>
-
-                <div className="flex-1">
-                  <div className="w-full bg-white/20 rounded-full h-1">
-                    <div
-                      className="bg-white h-1 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                <span className="text-white text-sm">0:00 / {formatDuration(lesson.duration)}</span>
-
-                <Button size="sm" variant="secondary">
-                  <Volume2 className="w-4 h-4" />
-                </Button>
-
-                <Button size="sm" variant="secondary">
-                  <Maximize className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Previous Lesson
-                </Button>
-                <Button variant="outline" size="sm">
-                  Next Lesson
-                </Button>
-              </div>
-
-              <Button
-                onClick={handleMarkComplete}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Mark as Complete
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Previous Lesson
+              </Button>
+              <Button variant="outline" size="sm">
+                Next Lesson
               </Button>
             </div>
+
+            <Button
+              onClick={handleMarkComplete}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Mark as Complete
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <Play className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-lg font-semibold mb-2">No Video Available</p>
+              <p className="text-sm text-muted-foreground">
+                This lesson does not have a video yet.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Lesson Content */}
       <Card>
@@ -287,39 +254,52 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
       </Card>
 
       {/* Lesson Attachments */}
-      {lesson.attachments && lesson.attachments.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Lesson Resources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {lesson.attachments.map((attachment) => (
-                <div key={attachment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      📎
-                    </div>
-                    <div>
-                      <p className="font-medium">{attachment.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {(attachment.fileSize / 1024 / 1024).toFixed(2)} MB • {attachment.mimeType}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
-                  >
-                    Download
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+       {lesson.attachments && lesson.attachments.length > 0 && (
+         <Card>
+           <CardHeader>
+             <CardTitle>Lesson Resources</CardTitle>
+           </CardHeader>
+           <CardContent>
+             <div className="space-y-3">
+               {lesson.attachments.map((attachment) => {
+                 const fileIcon = getFileIcon(attachment.fileName, attachment.mimeType);
+                 const formattedSize = formatFileSize(attachment.fileSize);
+
+                 return (
+                   <div key={attachment.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                     <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                         <span className="text-lg">{fileIcon}</span>
+                       </div>
+                       <div className="flex-1">
+                         <p className="font-medium">{attachment.name}</p>
+                         <p className="text-sm text-muted-foreground">
+                           {formattedSize} • {attachment.mimeType}
+                         </p>
+                       </div>
+                     </div>
+                     <div className="flex items-center gap-2">
+                       {/* Preview button for viewable files */}
+                       {(attachment.mimeType.startsWith('image/') ||
+                         attachment.mimeType === 'application/pdf' ||
+                         attachment.fileName.match(/\.(txt|md)$/i)) && (
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
+                         >
+                           <Eye className="w-4 h-4 mr-2" />
+                           Preview
+                         </Button>
+                       )}
+                     </div>
+                   </div>
+                 );
+               })}
+             </div>
+           </CardContent>
+         </Card>
+       )}
     </div>
   );
 }

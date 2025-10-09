@@ -4,49 +4,45 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@/server/db';
 import { EnrollmentStatus } from '@prisma/client';
 import { SessionUser } from '@/types/auth';
+import { CacheService } from '@/server/services/cacheService';
 
 /**
  * Simple and fast enrollment verification
  */
 export class EnrollmentVerification {
-  private static enrollmentCache = new Map<string, { isEnrolled: boolean; expires: number }>();
-  private static readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   /**
-   * Verify user enrollment in course with simple caching
-   */
-  static async verifyEnrollment(userId: string, courseId: string): Promise<boolean> {
-    const cacheKey = `${userId}:${courseId}`;
-    const cached = this.enrollmentCache.get(cacheKey);
+    * Verify user enrollment in course with unified caching
+    */
+   static async verifyEnrollment(userId: string, courseId: string): Promise<boolean> {
+     const cacheKey = CacheService.createKey('enrollment', userId, courseId);
 
-    // Check cache first
-    if (cached && cached.expires > Date.now()) {
-      return cached.isEnrolled;
-    }
+     // Check cache first
+     const cached = CacheService.get<boolean>(cacheKey);
+     if (cached !== null) {
+       return cached;
+     }
 
-    // Database lookup
-    const enrollment = await db.enrollment.findUnique({
-      where: {
-        userId_courseId: {
-          userId,
-          courseId
-        }
-      },
-      select: {
-        status: true
-      }
-    });
+     // Database lookup
+     const enrollment = await db.enrollment.findUnique({
+       where: {
+         userId_courseId: {
+           userId,
+           courseId
+         }
+       },
+       select: {
+         status: true
+       }
+     });
 
-    const isEnrolled = !!(enrollment && enrollment.status === EnrollmentStatus.ACTIVE);
+     const isEnrolled = !!(enrollment && enrollment.status === EnrollmentStatus.ACTIVE);
 
-    // Cache result
-    this.enrollmentCache.set(cacheKey, {
-      isEnrolled,
-      expires: Date.now() + this.CACHE_TTL
-    });
+     // Cache result for 5 minutes
+     CacheService.set(cacheKey, isEnrolled, 5 * 60 * 1000);
 
-    return isEnrolled;
-  }
+     return isEnrolled;
+   }
 
   /**
    * Middleware function for API routes requiring enrollment verification
@@ -94,22 +90,30 @@ export class EnrollmentVerification {
   }
 
   /**
-   * Clear enrollment cache for a specific user (useful after enrollment changes)
-   */
-  static clearUserCache(userId: string) {
-    for (const key of this.enrollmentCache.keys()) {
-      if (key.startsWith(`${userId}:`)) {
-        this.enrollmentCache.delete(key);
-      }
-    }
-  }
+    * Clear enrollment cache for a specific user (useful after enrollment changes)
+    */
+   static clearUserCache(userId: string) {
+     // Get all cache keys and filter enrollment keys for this user
+     const allKeys = CacheService.getStats().items.map(item => item.key);
+     const userEnrollmentKeys = allKeys.filter(key => key.startsWith(`enrollment:${userId}:`));
 
-  /**
-   * Clear all enrollment cache (useful for admin operations)
-   */
-  static clearAllCache() {
-    this.enrollmentCache.clear();
-  }
+     userEnrollmentKeys.forEach(key => {
+       CacheService.delete(key);
+     });
+   }
+
+   /**
+    * Clear all enrollment cache (useful for admin operations)
+    */
+   static clearAllCache() {
+     // Get all cache keys and filter enrollment keys
+     const allKeys = CacheService.getStats().items.map(item => item.key);
+     const enrollmentKeys = allKeys.filter(key => key.startsWith('enrollment:'));
+
+     enrollmentKeys.forEach(key => {
+       CacheService.delete(key);
+     });
+   }
 
 }
 
@@ -124,16 +128,15 @@ export function extractCourseId(params: { courseId: string } | { slug: string },
 }
 
 /**
- * Utility function to resolve course slug to course ID (with caching)
+ * Utility function to resolve course slug to course ID (with unified caching)
  */
-const slugToIdCache = new Map<string, { courseId: string; expires: number }>();
-const SLUG_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
-
 export async function resolveCourseSlug(slug: string): Promise<string | null> {
-  const cached = slugToIdCache.get(slug);
+  const cacheKey = CacheService.createKey('course-slug', slug);
 
-  if (cached && cached.expires > Date.now()) {
-    return cached.courseId;
+  // Check cache first
+  const cached = CacheService.get<string>(cacheKey);
+  if (cached !== null) {
+    return cached;
   }
 
   const course = await db.course.findUnique({
@@ -145,10 +148,8 @@ export async function resolveCourseSlug(slug: string): Promise<string | null> {
     return null;
   }
 
-  slugToIdCache.set(slug, {
-    courseId: course.id,
-    expires: Date.now() + SLUG_CACHE_TTL
-  });
+  // Cache result for 10 minutes
+  CacheService.set(cacheKey, course.id, 10 * 60 * 1000);
 
   return course.id;
 }

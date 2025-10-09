@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { File, Download, Trash2, Video, FileText, Image } from "lucide-react";
+import { Download, Trash2, File } from "lucide-react";
 import { Attachment } from "@/types/admin";
-
+import { getFileIcon, formatFileSize } from "@/lib/file-utils";
 
 interface AttachmentListProps {
   attachments: Attachment[];
@@ -44,27 +44,6 @@ export function AttachmentList({
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const getFileIcon = (mimeType: string) => {
-    if (mimeType.startsWith("image/")) {
-      return <Image className="h-5 w-5 text-primary" aria-hidden="true" />;
-    }
-    if (mimeType.startsWith("video/")) {
-      return <Video className="h-5 w-5 text-primary" aria-hidden="true" />;
-    }
-    if (mimeType.includes("pdf") || mimeType.includes("document")) {
-      return <FileText className="h-5 w-5 text-primary" aria-hidden="true" />;
-    }
-    return <File className="h-5 w-5 text-primary" aria-hidden="true" />;
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   if (attachments.length === 0) {

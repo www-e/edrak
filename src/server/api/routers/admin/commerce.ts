@@ -38,9 +38,6 @@ export const adminCommerceRouter = createTRPCRouter({
   /**
    * Update an existing coupon.
    */
-  /**
-   * Update an existing coupon.
-   */
   updateCoupon: adminProcedure
     .input(UpdateCouponInputSchema)
     .mutation(async ({ input }) => {

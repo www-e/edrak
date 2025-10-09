@@ -173,7 +173,6 @@ export default function EditLessonPage() {
               />
             </div>
 
-
             <FormField
               control={form.control}
               name="isVisible"
