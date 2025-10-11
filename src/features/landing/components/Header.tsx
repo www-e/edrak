@@ -19,6 +19,7 @@ export const Header = () => {
 
   const navLinks = [
     { href: "/courses", label: "Courses" },
+    { href: "/services", label: "Services" },
     { href: "/partners/", label: "Partners" },
   ];
 

@@ -30,12 +30,20 @@ export const HeroSection = () => {
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-lg">
               Enhance your skills through specialized programs in professional skill development, and earn certificates that support your career journey. All for free!
             </p>
-            <Link
-              href="/courses"
-              className="inline-block mt-8 py-4 px-8 bg-primary text-primary-foreground font-semibold text-base rounded-lg shadow-md hover:bg-primary/90 transition-colors"
-            >
-              Discover Our Learning Programs
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
+              <Link
+                href="/courses"
+                className="inline-block py-4 px-8 bg-primary text-primary-foreground font-semibold text-base rounded-lg shadow-md hover:bg-primary/90 transition-colors text-center"
+              >
+                Discover Our Learning Programs
+              </Link>
+              <Link
+                href="/services"
+                className="inline-block py-4 px-8 border-2 border-primary text-primary font-semibold text-base rounded-lg shadow-md hover:bg-primary hover:text-primary-foreground transition-colors text-center"
+              >
+                Explore Our Services
+              </Link>
+            </div>
 
             <div className="mt-16 flex">
               <div className="flex flex-col sm:flex-row gap-y-6 gap-x-8">
