@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Video, Download, FileText, Image } from "lucide-react";
 import Link from "next/link";
 import { VideoPlayer } from "@/components/ui/video-player";
+import { YouTubePlayer } from "@/components/ui/youtube-player";
 import { getFileIcon, formatFileSize } from "@/lib/file-utils";
 
 interface LessonViewerProps {
@@ -15,28 +16,29 @@ interface LessonViewerProps {
 }
 
 interface LessonData {
-  id: string;
-  title: string;
-  content: string;
-  duration: number | null;
-  order: number;
-  isVisible: boolean;
-  createdAt: string;
-  attachments: Array<{
-    id: string;
-    name: string;
-    fileName: string;
-    mimeType: string;
-    fileSize: number;
-    bunnyCdnUrl: string;
-    createdAt: string;
-  }>;
-  course: {
-    id: string;
-    title: string;
-    slug: string;
-  };
-}
+   id: string;
+   title: string;
+   content: string;
+   duration: number | null;
+   order: number;
+   isVisible: boolean;
+   createdAt: string;
+   youtubeUrl?: string | null;  // YouTube video URL for free courses
+   attachments: Array<{
+     id: string;
+     name: string;
+     fileName: string;
+     mimeType: string;
+     fileSize: number;
+     bunnyCdnUrl: string;
+     createdAt: string;
+   }>;
+   course: {
+     id: string;
+     title: string;
+     slug: string;
+   };
+ }
 
 // Smart content type detection
 type AttachmentType = 'VIDEO_PLAYER' | 'PDF_PREVIEW' | 'IMAGE_GALLERY' | 'DOCUMENT_PREVIEW' | 'DOWNLOAD_ONLY';
@@ -214,7 +216,30 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
 
       {/* Smart Video Detection & Display */}
       {(() => {
-        // Find the first video attachment to display as the main lesson video
+        // Check for YouTube URL first (zero bandwidth)
+        if (lesson.youtubeUrl) {
+          return (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">
+                    <Play className="w-3 h-3 mr-1" />
+                    YouTube Video
+                  </Badge>
+                  <Badge variant="outline" className="bg-green-100 text-green-800">
+                    Zero Bandwidth Cost
+                  </Badge>
+                </div>
+                <YouTubePlayer
+                  url={lesson.youtubeUrl}
+                  title={lesson.title}
+                />
+              </div>
+            </div>
+          );
+        }
+
+        // Fall back to Bunny CDN video attachment
         const mainVideoAttachment = lesson.attachments.find(att => att.mimeType.startsWith('video/'));
 
         if (mainVideoAttachment) {

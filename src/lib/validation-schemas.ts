@@ -64,6 +64,10 @@ export const createLessonSchema = z.object({
   order: z.number().int().min(1),
   content: z.string(),
   isVisible: z.boolean().default(true),
+  youtubeUrl: z.string().url().optional().refine((url) => {
+    if (!url) return true;
+    return /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/.test(url);
+  }, "Must be a valid YouTube URL"),
 });
 
 /**
@@ -110,7 +114,12 @@ export const courseParamSchema = z.object({
  * Common update schemas that extend creation schemas
  */
 export const updateCourseSchema = createCourseSchema.partial();
-export const updateLessonSchema = createLessonSchema.partial();
+export const updateLessonSchema = createLessonSchema.partial().extend({
+  youtubeUrl: z.string().url().optional().refine((url) => {
+    if (!url) return true;
+    return /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/.test(url);
+  }, "Must be a valid YouTube URL").nullable(),
+});
 export const updateCouponSchema = createCouponSchema.partial();
 
 /**

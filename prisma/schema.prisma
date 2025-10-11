@@ -86,6 +86,7 @@ model Lesson {
     course                Course           @relation(fields: [courseId], references: [id])
     lessonProgress        LessonProgress[]
     duration              Int?             // Duration in minutes
+    youtubeUrl            String?          // YouTube video URL for free courses
   }
 
 model Attachment {

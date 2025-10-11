@@ -60,6 +60,29 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
     },
   });
 
+  const enrollInFreeCourse = api.student.courses.enrollInFreeCourse.useMutation({
+    onSuccess: (data) => {
+      showSnackbar(
+        data.isNewEnrollment
+          ? "Successfully enrolled in free course! 🎉"
+          : "Welcome back to this course! 🎉",
+        "success"
+      );
+      // Redirect to course page after successful enrollment
+      router.push(`/student/courses/${course.id}`);
+    },
+    onError: (error) => {
+      showSnackbar(error.message || "Failed to enroll in free course.", "error");
+    },
+  });
+
+  // Redirect after successful free course enrollment
+  useEffect(() => {
+    if (enrollInFreeCourse.isSuccess && session?.user) {
+      router.push(`/student/courses/${course.id}`);
+    }
+  }, [enrollInFreeCourse.isSuccess, session?.user, router, course.id]);
+
   const validateCouponMutation = api.student.payment.validateCoupon.useMutation();
 
   const validateCoupon = async () => {
@@ -103,8 +126,8 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
 
   const handleEnroll = () => {
     if (isFree) {
-      // Logic for free courses can be added here
-      showSnackbar("This is a free course. Direct enrollment coming soon!", "success");
+      // Enroll in free course
+      enrollInFreeCourse.mutate({ courseId: course.id });
       return;
     }
 
@@ -383,13 +406,13 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
                   <Button
                     size="lg"
                     onClick={handleEnroll}
-                    disabled={initiatePayment.isPending}
+                    disabled={initiatePayment.isPending || enrollInFreeCourse.isPending}
                     className="px-12 py-6 text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-200 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
                   >
-                    {initiatePayment.isPending ? (
+                    {(initiatePayment.isPending || enrollInFreeCourse.isPending) ? (
                       <>
                         <Loader2 className="h-6 w-6 mr-3 animate-spin" />
-                        Processing Payment...
+                        {isFree ? 'Enrolling...' : 'Processing Payment...'}
                       </>
                     ) : (
                       <>

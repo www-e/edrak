@@ -6,6 +6,65 @@ import { TRPCError } from "@trpc/server";
 import { EnrollmentVerification } from "@/lib/enrollment-verification";
 
 export const studentCoursesRouter = createTRPCRouter({
+  /**
+   * Enroll in a free course (price <= 0)
+   */
+  enrollInFreeCourse: protectedProcedure
+    .input(z.object({ courseId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "User ID is required" });
+      }
+
+      // Check if course exists and is free
+      const course = await db.course.findUnique({
+        where: { id: input.courseId },
+        select: { id: true, price: true, visibility: true, title: true }
+      });
+
+      if (!course) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Course not found" });
+      }
+
+      if (course.visibility !== "PUBLISHED") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Course is not available for enrollment" });
+      }
+
+      if (course.price > 0) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "This endpoint is only for free courses" });
+      }
+
+      // Check if already enrolled
+      const existingEnrollment = await db.enrollment.findUnique({
+        where: { userId_courseId: { userId, courseId: input.courseId } }
+      });
+
+      if (existingEnrollment) {
+        if (existingEnrollment.status === "ACTIVE") {
+          throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this course" });
+        } else {
+          // Reactivate cancelled enrollment
+          const reactivatedEnrollment = await db.enrollment.update({
+            where: { id: existingEnrollment.id },
+            data: { status: "ACTIVE" }
+          });
+          return { enrollmentId: reactivatedEnrollment.id, isNewEnrollment: false };
+        }
+      }
+
+      // Create new enrollment
+      const newEnrollment = await db.enrollment.create({
+        data: {
+          userId,
+          courseId: input.courseId,
+          status: "ACTIVE"
+        }
+      });
+
+      return { enrollmentId: newEnrollment.id, isNewEnrollment: true };
+    }),
+
   checkEnrollment: protectedProcedure
     .input(z.object({ courseId: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
@@ -128,7 +187,8 @@ export const studentCoursesRouter = createTRPCRouter({
                 orderBy: {
                   createdAt: 'asc'
                 }
-              }
+              },
+              youtubeUrl: true
             }
           },
           _count: {
@@ -175,6 +235,7 @@ export const studentCoursesRouter = createTRPCRouter({
             duration: lesson.duration,
             isVisible: lesson.isVisible,
             createdAt: lesson.createdAt,
+            youtubeUrl: lesson.youtubeUrl,
             attachments: lesson.attachments
           }))
         }

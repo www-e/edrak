@@ -13,13 +13,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+   Form,
+   FormControl,
+   FormDescription,
+   FormField,
+   FormItem,
+   FormLabel,
+   FormMessage,
+ } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +56,7 @@ export default function EditLessonPage() {
         order: lesson.order,
         content: lesson.content,
         isVisible: lesson.isVisible,
+        youtubeUrl: lesson.youtubeUrl || "", // Fix: Provide default empty string
       });
     }
   }, [lesson, form]);
@@ -168,6 +170,29 @@ export default function EditLessonPage() {
                   <FormItem>
                     <FormLabel>Content *</FormLabel>
                     <FormControl><Textarea placeholder="Enter lesson content" {...field} rows={10} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <FormField
+                control={form.control}
+                name="youtubeUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>YouTube Video URL</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="https://youtube.com/watch?v=..."
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Optional: Add a YouTube video for this lesson. Leave empty to use uploaded video files.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

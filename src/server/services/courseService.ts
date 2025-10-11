@@ -82,6 +82,7 @@ export class AdminCourseService {
           orderBy: { order: "asc" },
           select: {
             ...DataAccess.getLessonSelect(),
+            youtubeUrl: true,
             attachments: {
               select: DataAccess.getAttachmentSelect(),
               orderBy: { createdAt: 'asc' }
@@ -95,7 +96,10 @@ export class AdminCourseService {
   static async createLesson(data: CreateLessonInput) {
     const transformedData = lessonDataTransformer(data) as CreateLessonInput;
     return db.lesson.create({
-      data: transformedData,
+      data: {
+        ...transformedData,
+        youtubeUrl: data.youtubeUrl || null,
+      },
     });
   }
 
@@ -103,7 +107,10 @@ export class AdminCourseService {
     const { id, ...updateData } = data;
     return db.lesson.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...updateData,
+        youtubeUrl: data.youtubeUrl !== undefined ? data.youtubeUrl : undefined,
+      },
     });
   }
 

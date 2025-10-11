@@ -67,6 +67,10 @@ export const CreateLessonInputSchema = z.object({
   order: z.number().int().min(1),
   content: z.string(),
   isVisible: z.boolean().default(true),
+  youtubeUrl: z.string().url().optional().refine((url) => {
+    if (!url) return true;
+    return /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/.test(url);
+  }, "Must be a valid YouTube URL"),
 });
 export type CreateLessonInput = z.infer<typeof CreateLessonInputSchema>;
 
@@ -100,6 +104,10 @@ export const UpdateLessonInputSchema = z.object({
   order: z.number().int().min(1).optional(),
   content: z.string().optional(),
   isVisible: z.boolean().optional(),
+  youtubeUrl: z.string().url().optional().refine((url) => {
+    if (!url) return true;
+    return /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/.test(url);
+  }, "Must be a valid YouTube URL").nullable(),
 });
 export type UpdateLessonInput = z.infer<typeof UpdateLessonInputSchema>;
 export const UpdateCouponInputSchema = CouponInputSchema.extend({

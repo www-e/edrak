@@ -16,6 +16,10 @@ const createLessonSchema = z.object({
   content: z.string().min(1, "Content is required"),
   order: z.number().int().min(1, "Order must be at least 1"),
   isVisible: z.boolean().default(true),
+  youtubeUrl: z.string().url().optional().refine((url) => {
+    if (!url) return true;
+    return /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}/.test(url);
+  }, "Must be a valid YouTube URL"),
 });
 
 type CreateLessonInput = z.infer<typeof createLessonSchema>;
@@ -30,6 +34,7 @@ export default function CreateLessonPage() {
     content: "",
     order: 1,
     isVisible: true,
+    youtubeUrl: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -143,6 +148,23 @@ export default function CreateLessonPage() {
             {errors.content && (
               <p className="text-sm text-destructive">{errors.content}</p>
             )}
+          </div>
+
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="youtubeUrl">YouTube Video URL</Label>
+            <Input
+              id="youtubeUrl"
+              value={formData.youtubeUrl || ""}
+              onChange={(e) => handleChange("youtubeUrl", e.target.value)}
+              placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+              className={errors.youtubeUrl ? "border-destructive" : ""}
+            />
+            {errors.youtubeUrl && (
+              <p className="text-sm text-destructive">{errors.youtubeUrl}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Optional: Add a YouTube video for this lesson. Leave empty to upload video files later.
+            </p>
           </div>
           
           
