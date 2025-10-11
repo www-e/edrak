@@ -3,21 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import {
   Home,
   BookOpen,
   User,
   CreditCard,
-  LogOut,
   ChevronLeft,
   ChevronRight,
   GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SessionUser } from "@/types/auth";
+import { UserMenu } from "@/components/auth/UserMenu"; // Import the new component
+
+// Convert SessionUser to UserMenu compatible format
+const convertSessionUserToUser = (sessionUser: SessionUser) => ({
+  name: sessionUser.name || undefined,
+  email: sessionUser.email || undefined,
+  image: sessionUser.image || undefined,
+});
 
 const navigation = [
   { name: "Dashboard", href: "/student", icon: Home },
@@ -34,10 +39,6 @@ export function StudentSidebar({ user }: StudentSidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
-  };
 
   return (
     <>
@@ -112,40 +113,14 @@ export function StudentSidebar({ user }: StudentSidebarProps) {
         </nav>
 
         {/* User Section */}
-        <div className="border-t border-border p-4">
-          {user && (
-            <div className="mb-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={user.image || ""} alt={user.name || "User"} />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user.name?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-
-                {!isCollapsed && (
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Sign Out Button */}
-          <Button
-            onClick={handleSignOut}
-            variant="ghost"
-            className={cn(
-              "w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-              isCollapsed ? "justify-center px-2" : "justify-start"
-            )}
-          >
-            <LogOut className="h-5 w-5 mr-3" />
-            {!isCollapsed && "Sign Out"}
-          </Button>
-        </div>
+        {user && (
+          <UserMenu
+            user={convertSessionUserToUser(user)}
+            displayMode="static"
+            isCollapsed={isCollapsed}
+            profileHref="/student/profile"
+          />
+        )}
       </div>
 
       {/* Mobile Toggle Button */}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, CheckCircle, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { StatCard } from "@/components/shared/StatCard";
 
 function CourseCardSkeleton() {
   return (
@@ -87,43 +88,23 @@ export default function StudentCoursesPage() {
         <>
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {enrollments.filter(e => e.completionPercentage < 100).length}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {enrollments.filter(e => e.completionPercentage === 100).length}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Progress</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {enrollments.length > 0
-                    ? Math.round(enrollments.reduce((acc, e) => acc + e.completionPercentage, 0) / enrollments.length)
-                    : 0}%
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard 
+              title="Active Courses" 
+              value={enrollments.filter(e => e.completionPercentage < 100).length} 
+              icon={BookOpen} 
+            />
+            <StatCard 
+              title="Completed" 
+              value={enrollments.filter(e => e.completionPercentage === 100).length} 
+              icon={CheckCircle} 
+            />
+            <StatCard 
+              title="Total Progress" 
+              value={`${enrollments.length > 0
+                ? Math.round(enrollments.reduce((acc, e) => acc + e.completionPercentage, 0) / enrollments.length)
+                : 0}%`}
+              icon={TrendingUp} 
+            />
           </div>
 
           {/* Course Grid */}

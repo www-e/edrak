@@ -7,33 +7,8 @@ import { BookOpen, Award, CreditCard, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
-function StatCard({ title, value, icon: Icon }: { title: string; value: string | number; icon: React.ElementType }) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function StatCardSkeleton() {
-    return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <Skeleton className="h-4 w-2/3" />
-                <Skeleton className="h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-                <Skeleton className="h-8 w-1/3" />
-            </CardContent>
-        </Card>
-    );
-}
+import { StatCard, StatCardSkeleton } from "@/components/shared/StatCard";
+import { formatCurrency } from "@/lib/utils";
 
 export default function StudentDashboardPage() {
   const { data: stats, isLoading, error } = api.student.dashboard.getDashboardStats.useQuery();
@@ -65,7 +40,7 @@ export default function StudentDashboardPage() {
                 <StatCard title="Active Courses" value={stats?.activeCourses ?? 0} icon={BookOpen} />
                 <StatCard title="Completed Courses" value={stats?.completedCourses ?? 0} icon={Award} />
                 <StatCard title="Total Payments" value={stats?.totalPayments ?? 0} icon={CreditCard} />
-                <StatCard title="Total Spent (EGP)" value={stats?.totalSpent ? Number(stats.totalSpent).toFixed(2) : '0.00'} icon={TrendingUp} />
+                <StatCard title="Total Spent (EGP)" value={formatCurrency(stats?.totalSpent ?? 0)} icon={TrendingUp} />
             </>
         )}
       </div>

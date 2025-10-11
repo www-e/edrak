@@ -7,11 +7,13 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Course } from '@/features/courses/types';
-import { Zap, CheckCircle, Loader2, CreditCard, Smartphone, Award, BookOpen, Users, Tag, X } from 'lucide-react';
+import { Zap, Loader2, CreditCard, Smartphone, Tag, X, CheckCircle } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { useSnackbar } from '@/components/shared/snackbar-context';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useCoupon } from '@/hooks/use-coupon';
+import { AlreadyEnrolledCard } from '@/components/payment/AlreadyEnrolledCard';
 
 interface CourseEnrollProps {
   course: Course;
@@ -24,32 +26,24 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
 
    const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
    const [walletNumber, setWalletNumber] = useState('');
-   const [couponCode, setCouponCode] = useState('');
-   const [appliedCoupon, setAppliedCoupon] = useState<{
-     code: string;
-     discount: number;
-     discountType: 'PERCENTAGE' | 'FIXED';
-     finalAmount: number;
-   } | null>(null);
-   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
 
-   // Check if user is already enrolled in this course
+   const { 
+     couponCode, 
+     setCouponCode, 
+     appliedCoupon, 
+     isValidatingCoupon, 
+     validateCoupon, 
+     removeCoupon 
+   } = useCoupon(course.price);
+
    const { data: enrollmentData } = api.student.courses.checkEnrollment.useQuery(
      { courseId: course.id },
      { enabled: !!session?.user }
    );
 
-   // Redirect enrolled users to student course page
-   useEffect(() => {
-     if (enrollmentData?.isEnrolled && session?.user) {
-       router.push(`/student/courses/${course.id}`);
-     }
-   }, [enrollmentData?.isEnrolled, session?.user, router, course.id]);
-
   const initiatePayment = api.student.payment.initiateCoursePayment.useMutation({
     onSuccess: (data) => {
       if (data.type === 'iframe' && data.iframeUrl) {
-        // Open iframe URL directly in current window (matching working project)
         window.location.href = data.iframeUrl;
       } else if (data.type === 'redirect' && data.redirectUrl) {
         window.location.href = data.redirectUrl;
@@ -68,7 +62,6 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
           : "Welcome back to this course! 🎉",
         "success"
       );
-      // Redirect to course page after successful enrollment
       router.push(`/student/courses/${course.id}`);
     },
     onError: (error) => {
@@ -76,57 +69,8 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
     },
   });
 
-  // Redirect after successful free course enrollment
-  useEffect(() => {
-    if (enrollInFreeCourse.isSuccess && session?.user) {
-      router.push(`/student/courses/${course.id}`);
-    }
-  }, [enrollInFreeCourse.isSuccess, session?.user, router, course.id]);
-
-  const validateCouponMutation = api.student.payment.validateCoupon.useMutation();
-
-  const validateCoupon = async () => {
-    if (!couponCode.trim()) {
-      showSnackbar('Please enter a coupon code', 'error');
-      return;
-    }
-
-    setIsValidatingCoupon(true);
-    try {
-      const result = await validateCouponMutation.mutateAsync({
-        couponCode: couponCode.trim(),
-        coursePrice: course.price,
-      });
-
-      if (result.isValid) {
-        setAppliedCoupon({
-          code: result.coupon!.code,
-          discount: result.discount,
-          discountType: result.discountType as 'PERCENTAGE' | 'FIXED',
-          finalAmount: result.finalAmount,
-        });
-        showSnackbar(`Coupon applied! You saved ${result.discount.toFixed(2)} EGP`, 'success');
-      } else {
-        showSnackbar(result.error || 'Invalid coupon code', 'error');
-        setAppliedCoupon(null);
-      }
-    } catch (error) {
-      showSnackbar('Error validating coupon', 'error');
-      setAppliedCoupon(null);
-    } finally {
-      setIsValidatingCoupon(false);
-    }
-  };
-
-  const removeCoupon = () => {
-    setCouponCode('');
-    setAppliedCoupon(null);
-    showSnackbar('Coupon removed');
-  };
-
   const handleEnroll = () => {
     if (isFree) {
-      // Enroll in free course
       enrollInFreeCourse.mutate({ courseId: course.id });
       return;
     }
@@ -148,89 +92,8 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
   const isFree = course.price <= 0;
   const isEnrolled = enrollmentData?.isEnrolled;
 
-  // Show enrolled user UI
-  if (isEnrolled && session) {
-    return (
-      <section className="py-8 md:py-12 bg-gradient-to-br from-green-50/50 via-background to-blue-50/50 dark:from-green-950/10 dark:via-background dark:to-blue-950/10">
-        <div className="container mx-auto px-4">
-          <Card className="max-w-5xl mx-auto overflow-hidden shadow-2xl border-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md">
-            <CardContent className="p-0">
-              {/* Success Header */}
-              <div className="bg-gradient-to-r from-green-500 via-green-600 to-emerald-600 p-6 md:p-8 text-white relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20" />
-                <div className="relative text-center">
-                  <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-6 backdrop-blur-sm">
-                    <CheckCircle className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-bold mb-3">Already Enrolled! 🎉</h3>
-                  <p className="text-green-50 text-lg md:text-xl max-w-2xl mx-auto">
-                    Welcome back! You have full access to this course content.
-                  </p>
-                </div>
-              </div>
-
-              {/* Progress Section */}
-              <div className="p-6 md:p-8">
-                <div className="text-center mb-8">
-                  <h4 className="text-2xl font-bold text-foreground mb-4">
-                    Continue Your Learning Journey
-                  </h4>
-
-                  {/* Progress Bar */}
-                  <div className="max-w-md mx-auto mb-6">
-                    <div className="flex justify-between text-sm font-medium mb-2">
-                      <span className="text-muted-foreground">Progress</span>
-                      <span className="text-primary font-bold">
-                        {enrollmentData.enrollment?.completionPercentage || 0}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-primary to-primary/80 h-3 rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${enrollmentData.enrollment?.completionPercentage || 0}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <p className="text-muted-foreground text-lg">
-                    {enrollmentData.enrollment?.completionPercentage === 100
-                      ? "🎓 Congratulations! You've completed this course. You can review the content anytime."
-                      : `📚 You've completed ${enrollmentData.enrollment?.completionPercentage || 0}% of this course. Keep up the great work!`
-                    }
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button asChild size="lg" className="w-full sm:w-auto px-8 py-4 text-lg font-semibold shadow-lg">
-                    <Link href={`/student/courses/${course.id}`} className="flex items-center gap-2">
-                      {enrollmentData.enrollment?.completionPercentage === 100 ? (
-                        <>
-                          <Award className="w-5 h-5" />
-                          Review Course
-                        </>
-                      ) : (
-                        <>
-                          <BookOpen className="w-5 h-5" />
-                          Continue Learning
-                        </>
-                      )}
-                    </Link>
-                  </Button>
-
-                  <Button asChild variant="outline" size="lg" className="w-full sm:w-auto px-8 py-4 text-lg font-semibold">
-                    <Link href="/student/courses" className="flex items-center gap-2">
-                      <Users className="w-5 h-5" />
-                      View All My Courses
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-    );
+  if (isEnrolled && session && enrollmentData.enrollment) {
+    return <AlreadyEnrolledCard enrollmentData={enrollmentData.enrollment} courseId={course.id} />;
   }
 
   return (

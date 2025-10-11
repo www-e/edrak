@@ -4,19 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Play, Lock, BookOpen, Clock, Eye, LucideIcon } from 'lucide-react';
 import { Course } from '@/features/courses/types';
 import Link from 'next/link';
+import { StatCard } from '@/components/shared/StatCard';
 
 interface CourseCurriculumProps { course: Course; }
 
 interface Lesson { id: string; title: string; order: number; }
-
-const StatCard = ({ icon: Icon, label, value, color = "text-primary" }: {
-  icon: LucideIcon; label: string; value: string | number; color?: string;
-}) => (
-  <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-900/80 px-4 py-2 rounded-full border border-border/50">
-    <Icon className={`h-5 w-5 ${color}`} />
-    <span className="font-semibold">{value} {label}</span>
-  </div>
-);
 
 const LessonCard = ({ lesson, index, isPreview, isLocked }: {
   lesson: Lesson; index: number; isPreview?: boolean; isLocked?: boolean;
@@ -63,9 +55,9 @@ export function CourseCurriculum({ course }: CourseCurriculumProps) {
           </p>
 
           <div className="flex flex-wrap justify-center gap-6 mb-8">
-            <StatCard icon={BookOpen} label="Lessons" value={lessons.length} />
-            <StatCard icon={Clock} label="h Total" value={Math.floor((lessons.length * 45) / 60)} color="text-blue-600" />
-            <StatCard icon={Eye} label="Free Preview" value={previewLessons.length} color="text-green-600" />
+            <StatCard title="Lessons" value={lessons.length} icon={BookOpen} />
+            <StatCard title="Hours (Estimated)" value={Math.floor((lessons.length * 45) / 60)} icon={Clock} />
+            <StatCard title="Free Previews" value={previewLessons.length} icon={Eye} />
           </div>
         </div>
 
