@@ -28,7 +28,6 @@ import { useSnackbar } from "@/components/shared/snackbar-context";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
 import { YouTubePlayer } from "@/components/ui/youtube-player";
-import { VideoPlayer } from "@/components/ui/video-player";
 import { Play, Monitor, Upload } from "lucide-react";
 
 type UpdateLessonFormInput = z.infer<typeof UpdateLessonInputSchema>;
