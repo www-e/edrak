@@ -27,6 +27,9 @@ import { Badge } from "@/components/ui/badge";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 import { FileUpload } from "@/components/admin/media/file-upload";
 import { AttachmentList } from "@/components/admin/media/attachment-list";
+import { YouTubePlayer } from "@/components/ui/youtube-player";
+import { VideoPlayer } from "@/components/ui/video-player";
+import { Play, Monitor, Upload } from "lucide-react";
 
 type UpdateLessonFormInput = z.infer<typeof UpdateLessonInputSchema>;
 
@@ -176,29 +179,6 @@ export default function EditLessonPage() {
               />
             </div>
 
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="youtubeUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>YouTube Video URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="https://youtube.com/watch?v=..."
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Optional: Add a YouTube video for this lesson. Leave empty to use uploaded video files.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
               name="isVisible"
@@ -219,6 +199,125 @@ export default function EditLessonPage() {
               )}
             />
           </div>
+
+          {/* Video Management Section - Enhanced UX */}
+          <Card className="border-2 border-dashed border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Monitor className="w-5 h-5 text-primary" />
+                Lesson Video Management
+                <Badge variant="outline" className="ml-auto">
+                  {lesson.youtubeUrl ? "YouTube Video" : "File Upload"}
+                </Badge>
+              </CardTitle>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Choose how to provide video content for this lesson. You can use YouTube for zero-cost hosting or upload video files.
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    ✅ YouTube: Zero bandwidth cost
+                  </Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    📁 File Upload: Full control
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Current Video Display */}
+              {lesson.youtubeUrl && (
+                <div className="space-y-4 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Play className="w-4 h-4 text-red-600" />
+                    <span className="font-medium text-red-800 dark:text-red-200">Current YouTube Video</span>
+                  </div>
+                  <YouTubePlayer
+                    url={lesson.youtubeUrl}
+                    title={`Preview: ${lesson.title}`}
+                    className="max-w-md"
+                  />
+                </div>
+              )}
+
+              {/* Video Source Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* YouTube Option */}
+                <div className={`p-4 border-2 rounded-lg transition-all cursor-pointer ${
+                  lesson.youtubeUrl ? 'border-red-300 bg-red-50 dark:bg-red-950/20' : 'border-border hover:border-primary/50'
+                }`}>
+                  <FormField
+                    control={form.control}
+                    name="youtubeUrl"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center gap-2 text-base font-semibold">
+                          <Play className="w-4 h-4 text-red-600" />
+                          YouTube Video
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            className="h-10"
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Paste any YouTube URL. Videos load instantly with zero bandwidth cost.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* File Upload Option */}
+                <div className={`p-4 border-2 rounded-lg transition-all ${
+                  !lesson.youtubeUrl && attachments.some(att => att.mimeType.startsWith('video/'))
+                    ? 'border-purple-300 bg-purple-50 dark:bg-purple-950/20'
+                    : 'border-border hover:border-primary/50'
+                }`}>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-base font-semibold cursor-pointer">
+                      <Upload className="w-4 h-4 text-purple-600" />
+                      Video File Upload
+                    </label>
+                    <p className="text-xs text-muted-foreground">
+                      Upload MP4, WebM, or other video formats. Stored on Bunny CDN.
+                    </p>
+                    {attachments.filter(att => att.mimeType.startsWith('video/')).length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-green-700 dark:text-green-300">
+                          ✓ {attachments.filter(att => att.mimeType.startsWith('video/')).length} video(s) uploaded
+                        </p>
+                        {attachments.filter(att => att.mimeType.startsWith('video/')).map(att => (
+                          <div key={att.id} className="text-xs text-muted-foreground truncate">
+                            📹 {att.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Video Preview */}
+              {lesson.youtubeUrl && (
+                <div className="p-4 bg-muted/30 rounded-lg">
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    <Play className="w-4 h-4" />
+                    Video Preview
+                  </h4>
+                  <YouTubePlayer
+                    url={lesson.youtubeUrl}
+                    title={lesson.title}
+                    className="w-full max-w-lg"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Enhanced attachment management section */}
           <Card>
