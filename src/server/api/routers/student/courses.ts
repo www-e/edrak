@@ -4,6 +4,7 @@ import { EnrollmentStatus } from "@prisma/client";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { EnrollmentVerification } from "@/lib/enrollment-verification";
+import { cacheData, getCachedData } from "@/lib/redis";
 
 export const studentCoursesRouter = createTRPCRouter({
   /**
@@ -87,6 +88,27 @@ export const studentCoursesRouter = createTRPCRouter({
 
   getMyEnrolledCourses: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
+    const cacheKey = `student:${userId}:courses`;
+
+    // Try Redis cache first (enrollment data changes occasionally)
+    const cachedCourses = await getCachedData<Array<{
+      enrollmentId: string;
+      enrolledAt: Date;
+      course: {
+        id: string;
+        title: string;
+        slug: string;
+        description: string;
+        language: string;
+        rating: number;
+        professorName: string;
+        lessonCount: number;
+      };
+      completionPercentage: number;
+    }>>(cacheKey);
+    if (cachedCourses) {
+      return cachedCourses;
+    }
 
     const enrollments = await db.enrollment.findMany({
       where: { userId, status: EnrollmentStatus.ACTIVE },
@@ -101,7 +123,7 @@ export const studentCoursesRouter = createTRPCRouter({
       orderBy: { enrolledAt: "desc" }
     });
 
-    return enrollments.map(enrollment => ({
+    const courses = enrollments.map(enrollment => ({
       enrollmentId: enrollment.id,
       enrolledAt: enrollment.enrolledAt,
       course: {
@@ -116,6 +138,11 @@ export const studentCoursesRouter = createTRPCRouter({
       },
       completionPercentage: enrollment.completionPercentage,
     }));
+
+    // Cache for 3 minutes (enrollment data changes occasionally)
+    await cacheData(cacheKey, courses, 180);
+
+    return courses;
   }),
 
   /**

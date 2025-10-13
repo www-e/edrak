@@ -1,44 +1,42 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { api } from '@/trpc/react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, ChevronLeft, ChevronRight, Calendar, Signal, Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const categories = [
-  'Career Preparation', 'Technology', 'Self Development', 'Business & Entrepreneurship',
-  'Languages', 'Art, Design & Media', 'Teacher Education & Training', 'Classroom Environment', 'Humanities'
-];
-
+// Types for server-fetched data
 interface Course {
   id: string;
   title: string;
   slug: string;
   description: string;
+  price: number;
+  language: string;
+  rating: number;
+  ratingCount: number;
+  createdAt: Date;
   category: { name: string } | null;
-  _count?: { enrollments?: number };
+  professor: { firstName: string; lastName: string };
+  _count: { enrollments: number };
 }
 
-const FilterButton = ({ category, selected, onClick }: {
-  category: string; selected: boolean; onClick: () => void;
-}) => (
-  <Button
-    variant={selected ? 'default' : 'outline'}
-    onClick={onClick}
-    className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
-      selected
-        ? 'bg-primary text-primary-foreground shadow-lg'
-        : 'hover:bg-primary/10 hover:border-primary'
-    }`}
-  >
-    {category}
-  </Button>
-);
+interface PaginationResult {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+interface CourseListProps {
+  initialCourses: Course[];
+  initialPagination: PaginationResult;
+  searchParams?: { category?: string; search?: string; page?: string };
+}
+
+const categories = [
+  'Career Preparation', 'Technology', 'Self Development', 'Business & Entrepreneurship',
+  'Languages', 'Art, Design & Media', 'Teacher Education & Training', 'Classroom Environment', 'Humanities'
+];
 
 const CourseCard = ({ course }: { course: Course }) => (
   <div className="bg-card rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] overflow-hidden hover:shadow-2xl transition-all duration-300 group">
@@ -51,15 +49,15 @@ const CourseCard = ({ course }: { course: Course }) => (
         className="object-cover w-full h-[202px]"
       />
       <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 text-sm font-semibold text-foreground rounded-full px-3 py-1">
-        <Calendar className="w-4 h-4 text-gray-500" />
+        <span>📅</span>
         <span>4 Weeks</span>
       </div>
       <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/40 rounded-full">
-        <Signal className="w-5 h-5 text-white" />
+        <span className="text-white text-lg">📊</span>
       </div>
       <div className="absolute bottom-3 left-3 flex items-center gap-2">
         <div className="flex items-center gap-1 bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
-          <Signal className="w-4 h-4 text-red-500" />
+          <span className="text-red-500">🔴</span>
           <span>Beginner</span>
         </div>
         <div className="bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
@@ -78,7 +76,7 @@ const CourseCard = ({ course }: { course: Course }) => (
       <div className="flex justify-between items-center text-accent font-bold">
         <div className="flex items-center gap-2 text-blue-800">
           <span>+{course._count?.enrollments || 0} enrolled</span>
-          <Bookmark className="w-5 h-5" />
+          <span>🔖</span>
         </div>
       </div>
       <Link
@@ -86,47 +84,16 @@ const CourseCard = ({ course }: { course: Course }) => (
         className="w-full inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary text-primary font-bold py-3 px-4 hover:bg-primary hover:text-primary-foreground transition-colors"
       >
         <span>View Course</span>
-        <ChevronRight className="w-5 h-5" />
+        <span>→</span>
       </Link>
     </div>
   </div>
 );
 
-export function CourseList() {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const pageSize = 12;
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 300);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  useEffect(() => setCurrentPage(1), [selectedCategory, debouncedSearchQuery]);
-
-  const { data: coursesData, isLoading, error } = api.public.course.getAllCourses.useQuery({
-    category: selectedCategory || undefined,
-    search: debouncedSearchQuery || undefined,
-    page: currentPage,
-    limit: pageSize,
-  });
-
-  const courses = coursesData?.courses || [];
-  const pagination = coursesData?.pagination;
-
-  if (error) {
-    return (
-      <section className="bg-secondary py-20">
-        <div className="container mx-auto px-4 text-center py-12">
-          <h3 className="text-2xl font-bold text-foreground mb-4">Unable to load courses</h3>
-          <p className="text-muted-foreground">Please try again later</p>
-        </div>
-      </section>
-    );
-  }
+export function CourseList({ initialCourses, initialPagination, searchParams }: CourseListProps) {
+  const currentPage = parseInt(searchParams?.page || '1');
+  const selectedCategory = searchParams?.category || '';
+  const searchQuery = searchParams?.search || '';
 
   return (
     <section className="bg-secondary py-20">
@@ -137,28 +104,40 @@ export function CourseList() {
             Discover expertly designed courses to advance your skills and accelerate your career growth
           </p>
 
+          {/* Static search form - client-side filtering will be handled by page navigation */}
           <div className="max-w-2xl mx-auto relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-6 w-6" />
-            <Input
-              type="text"
-              placeholder="Search for courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-14 pr-4 h-14 text-lg rounded-xl border-2 border-border focus:border-primary bg-background"
-            />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+            <div className="pl-14 pr-4 h-14 text-lg rounded-xl border-2 border-border bg-muted flex items-center">
+              <span className="text-muted-foreground">Search for courses...</span>
+            </div>
           </div>
         </div>
 
         <div className="mb-12">
           <div className="flex flex-wrap justify-center gap-3 mb-8">
-            <FilterButton category="All Categories" selected={!selectedCategory} onClick={() => setSelectedCategory('')} />
+            {/* Static filter buttons - will link to different URLs */}
+            <Link
+              href="/courses"
+              className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
+                !selectedCategory
+                  ? 'bg-primary text-primary-foreground shadow-lg'
+                  : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
+              }`}
+            >
+              All Categories
+            </Link>
             {categories.map(category => (
-              <FilterButton
+              <Link
                 key={category}
-                category={category}
-                selected={selectedCategory === category}
-                onClick={() => setSelectedCategory(category)}
-              />
+                href={`/courses?category=${encodeURIComponent(category)}`}
+                className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
+                  selectedCategory === category
+                    ? 'bg-primary text-primary-foreground shadow-lg'
+                    : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
+                }`}
+              >
+                {category}
+              </Link>
             ))}
           </div>
         </div>
@@ -166,7 +145,7 @@ export function CourseList() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-2xl font-bold text-foreground">
-              {pagination?.total || 0} {pagination?.total === 1 ? "Course" : "Courses"}
+              {initialPagination?.total || 0} {initialPagination?.total === 1 ? "Course" : "Courses"}
             </h2>
             {selectedCategory && (
               <p className="text-muted-foreground mt-1">
@@ -174,72 +153,82 @@ export function CourseList() {
               </p>
             )}
           </div>
-          <Button variant="outline" onClick={() => setShowMobileFilters(!showMobileFilters)} className="lg:hidden">
-            Filters
-          </Button>
         </div>
 
-        {isLoading ? (
+        {/* Static course grid - no loading states needed for server component */}
+        {initialCourses.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {Array.from({ length: 8 }).map((_, idx) => (
-              <div key={idx} className="bg-card rounded-xl overflow-hidden shadow-lg">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-6 space-y-4">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-6 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : courses.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {courses.map(course => <CourseCard key={course.id} course={course} />)}
+            {initialCourses.map(course => <CourseCard key={course.id} course={course} />)}
           </div>
         ) : (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <h3 className="text-2xl font-bold text-foreground mb-4">No courses found</h3>
               <p className="text-muted-foreground mb-6">Try adjusting your search or filters.</p>
-              <Button onClick={() => { setSelectedCategory(''); setSearchQuery(''); }} variant="outline">
+              <Link
+                href="/courses"
+                className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90"
+              >
                 Clear Filters
-              </Button>
+              </Link>
             </div>
           </div>
         )}
 
-        {pagination && pagination.totalPages > 1 && (
+        {/* Static pagination - server-calculated */}
+        {initialPagination && initialPagination.totalPages > 1 && (
           <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} courses
+              Showing {((initialPagination.page - 1) * initialPagination.limit) + 1} to {Math.min(initialPagination.page * initialPagination.limit, initialPagination.total)} of {initialPagination.total} courses
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="lg" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={!pagination.hasPrev} className="rounded-full">
-                <ChevronLeft className="h-5 w-5" /> Previous
-              </Button>
+              {initialPagination.hasPrev ? (
+                <Link
+                  href={`/courses?page=${currentPage - 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                  className="inline-flex items-center justify-center rounded-full border-2 border-border bg-background px-4 py-2 text-sm font-medium hover:bg-primary/10 hover:border-primary"
+                >
+                  <span className="mr-2">←</span> Previous
+                </Link>
+              ) : (
+                <span className="inline-flex items-center justify-center rounded-full border-2 border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed">
+                  <span className="mr-2">←</span> Previous
+                </span>
+              )}
 
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                {Array.from({ length: Math.min(5, initialPagination.totalPages) }, (_, i) => {
                   const pageNum = i + 1;
+                  const isActive = currentPage === pageNum;
+
                   return (
-                    <Button
+                    <Link
                       key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-12 h-12 rounded-full font-bold ${currentPage === pageNum ? 'bg-primary text-primary-foreground shadow-lg' : 'hover:bg-primary/10 hover:border-primary'}`}
+                      href={`/courses?page=${pageNum}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                      className={`w-12 h-12 rounded-full font-bold flex items-center justify-center ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground shadow-lg'
+                          : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
+                      }`}
                     >
                       {pageNum}
-                    </Button>
+                    </Link>
                   );
                 })}
               </div>
 
-              <Button variant="outline" size="lg" onClick={() => setCurrentPage(p => Math.min(pagination.totalPages, p + 1))} disabled={!pagination.hasNext} className="rounded-full">
-                Next <ChevronRight className="h-5 w-5" />
-              </Button>
+              {initialPagination.hasNext ? (
+                <Link
+                  href={`/courses?page=${currentPage + 1}${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ''}`}
+                  className="inline-flex items-center justify-center rounded-full border-2 border-border bg-background px-4 py-2 text-sm font-medium hover:bg-primary/10 hover:border-primary"
+                >
+                  Next <span className="ml-2">→</span>
+                </Link>
+              ) : (
+                <span className="inline-flex items-center justify-center rounded-full border-2 border-border bg-muted px-4 py-2 text-sm font-medium text-muted-foreground cursor-not-allowed">
+                  Next <span className="ml-2">→</span>
+                </span>
+              )}
             </div>
           </div>
         )}

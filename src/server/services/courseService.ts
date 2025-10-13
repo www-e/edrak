@@ -3,6 +3,7 @@ import { CourseVisibility, Prisma } from "@prisma/client";
 import { createSearchConditions } from "@/lib/search";
 import { courseDataTransformer, lessonDataTransformer } from "@/lib/data-transform";
 import { DataAccess } from "@/lib/data-access";
+import { cacheCourseData, getCachedData, generateCourseCacheKey, cacheData } from "@/lib/redis";
 import type {
   CreateCourseInput,
   CreateLessonInput,
@@ -35,6 +36,41 @@ export class AdminCourseService {
   }) {
     const { page = 1, limit = 20, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
 
+    // Generate cache key for admin course listings
+    const cacheKey = generateCourseCacheKey({
+      type: 'admin_courses',
+      page,
+      limit,
+      search: search || '',
+      sortBy,
+      sortOrder,
+    });
+
+    // Try Redis cache first (admin courses change moderately)
+    const cachedResult = await getCachedData<{
+      courses: Array<{
+        id: string;
+        title: string;
+        description: string;
+        price: number;
+        language: string;
+        visibility: string;
+        createdAt: Date;
+        professor: { firstName: string; lastName: string };
+      }>;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+    }>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     // Build search conditions using utility
     const where = createSearchConditions(search, ['title', 'description']) as Prisma.CourseWhereInput;
 
@@ -65,10 +101,15 @@ export class AdminCourseService {
       limit
     );
 
-    return {
+    const result = {
       courses,
       pagination
     };
+
+    // Cache for 3 minutes (admin courses change moderately)
+    await cacheData(cacheKey, result, 180);
+
+    return result;
   }
 
   static async getCourseById(id: string) {
@@ -140,6 +181,7 @@ export class AdminCourseService {
 export class CourseService {
   /**
    * Get all published courses with relevant information for public display
+   * Enhanced with Redis caching for improved performance
    */
   static async getPublishedCourses(filters?: {
     category?: string;
@@ -148,6 +190,47 @@ export class CourseService {
     page?: number;
     limit?: number;
   }) {
+    // Generate cache key for consistent caching
+    const cacheKey = generateCourseCacheKey({
+      category: filters?.category || '',
+      price: filters?.price || '',
+      search: filters?.search || '',
+      page: filters?.page || 1,
+      limit: filters?.limit || 12,
+    });
+
+    // Define proper types for cached data
+    type CachedCourseData = {
+      courses: Array<{
+        id: string;
+        title: string;
+        description: string;
+        price: number;
+        language: string;
+        slug: string;
+        rating: number;
+        ratingCount: number;
+        createdAt: Date;
+        category: { name: string } | null;
+        professor: { firstName: string; lastName: string };
+        _count: { enrollments: number };
+      }>;
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+      };
+    };
+
+    // Try to get from cache first
+    const cachedResult = await getCachedData<CachedCourseData>(cacheKey);
+    if (cachedResult) {
+      return cachedResult;
+    }
+
     const where: Prisma.CourseWhereInput = {
       visibility: CourseVisibility.PUBLISHED
     };
@@ -225,57 +308,87 @@ export class CourseService {
       limit
     );
 
-    return {
-      courses,
-      pagination
-    };
+    const result = { courses, pagination };
+
+    // Cache the result for 2 hours (courses don't change frequently)
+    await cacheCourseData(cacheKey, result);
+
+    return result;
   }
 
   /**
-   * Get a specific course by its slug (PUBLIC - No lesson details)
-   * Only returns basic course information for preview/marketing
-   */
-  static async getCourseBySlug(slug: string) {
-    return db.course.findUnique({
-      where: {
-        slug,
-        visibility: CourseVisibility.PUBLISHED
-      },
-      select: {
-        id: true,
-        title: true,
-        description: true,
-        price: true,
-        language: true,
-        slug: true,
-        rating: true,
-        ratingCount: true,
-        createdAt: true,
-        category: {
-          select: {
-            name: true
-          }
-        },
-        professor: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            username: true
-          }
-        },
-        _count: {
-          select: {
-            enrollments: true,
-            lessons: {
-              where: {
-                isDeleted: false,
-                isVisible: true
-              }
-            }
-          }
-        }
-      }
-    });
-  }
+    * Get a specific course by its slug (PUBLIC - No lesson details)
+    * Only returns basic course information for preview/marketing with Redis caching
+    */
+   static async getCourseBySlug(slug: string) {
+     const cacheKey = `course:slug:${slug}`;
+
+     // Try Redis cache first (course details change infrequently)
+     const cachedCourse = await getCachedData<{
+       id: string;
+       title: string;
+       description: string;
+       price: number;
+       language: string;
+       slug: string;
+       rating: number;
+       ratingCount: number;
+       createdAt: Date;
+       category: { name: string } | null;
+       professor: { id: string; firstName: string; lastName: string; username: string };
+       _count: { enrollments: number; lessons: number };
+     } | null>(cacheKey);
+     if (cachedCourse) {
+       return cachedCourse;
+     }
+
+     const course = await db.course.findUnique({
+       where: {
+         slug,
+         visibility: CourseVisibility.PUBLISHED
+       },
+       select: {
+         id: true,
+         title: true,
+         description: true,
+         price: true,
+         language: true,
+         slug: true,
+         rating: true,
+         ratingCount: true,
+         createdAt: true,
+         category: {
+           select: {
+             name: true
+           }
+         },
+         professor: {
+           select: {
+             id: true,
+             firstName: true,
+             lastName: true,
+             username: true
+           }
+         },
+         _count: {
+           select: {
+             enrollments: true,
+             lessons: {
+               where: {
+                 isDeleted: false,
+                 isVisible: true
+               }
+             }
+           }
+         }
+       }
+     });
+
+     // Cache for 1 hour (course details change infrequently)
+     if (course) {
+       await cacheData(cacheKey, course, 3600);
+     }
+
+     return course;
+   }
 }

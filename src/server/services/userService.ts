@@ -2,6 +2,7 @@ import { db } from "@/server/db";
 import bcrypt from 'bcryptjs';
 import { CreateUserInput, UpdateUserInput, ResetPasswordInput } from '@/types/admin';
 import { DataAccess } from '@/lib/data-access';
+import { cacheData, getCachedData, generateCourseCacheKey } from "@/lib/redis";
 
 /**
  * Service class for admin-related user management.
@@ -29,38 +30,75 @@ export class AdminUserService {
   }
   
   /**
-   * Retrieves all users with pagination and search support.
-   */
-  static async getAllUsers(options?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-  }) {
-    const { page = 1, limit = 50, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+    * Retrieves all users with pagination and search support with Redis caching.
+    */
+   static async getAllUsers(options?: {
+     page?: number;
+     limit?: number;
+     search?: string;
+     sortBy?: string;
+     sortOrder?: 'asc' | 'desc';
+   }) {
+     const { page = 1, limit = 50, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
 
-    const searchFields = ['username', 'email', 'firstName', 'lastName'];
-    const where = DataAccess.buildSearchQuery(search, searchFields);
+     // Generate cache key for user listings
+     const cacheKey = generateCourseCacheKey({
+       type: 'users',
+       page,
+       limit,
+       search: search || '',
+       sortBy,
+       sortOrder,
+     });
 
-    const { data: users, pagination } = await DataAccess.executeParallelQuery(
-      () => db.user.findMany({
-        where,
-        select: DataAccess.getUserSelect(),
-        orderBy: { [sortBy]: sortOrder },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      () => db.user.count({ where }),
-      page,
-      limit
-    );
+     // Try Redis cache first (users change moderately)
+     const cachedResult = await getCachedData<{
+       users: Array<{
+         id: string;
+         username: string;
+         firstName: string;
+         lastName: string;
+         role: string;
+         isActive: boolean;
+         createdAt: Date;
+       }>;
+       page: number;
+       limit: number;
+       total: number;
+       totalPages: number;
+       hasNext: boolean;
+       hasPrev: boolean;
+     }>(cacheKey);
+     if (cachedResult) {
+       return cachedResult;
+     }
 
-    return {
-      users,
-      ...pagination
-    };
-  }
+     const searchFields = ['username', 'email', 'firstName', 'lastName'];
+     const where = DataAccess.buildSearchQuery(search, searchFields);
+
+     const { data: users, pagination } = await DataAccess.executeParallelQuery(
+       () => db.user.findMany({
+         where,
+         select: DataAccess.getUserSelect(),
+         orderBy: { [sortBy]: sortOrder },
+         skip: (page - 1) * limit,
+         take: limit,
+       }),
+       () => db.user.count({ where }),
+       page,
+       limit
+     );
+
+     const result = {
+       users,
+       ...pagination
+     };
+
+     // Cache for 2 minutes (users change moderately)
+     await cacheData(cacheKey, result, 120);
+
+     return result;
+   }
     /**
    * Retrieves a single user by their ID.
    * @param id - The ID of the user.

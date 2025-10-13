@@ -45,6 +45,39 @@ const nextConfig: NextConfig = {
 
   // Standalone output for Vercel deployment
   output: 'standalone',
+
+  // Enhanced caching headers for performance
+  async headers() {
+    return [
+      {
+        source: '/courses/:slug',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400'
+          }
+        ]
+      },
+      {
+        source: '/api/courses/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=3600'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      }
+    ];
+  },
 };
 
 export default nextConfig;
