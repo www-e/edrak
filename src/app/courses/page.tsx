@@ -7,7 +7,7 @@ import { CourseService } from '@/server/services/courseService';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: 'Explore Courses - Edrak Learning Platform',
+  title: 'Explore Courses - Sportology Plus Learning Platform',
   description: 'Discover expertly designed courses to advance your skills and accelerate your career growth',
 };
 

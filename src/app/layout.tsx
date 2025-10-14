@@ -25,7 +25,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "sportschool Inspired Landing Page",
+  title: "Sportology Plus - Advanced Learning Platform",
   description: "Aspire. Learn. Advance.",
 };
 

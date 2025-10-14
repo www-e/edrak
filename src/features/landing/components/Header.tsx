@@ -34,13 +34,13 @@ export const Header = () => {
         <div className="flex items-center h-full gap-x-6">
           <Link href="/">
             <Image
-              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/logo-light.5df7d56d5214-1.png?"
-              alt="sportschool Logo"
-              width={110}
-              height={34}
-              className="h-8 w-auto"
+              src="/spl-logo.png"
+              alt="Sportology Plus Logo"
+              width={240}
+              height={76}
+              className="h-16 w-auto"
               priority={true}
-              sizes="110px"
+              sizes="240px"
             />
           </Link>
           
@@ -136,11 +136,11 @@ export const Header = () => {
           </button>
           <Link href="/">
             <Image
-              src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/logo-light.5df7d56d5214-1.png?"
-              alt="sportschool Logo"
-              width={90}
-              height={28}
-              className="h-7 w-auto"
+              src="/spl-logo.png"
+              alt="Sportology Plus Logo"
+              width={240}
+              height={76}
+              className="h-16 w-auto"
               priority
             />
           </Link>
