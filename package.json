@@ -11,7 +11,9 @@
     "db:reset": "npx prisma migrate reset",
     "db:studio": "npx prisma studio",
     "env:setup": "npx tsx scripts/setup-env.ts",
-    "admin:create": "npx tsx scripts/create-admin.ts"
+    "admin:create": "npx tsx scripts/create-admin.ts",
+    "cache:reset": "npx tsx src/scripts/reset-cache.ts",
+    "cache:test": "npx tsx src/scripts/test-serialization.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

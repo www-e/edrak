@@ -310,6 +310,14 @@ export class CourseService {
 
     const result = { courses, pagination };
 
+    // Debug: Check what we're trying to cache
+    console.log('Caching course data:', {
+      coursesCount: result.courses.length,
+      hasCourses: !!result.courses,
+      hasPagination: !!result.pagination,
+      cacheKey
+    });
+
     // Cache the result for 2 hours (courses don't change frequently)
     await cacheCourseData(cacheKey, result);
 
