@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Signal, Info, ChevronRight, Bookmark } from 'lucide-react';
+import { ChevronRight, Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -7,10 +7,7 @@ import Link from 'next/link';
 type CourseCardProps = {
   id: string | number;
   image: string;
-  duration: string;
   specialization?: string;
-  type: string;
-  level: 'Beginner' | 'Intermediate';
   title: string;
   enrollment: string;
   url: string;
@@ -18,10 +15,7 @@ type CourseCardProps = {
 
 export function CourseCard({
   image,
-  duration,
   specialization,
-  type,
-  level,
   title,
   enrollment,
   url
@@ -38,22 +32,6 @@ export function CourseCard({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 360px"
             priority={false}
           />
-          <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 text-sm font-semibold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
-            <Calendar className="w-4 h-4 text-gray-500" />
-            <span>{duration}</span>
-          </div>
-          <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/40 rounded-full hover:bg-black/60 transition-colors">
-            <Info className="w-5 h-5 text-white" />
-          </div>
-          <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
-              <Signal className="w-4 h-4 text-red-500" />
-              <span>{level}</span>
-            </div>
-            <div className="bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1 backdrop-blur-sm">
-              <span>{type}</span>
-            </div>
-          </div>
         </div>
         <CardContent className="p-4 flex flex-col gap-3">
           {specialization && (

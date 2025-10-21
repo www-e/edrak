@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
 import { CompaniesSection } from "@/features/landing/components/CompaniesSection";
-import { CategoriesSection } from "@/features/landing/components/CategoriesSection";
 import { FeaturedCoursesSection } from "@/features/landing/components/FeaturedCoursesSection";
 import { ActivitiesSection } from "@/features/landing/components/ActivitiesSection";
 import { Footer } from "@/features/landing/components/Footer";
@@ -43,7 +42,6 @@ export default async function LandingPage({ searchParams }: { searchParams: Prom
       <Header />
       <HeroSection />
       <CompaniesSection />
-      <CategoriesSection />
       <FeaturedCoursesSection />
       <CourseSearch />
       <ActivitiesSection />

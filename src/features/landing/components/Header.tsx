@@ -38,7 +38,7 @@ export const Header = () => {
               alt="Sportology Plus Logo"
               width={240}
               height={76}
-              className="h-16 w-auto"
+              className="h-18 w-auto"
               priority={true}
               sizes="240px"
             />
@@ -89,8 +89,7 @@ export const Header = () => {
           <div className="flex items-center gap-x-4">
             {status === "loading" ? (
               <div className="flex items-center text-sm font-semibold">
-                <div className="w-5 h-5 bg-green-400 rounded-full border-2 border-background animate-pulse"></div>
-                <span className="ml-2">Loading...</span>
+                <span>Loading...</span>
               </div>
             ) : session?.user ? (
               <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
@@ -140,7 +139,7 @@ export const Header = () => {
               alt="Sportology Plus Logo"
               width={240}
               height={76}
-              className="h-16 w-auto"
+              className="h-18 w-auto"
               priority
             />
           </Link>
@@ -148,8 +147,7 @@ export const Header = () => {
         <div className="flex items-center gap-x-2">
           {status === "loading" ? (
             <div className="flex items-center text-xs">
-              <div className="w-4 h-4 bg-green-400 rounded-full border animate-pulse"></div>
-              <span className="ml-1">Loading...</span>
+              <span>Loading...</span>
             </div>
           ) : session?.user ? (
             <>

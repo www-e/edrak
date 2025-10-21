@@ -61,10 +61,7 @@ export const ActivitiesSection = () => {
                                 key={course.id}
                                 id={course.id}
                                 image="/images/course-placeholder.jpg"
-                                duration="4 Weeks"
                                 specialization={course.description?.substring(0, 100) + "..." || ""}
-                                type="Course"
-                                level="Beginner"
                                 title={course.title}
                                 enrollment={`+${course._count?.enrollments || 0} enrolled`}
                                 url={`/courses/${course.slug}`}

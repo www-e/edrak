@@ -3,7 +3,7 @@
 import { useState, useRef} from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, Signal, Info, ChevronRight, ChevronLeft, Bookmark } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Bookmark } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from "@/trpc/react";
@@ -114,22 +114,6 @@ export const CategoriesSection = () => {
                          height={202}
                          className="object-cover w-full h-[202px]"
                        />
-                       <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 text-sm font-semibold text-foreground rounded-full px-3 py-1">
-                         <Calendar className="w-4 h-4 text-gray-500" />
-                         <span>4 Weeks</span>
-                       </div>
-                       <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/40 rounded-full">
-                         <Info className="w-5 h-5 text-white" />
-                       </div>
-                       <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                         <div className="flex items-center gap-1 bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
-                           <Signal className="w-4 h-4 text-red-500" />
-                           <span>Beginner</span>
-                         </div>
-                         <div className="bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
-                           <span>Course</span>
-                         </div>
-                       </div>
                      </div>
                      <CardContent className="p-4 flex flex-col gap-3">
                        {course.description && (
