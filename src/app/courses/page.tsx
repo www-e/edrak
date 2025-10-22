@@ -1,7 +1,8 @@
-import { Metadata } from 'next';
+ import { Metadata } from 'next';
 import { Header } from '@/features/landing/components/Header';
 import { CourseList } from './CourseList';
 import { CourseService } from '@/server/services/courseService';
+import { AdminCategoryService } from '@/server/services/categoryService';
 
 // Enable ISR - regenerate every hour
 export const revalidate = 3600;
@@ -32,6 +33,9 @@ export default async function CoursesPage({
     limit: 12,
   });
 
+  // Fetch categories server-side
+  const categories = await AdminCategoryService.getAllCategories();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -39,6 +43,7 @@ export default async function CoursesPage({
         initialCourses={coursesData.courses}
         initialPagination={coursesData.pagination}
         searchParams={params}
+        categories={categories}
       />
     </div>
   );

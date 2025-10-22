@@ -5,13 +5,31 @@ import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 export const Footer = () => {
   return (
     <footer className="bg-[#1a2b3d] text-white">
+      {/* CTA Section */}
+      <div className="bg-primary text-primary-foreground py-16">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-4">Start your journey with us now</h2>
+          <p className="text-lg mb-8">Be part of a community that believes in ambition, science, and progress.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/services" className="inline-block py-3 px-6 bg-primary-foreground text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Browse Services
+            </Link>
+            <Link href="/courses" className="inline-block py-3 px-6 bg-primary-foreground text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Subscribe to Course
+            </Link>
+            <Link href="/contact" className="inline-block py-3 px-6 bg-primary-foreground text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors">
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </div>
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
           
           {/* Column 1: Logo & Social */}
           <div className="flex flex-col items-start">
-            <h2 className="text-4xl font-bold text-white mb-2 font-display">sportschool</h2>
-            <p className="text-gray-400 text-base">Learn wherever you are</p>
+            <h2 className="text-4xl font-bold text-white mb-2 font-display">Sportology Plus</h2>
+            <p className="text-gray-400 text-base">Ambition, Science, Progress</p>
             
             <h3 className="font-bold text-lg text-white mt-10 mb-4 font-display">Follow us on social networks</h3>
             <div className="flex space-x-4 space-x-reverse">
@@ -64,7 +82,7 @@ export const Footer = () => {
         <hr className="my-10 border-gray-700" />
         
         <div className="flex flex-col-reverse md:flex-row justify-between items-center text-center md:text-left gap-y-4">
-            <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} sportschool. All rights reserved</p>
+            <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Sportology Plus. All rights reserved</p>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
                 <Link href="/terms-of-service" className="text-gray-300 hover:text-white transition-colors text-sm">Terms of Service</Link>
                 <Link href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">Privacy Policy</Link>

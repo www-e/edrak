@@ -3,237 +3,195 @@
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
-import { Search, ChevronDown, Menu, X, ChevronLeft, User, LogOut } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import Image from 'next/image';
-
-const ChevronBack = ChevronLeft;
+import { Search } from 'lucide-react';
 
 export const Header = () => {
-  const [isExploreOpen, setIsExploreOpen] = useState(false);
-  const [isLangOpen, setIsLangOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mobileMenuPage, setMobileMenuPage] = useState('main'); // 'main', 'categories', 'languages'
   const { data: session, status } = useSession();
 
   const navLinks = [
     { href: "/courses", label: "Courses" },
     { href: "/services", label: "Services" },
-    { href: "/partners/", label: "Partners" },
-  ];
-
-  const exploreLinks = [
-    { href: "/courses", label: "All Courses" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 h-[88px] bg-white shadow-[0_4px_16px_0_rgba(0,0,0,0.06)] font-body">
-      {/* Desktop Navigation */}
-      <nav className="hidden lg:flex items-center justify-between h-full max-w-[1200px] mx-auto px-5">
-        <div className="flex items-center h-full gap-x-6">
-          <Link href="/">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0">
             <Image
               src="/spl-logo.png"
               alt="Sportology Plus Logo"
-              width={240}
-              height={76}
-              className="h-18 w-auto"
+              width={180}
+              height={40}
+              className="h-10 w-auto"
               priority={true}
-              sizes="240px"
             />
           </Link>
-          
-          <div className="relative h-full flex items-center" onMouseEnter={() => setIsExploreOpen(true)} onMouseLeave={() => setIsExploreOpen(false)}>
-            <button className="flex items-center gap-x-1 text-foreground text-base font-semibold hover:text-primary transition-colors">
-              Learning Areas
-              <ChevronDown size={16} className={`transition-transform duration-200 ${isExploreOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isExploreOpen && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-4 z-10">
-                <div className="flex flex-col">
-                  {exploreLinks.map((link) => (
-                    <Link key={link.href} href={link.href} className="px-6 py-2 text-foreground hover:bg-muted transition-colors text-left">
-                      {link.label}
-                    </Link>
-                  ))}
-                  <div className="border-t border-border my-2"></div>
-                  <Link href="/courses" className="px-6 py-2 text-primary font-semibold hover:bg-muted transition-colors text-left">
-                    View All Courses
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-           <div className="relative">
-            <Input 
-              type="search" 
-              placeholder="Search"
-              className="bg-muted border-none rounded-full h-10 w-64 pl-10 pr-4 text-foreground placeholder:text-muted-foreground"
-            />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-          </div>
-        </div>
 
-        <div className="flex items-center gap-x-6">
-          <div className="flex items-center gap-x-6">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="text-base font-semibold text-foreground hover:text-primary transition-colors">
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          <div className="h-6 border-l border-border"></div>
-
-          <div className="flex items-center gap-x-4">
-            {status === "loading" ? (
-              <div className="flex items-center text-sm font-semibold">
-                <span>Loading...</span>
-              </div>
-            ) : session?.user ? (
-              <div className="hidden md:flex items-center gap-x-2 text-sm font-semibold">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-                  {session.user?.name?.charAt(0).toUpperCase() || ''}
-                </div>
-                <span className="font-body font-semibold">{session.user?.name || ''}</span>
-                <Link href="/student/profile">
-                  <Button variant="outline" size="sm" className="bg-background border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold shadow-sm">
-                    <User size={16} className="mr-2" />
-                    Profile
-                  </Button>
-                </Link>
-                <Button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  variant="destructive"
-                  size="sm"
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold shadow-sm"
+          {/* Desktop: Nav + Search + Auth */}
+          <div className="hidden lg:flex items-center gap-6 flex-1 justify-end">
+            {/* Navigation Links */}
+            <nav className="flex items-center gap-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg"
                 >
-                  <LogOut size={16} className="mr-2" />
-                  Sign Out
-                </Button>
-              </div>
-            ) : (
-              <Link href="/auth/student/signin" className="text-base font-semibold text-foreground hover:text-primary transition-colors">
-                Sign In
-              </Link>
-            )}
-            <Link href="/auth/signup" passHref>
-              <Button asChild className="bg-primary text-primary-foreground rounded-lg px-6 py-2 h-auto text-base font-semibold hover:bg-primary/90">
-                Sign Up Free
-              </Button>
-            </Link>
-            
-          </div>
-        </div>
-      </nav>
-      {/* Mobile Navigation */}
-      <nav className="lg:hidden flex items-center justify-between h-full px-5">
-        <div className="flex items-center gap-x-4">
-          <button onClick={() => { setIsMobileMenuOpen(true); setMobileMenuPage('main'); }} aria-label="Open menu">
-            <Menu size={24} className="text-foreground" />
-          </button>
-          <Link href="/">
-            <Image
-              src="/spl-logo.png"
-              alt="Sportology Plus Logo"
-              width={240}
-              height={76}
-              className="h-18 w-auto"
-              priority
-            />
-          </Link>
-        </div>
-        <div className="flex items-center gap-x-2">
-          {status === "loading" ? (
-            <div className="flex items-center text-xs">
-              <span>Loading...</span>
-            </div>
-          ) : session?.user ? (
-            <>
-              <Link href="/student/profile">
-                <Button variant="outline" size="sm" className="bg-background border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold">
-                  <User size={14} className="mr-1" />
-                  Profile
-                </Button>
-              </Link>
-              <Button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                variant="destructive"
-                size="sm"
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
-              >
-                <LogOut size={14} className="mr-1" />
-                Sign Out
-              </Button>
-            </>
-          ) : (
-            <Link href="/auth/student/signin" className="text-sm font-semibold text-foreground">
-              Sign In
-            </Link>
-          )}
-          <Link href="/auth/signup" passHref>
-            <Button asChild size="sm" className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 h-auto text-sm font-semibold">
-              Sign Up
-            </Button>
-          </Link>
-        </div>
-      </nav>
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className={`fixed top-0 left-0 h-full w-4/5 max-w-sm bg-white z-50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} onClick={(e) => e.stopPropagation()}>
-            {/* Main Menu */}
-            <div className={`flex flex-col h-full ${mobileMenuPage === 'main' ? '' : 'hidden'}`}>
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <button onClick={() => setIsMobileMenuOpen(false)} aria-label="Close menu">
-                  <X size={24} className="text-muted-foreground" />
-                </button>
-              </div>
-              <div className="p-4">
-                <div className="relative">
-                  <Input type="search" placeholder="Search" className="bg-muted border-none rounded-full h-10 w-full pl-10 pr-4"/>
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-                </div>
-              </div>
-              <div className="flex flex-col p-4 text-lg font-semibold text-foreground">
-                <button onClick={() => setMobileMenuPage('categories')} className="w-full text-left py-3">Learning Areas</button>
-                {navLinks.map((link) => (
-                     <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="w-full text-left py-3">{link.label}</Link>
-                ))}
-              </div>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="w-64 h-9 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
             </div>
 
-            {/* Categories Menu */}
-            <div className={`flex flex-col h-full ${mobileMenuPage === 'categories' ? '' : 'hidden'}`}>
-                 <div className="flex items-center p-4 border-b border-border">
-                  <button onClick={() => setMobileMenuPage('main')}>
-                    <ChevronBack size={24} className="text-muted-foreground" />
-                  </button>
-                  <h6 className="flex-grow text-center font-bold text-xl">Learning Areas</h6>
-                </div>
-                <div className="flex flex-col p-4 text-lg font-semibold text-foreground">
-                  {exploreLinks.map((link) => (
-                    <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="py-3">
-                      {link.label}
+            {/* Auth Section */}
+            <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
+              {status === "loading" ? (
+                <span className="text-sm text-gray-500">Loading...</span>
+              ) : session?.user ? (
+                <>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">
+                      {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{session.user?.name}</span>
+                  </div>
+                  <Link href="/student/profile">
+                    <Button variant="outline" size="sm">
+                      Profile
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth/student/signin">
+                    <Button variant="ghost" size="sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup">
+                    <Button size="sm">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 text-gray-700 hover:bg-gray-50 rounded-lg"
+          >
+            <svg width={24} height={24} fill="none" stroke="currentColor" strokeWidth={2}>
+              {isMobileMenuOpen ? (
+                <>
+                  <line x1={18} y1={6} x2={6} y2={18} />
+                  <line x1={6} y1={6} x2={18} y2={18} />
+                </>
+              ) : (
+                <>
+                  <line x1={3} y1={6} x2={21} y2={6} />
+                  <line x1={3} y1={12} x2={21} y2={12} />
+                  <line x1={3} y1={18} x2={21} y2={18} />
+                </>
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-200">
+          <div className="px-4 py-4 space-y-4">
+            {/* Mobile Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="w-full h-10 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+
+            {/* Mobile Navigation */}
+            <nav className="space-y-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Mobile Auth */}
+            <div className="pt-3 border-t border-gray-200">
+              {status === "loading" ? (
+                <span className="text-sm text-gray-500">Loading...</span>
+              ) : session?.user ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold">
+                      {session.user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span className="text-sm font-medium">{session.user?.name}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href="/student/profile" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">
+                        Profile
+                      </Button>
                     </Link>
-                  ))}
-                  <div className="border-t border-border my-2"></div>
-                  <Link href="/courses" onClick={() => setIsMobileMenuOpen(false)} className="py-3 text-primary">
-                    View All Courses
+                    <Button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      variant="destructive"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      Sign Out
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link href="/auth/student/signin" className="block">
+                    <Button variant="outline" size="sm" className="w-full">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/auth/signup" className="block">
+                    <Button size="sm" className="w-full">
+                      Sign Up
+                    </Button>
                   </Link>
                 </div>
-            </div>
-            
-             <div className={`flex flex-col h-full ${mobileMenuPage === 'languages' ? '' : 'hidden'}`}>
-                 <div className="flex items-center p-4 border-b border-border">
-                  <button onClick={() => setMobileMenuPage('main')}>
-                    <ChevronBack size={24} className="text-muted-foreground" />
-                  </button>
-                  <h6 className="flex-grow text-center font-bold text-xl">Languages</h6>
-                </div>
-                 <div className="flex flex-col p-4 font-semibold text-foreground">
-                  <span className="py-3 text-muted-foreground">Language selection coming soon</span>
-                </div>
+              )}
             </div>
           </div>
         </div>

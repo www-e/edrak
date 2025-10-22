@@ -4,15 +4,15 @@ import Image from "next/image";
 
 const features = [
   {
-    text: 'Free Learning',
+    text: 'Educational Courses',
     icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1df27a1f65d7a11c430110d8c0b19059-3.svg?',
   },
   {
-    text: 'In Arabic Language',
+    text: 'Expert Consultations',
     icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/24a5b0927f8bfdee096f8788396076ef-4.svg?',
   },
   {
-    text: 'High-Quality Content & Expert Trainers!',
+    text: 'Personalized Programs',
     icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1b5b8c5bbcaaa4382cf7d3656fd0d067-5.svg?',
   },
 ];
@@ -25,23 +25,26 @@ export const HeroSection = () => {
           
           <div className="z-10">
             <h1 className="text-5xl font-bold font-display text-foreground leading-tight">
-              Aspire. Learn. Advance.
+              Sportology Plus – Ambition, Science, Progress
             </h1>
             <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-lg">
-              Enhance your skills through specialized programs in professional skill development, and earn certificates that support your career journey. All for free!
+              In Sportology Plus, we believe that ambition is the beginning, science is the path, and progress is the result. We are here to guide you in your sports journey towards the best.
+            </p>
+            <p className="mt-3 text-lg text-muted-foreground leading-relaxed max-w-lg">
+              Your integrated platform for sports sciences - from educational courses to specialized programs, and professional consultations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Link
-                href="/courses"
+                href="/services"
                 className="inline-block py-4 px-8 bg-primary text-primary-foreground font-semibold text-base rounded-lg shadow-md hover:bg-primary/90 transition-colors text-center"
               >
-                Discover Our Learning Programs
+                Browse Services
               </Link>
               <Link
-                href="/services"
+                href="/courses"
                 className="inline-block py-4 px-8 border-2 border-primary text-primary font-semibold text-base rounded-lg shadow-md hover:bg-primary hover:text-primary-foreground transition-colors text-center"
               >
-                Explore Our Services
+                Subscribe to Course
               </Link>
             </div>
 

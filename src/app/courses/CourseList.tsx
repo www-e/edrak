@@ -1,22 +1,6 @@
-import { Badge } from '@/components/ui/badge';
-import Image from 'next/image';
 import Link from 'next/link';
-
-// Types for server-fetched data
-interface Course {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  price: number;
-  language: string;
-  rating: number;
-  ratingCount: number;
-  createdAt: Date;
-  category: { name: string } | null;
-  professor: { firstName: string; lastName: string };
-  _count: { enrollments: number };
-}
+import { CourseCard } from '@/components/shared/CourseCard';
+import { Course } from '@/features/courses/types';
 
 interface PaginationResult {
   page: number;
@@ -33,64 +17,23 @@ interface CourseListProps {
   searchParams?: { category?: string; search?: string; page?: string };
 }
 
-const categories = [
-  'Career Preparation', 'Technology', 'Self Development', 'Business & Entrepreneurship',
-  'Languages', 'Art, Design & Media', 'Teacher Education & Training', 'Classroom Environment', 'Humanities'
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-const CourseCard = ({ course }: { course: Course }) => (
-  <div className="bg-card rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.08)] overflow-hidden hover:shadow-2xl transition-all duration-300 group">
-    <div className="relative">
-      <Image
-        src="/images/course-placeholder.jpg"
-        alt={course.title}
-        width={360}
-        height={202}
-        className="object-cover w-full h-[202px]"
-      />
-      <div className="absolute top-3 left-3 flex items-center gap-2 bg-white/90 text-sm font-semibold text-foreground rounded-full px-3 py-1">
-        <span>📅</span>
-        <span>4 Weeks</span>
-      </div>
-      <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/40 rounded-full">
-        <span className="text-white text-lg">📊</span>
-      </div>
-      <div className="absolute bottom-3 left-3 flex items-center gap-2">
-        <div className="flex items-center gap-1 bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
-          <span className="text-red-500">🔴</span>
-          <span>Beginner</span>
-        </div>
-        <div className="bg-white/90 text-sm font-bold text-foreground rounded-full px-3 py-1">
-          <span>Course</span>
-        </div>
-      </div>
-    </div>
-    <div className="p-6 flex flex-col gap-3">
-      {course.category && <Badge variant="secondary" className="w-fit">{course.category.name}</Badge>}
-      <Link href={`/courses/${course.slug}`} className="group">
-        <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-          {course.title}
-        </h3>
-      </Link>
-      <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">{course.description}</p>
-      <div className="flex justify-between items-center text-accent font-bold">
-        <div className="flex items-center gap-2 text-blue-800">
-          <span>+{course._count?.enrollments || 0} enrolled</span>
-          <span>🔖</span>
-        </div>
-      </div>
-      <Link
-        href={`/courses/${course.slug}`}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-full border-2 border-primary text-primary font-bold py-3 px-4 hover:bg-primary hover:text-primary-foreground transition-colors"
-      >
-        <span>View Course</span>
-        <span>→</span>
-      </Link>
-    </div>
-  </div>
-);
+interface CourseListProps {
+  initialCourses: Course[];
+  initialPagination: PaginationResult;
+  searchParams?: { category?: string; search?: string; page?: string };
+  categories: Category[];
+}
 
-export function CourseList({ initialCourses, initialPagination, searchParams }: CourseListProps) {
+export function CourseList({ initialCourses, initialPagination, searchParams, categories }: CourseListProps) {
   const currentPage = parseInt(searchParams?.page || '1');
   const selectedCategory = searchParams?.category || '';
   const searchQuery = searchParams?.search || '';
@@ -114,31 +57,33 @@ export function CourseList({ initialCourses, initialPagination, searchParams }: 
         </div>
 
         <div className="mb-12">
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
-            {/* Static filter buttons - will link to different URLs */}
-            <Link
-              href="/courses"
-              className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
-                !selectedCategory
-                  ? 'bg-primary text-primary-foreground shadow-lg'
-                  : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
-              }`}
-            >
-              All Categories
-            </Link>
-            {categories.map(category => (
+          <div className="flex flex-col items-center gap-4">
+            <h3 className="text-lg font-semibold text-foreground">Filter by Category</h3>
+            <div className="flex flex-wrap justify-center gap-3">
               <Link
-                key={category}
-                href={`/courses?category=${encodeURIComponent(category)}`}
+                href="/courses"
                 className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
-                  selectedCategory === category
+                  !selectedCategory
                     ? 'bg-primary text-primary-foreground shadow-lg'
                     : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
                 }`}
               >
-                {category}
+                All Categories
               </Link>
-            ))}
+              {categories.map(category => (
+                <Link
+                  key={category.id}
+                  href={`/courses?category=${encodeURIComponent(category.slug)}`}
+                  className={`rounded-full px-6 py-3 text-base font-medium transition-all duration-300 ${
+                    selectedCategory === category.slug
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'bg-background border-2 border-border hover:bg-primary/10 hover:border-primary'
+                  }`}
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
