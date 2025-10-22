@@ -14,6 +14,7 @@ export const Header = () => {
   const navLinks = [
     { href: "/courses", label: "Courses" },
     { href: "/services", label: "Services" },
+    { href: "/about", label: "About" },
   ];
 
   return (
@@ -27,7 +28,7 @@ export const Header = () => {
               alt="Sportology Plus Logo"
               width={180}
               height={40}
-              className="h-10 w-auto"
+              className="h-20 w-auto"
               priority={true}
             />
           </Link>
