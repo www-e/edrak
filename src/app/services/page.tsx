@@ -1,122 +1,53 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { Header } from '@/features/landing/components/Header';
-import { ServicesHero } from '@/features/services/components/ServicesHero';
-import { ServiceTabs } from '@/features/services/components/ServiceTabs';
-import { PricingSection } from '@/features/services/components/PricingSection';
-import { ComparisonTable } from '@/features/services/components/ComparisonTable';
-import { FAQSection } from '@/features/services/components/FAQSection';
-import { CTASection } from '@/features/services/components/CTASection';
-
-export type ServiceType = 'physiotherapy' | 'swimming';
-
-export interface ServiceTheme {
-  name: string;
-  primary: string;
-  secondary: string;
-  accent: string;
-  background: string;
-  surface: string;
-  text: string;
-  textMuted: string;
-  animationType: 'medical' | 'fluid';
-}
-
-const serviceThemes: Record<ServiceType, ServiceTheme> = {
-  physiotherapy: {
-    name: 'Physical Therapy',
-    primary: '#2563EB', // Brighter blue for better contrast
-    secondary: '#059669', // Brighter green
-    accent: '#7C3AED',
-    background: '#F8FAFC',
-    surface: '#FFFFFF',
-    text: '#111827', // Darker for better contrast
-    textMuted: '#4B5563',
-    animationType: 'medical'
-  },
-  swimming: {
-    name: 'Swimming',
-    primary: '#0284C7', // Brighter blue
-    secondary: '#0891B2',
-    accent: '#3B82F6',
-    background: '#FFFFFF', // Changed to white for better contrast
-    surface: '#F8FAFC', // Light gray
-    text: '#111827', // Dark text
-    textMuted: '#4B5563',
-    animationType: 'fluid'
-  }
-};
+import { ServicesOverview } from '@/features/services/components/ServicesOverview';
+import { CoursesSection } from '@/features/services/components/CoursesSection';
+import { TrainingSection } from '@/features/services/components/TrainingSection';
+import { NutritionSection } from '@/features/services/components/NutritionSection';
+import { PsychologicalSection } from '@/features/services/components/PsychologicalSection';
+import { ContentSection } from '@/features/services/components/ContentSection';
+import { EmploymentSection } from '@/features/services/components/EmploymentSection';
+import { ServicesClosing } from '@/features/services/components/ServicesClosing';
 
 export default function ServicesPage() {
-  const [activeService, setActiveService] = useState<ServiceType>('physiotherapy');
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const currentTheme = serviceThemes[activeService];
-
-  const handleServiceChange = async (service: ServiceType) => {
-    if (service === activeService) return;
-
-    setIsTransitioning(true);
-    await new Promise(resolve => setTimeout(resolve, 150));
-    setActiveService(service);
-    setIsTransitioning(false);
-  };
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div
-        className="transition-colors duration-500"
-        style={{
-          backgroundColor: currentTheme.background,
-          color: currentTheme.text
-        }}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeService}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{
-              opacity: isTransitioning ? 0 : 1,
-              y: isTransitioning ? -20 : 0
-            }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <ServicesHero
-              theme={currentTheme}
-              activeService={activeService}
-            />
+      <div className="container mx-auto px-4 py-8">
+        {/* Breadcrumbs */}
+        <nav className="mb-8">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-blue-600">الرئيسية</Link>
+            <span>/</span>
+            <span className="text-gray-900">خدماتنا</span>
+          </div>
+        </nav>
 
-          <ServiceTabs
-            activeService={activeService}
-            onServiceChange={handleServiceChange}
-            theme={currentTheme}
-          />
+        {/* Hero Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">🏆 خدماتنا</h1>
+          <p className="text-xl text-gray-700 max-w-4xl mx-auto mb-8">
+            حلول متكاملة لكل الرياضيين – من التعلم إلى التدريب والتوظيف<br />
+            كل ما تحتاجه لتطورك الرياضي في منصة واحدة تجمع العلم، الخبرة، والدعم المستمر.
+          </p>
+        </motion.section>
 
-          <PricingSection
-            theme={currentTheme}
-            activeService={activeService}
-          />
-
-          <ComparisonTable
-            theme={currentTheme}
-            activeService={activeService}
-          />
-
-          <FAQSection
-            theme={currentTheme}
-            activeService={activeService}
-          />
-
-          <CTASection
-            theme={currentTheme}
-            activeService={activeService}
-          />
-        </motion.div>
-      </AnimatePresence>
+        <ServicesOverview />
+        <CoursesSection />
+        <TrainingSection />
+        <NutritionSection />
+        <PsychologicalSection />
+        <ContentSection />
+        <EmploymentSection />
+        <ServicesClosing />
       </div>
     </div>
   );
