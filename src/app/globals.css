@@ -145,11 +145,13 @@
   }
 
   body {
-    background-color: var(--background);
+    background-color: transparent;
     color: var(--foreground);
     font-family: var(--font-body);
     line-height: 1.6;
   }
+
+  /* Services page has clean white background with subtle section gradients */
 
   h1 {
     font-family: var(--font-display);
