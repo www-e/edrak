@@ -61,7 +61,7 @@ export default function ServicesHero() {
             Home
           </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-foreground font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Our Services</span>
+          <span className=" font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary">Our Services</span>
         </motion.nav>
 
         {/* Enhanced Hero content */}
