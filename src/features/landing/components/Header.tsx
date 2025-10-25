@@ -42,6 +42,7 @@ export const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg"
                 >
                   {link.label}
@@ -144,6 +145,7 @@ export const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   className="block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

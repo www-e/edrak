@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { lazyWarmCache } from './cache-utils';
 
 // ============================================================================
 // 🔧 Configuration & Setup
@@ -201,6 +202,8 @@ export async function getCachedData<T>(key: string): Promise<T | null> {
 
     if (!cached) {
       logger.warn('Cache MISS');
+      // Lazy warm the cache in the background
+      lazyWarmCache(key).catch(() => {}); // Ignore errors
       logger.groupEnd();
       return null;
     }

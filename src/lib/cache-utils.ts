@@ -78,29 +78,24 @@ export async function getCacheSystemStatus(): Promise<{
 }
 
 /**
- * Cache warming utility for frequently accessed data
+ * Lazy cache warming utility - warms on first miss to avoid server start delay
  */
-export async function warmPopularCaches(): Promise<{
-  warmed: string[];
-  errors: string[];
-}> {
-  const warmed: string[] = [];
-  const errors: string[] = [];
-
+export async function lazyWarmCache(key: string): Promise<void> {
   try {
-    console.log('🔥 Warming popular caches...');
+    console.log(`🔥 Lazy warming cache for: ${key}`);
 
-    // Example: Warm categories cache
-    // await warmCategoriesCache();
-    warmed.push('categories');
+    // Warm popular courses if it's a course key
+    if (key.startsWith('courses:')) {
+      const { CourseService } = await import('@/server/services/courseService');
+      await CourseService.getPublishedCourses({ limit: 12 });
+    }
 
-    // Example: Warm popular courses cache
-    // await warmPopularCoursesCache();
-    warmed.push('popular-courses');
-
+    // Warm categories if it's a category key
+    if (key.startsWith('categories:')) {
+      const { AdminCategoryService } = await import('@/server/services/categoryService');
+      await AdminCategoryService.getAllCategories();
+    }
   } catch (error) {
-    errors.push(`Cache warming failed: ${error}`);
+    console.error(`Lazy warming failed for ${key}:`, error);
   }
-
-  return { warmed, errors };
 }

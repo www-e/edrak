@@ -28,6 +28,13 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Fix for google-play-badge image
+      {
+        protocol: 'https',
+        hostname: 'www.edraak.org',
+        port: '',
+        pathname: '/static/images/**',
+      },
       {
         protocol: 'https',
         hostname: 'edrak-courses-cdn.b-cdn.net',

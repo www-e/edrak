@@ -1,8 +1,10 @@
  import { Metadata } from 'next';
-import { Header } from '@/features/landing/components/Header';
-import { CourseList } from './CourseList';
-import { CourseService } from '@/server/services/courseService';
-import { AdminCategoryService } from '@/server/services/categoryService';
+ import { Header } from '@/features/landing/components/Header';
+ import { CourseList } from './CourseList';
+ import { CourseService } from '@/server/services/courseService';
+ import { AdminCategoryService } from '@/server/services/categoryService';
+ import { Suspense } from 'react';
+ import { Skeleton } from '@/components/ui/skeleton';
 
 // Enable ISR - regenerate every hour
 export const revalidate = 3600;
@@ -39,12 +41,27 @@ export default async function CoursesPage({
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <CourseList
-        initialCourses={coursesData.courses}
-        initialPagination={coursesData.pagination}
-        searchParams={params}
-        categories={categories}
-      />
+      <Suspense fallback={<CourseListSkeleton />}>
+        <CourseList
+          initialCourses={coursesData.courses}
+          initialPagination={coursesData.pagination}
+          searchParams={params}
+          categories={categories}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+function CourseListSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Skeleton className="h-8 w-64 mb-6" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-64 w-full" />
+        ))}
+      </div>
     </div>
   );
 }

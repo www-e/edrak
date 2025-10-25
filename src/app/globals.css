@@ -140,6 +140,17 @@
     --sidebar-ring: var(--color-sidebar-ring);
   }
 
+  /* Environment-aware styles for dev/prod consistency */
+  .dark {
+    --background: #1a1a1a;
+    --foreground: #ffffff;
+  }
+
+  /* Force variables in development if needed */
+  [data-theme="light"] {
+    --primary: #2E8B8B;
+  }
+
   * {
     border-color: var(--border);
   }

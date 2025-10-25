@@ -1,4 +1,7 @@
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState } from 'react';
+import { Fade, Slide } from 'react-awesome-reveal';
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
 import { CompaniesSection } from "@/features/landing/components/CompaniesSection";
@@ -8,46 +11,64 @@ import { Footer } from "@/features/landing/components/Footer";
 import { K12Section } from "@/features/landing/components/K12Section";
 import { BlogSection } from "@/features/landing/components/BlogSection";
 import { CourseSearch } from "@/features/landing/components/CourseSearch";
-import { processPaymentReturn } from '@/lib/payment-return-processor';
+import LoadingIntro from '@/components/shared/LoadingIntro';
 
-export default async function LandingPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
-  const resolvedSearchParams = await searchParams;
+export default function LandingPage() {
+  const [isLoading, setIsLoading] = useState(true);
 
-  const isPaymobReturn = resolvedSearchParams.id && resolvedSearchParams.success !== undefined;
+  const handleLoadingComplete = () => {
+    // Small delay to ensure smooth transition
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+  };
 
-  if (isPaymobReturn) {
-    try {
-      await processPaymentReturn(resolvedSearchParams);
-      const params = new URLSearchParams();
-      Object.entries(resolvedSearchParams).forEach(([key, value]) => {
-        if (value !== undefined) {
-          params.append(key, Array.isArray(value) ? value[0] : value);
-        }
-      });
-      redirect(`/payments/return?${params.toString()}`);
-    } catch {
-      const params = new URLSearchParams();
-      Object.entries(resolvedSearchParams).forEach(([key, value]) => {
-        if (value !== undefined) {
-          params.append(key, Array.isArray(value) ? value[0] : value);
-        }
-      });
-      redirect(`/payments/return?${params.toString()}`);
-    }
-  }
-
-  // Otherwise, show the normal landing page
   return (
-    <main className="min-h-screen bg-background font-body">
-      <Header />
-      <HeroSection />
-      <CompaniesSection />
-      <FeaturedCoursesSection />
-      <CourseSearch />
-      <ActivitiesSection />
-      <K12Section />
-      <BlogSection />
-      <Footer />
-    </main>
+    <>
+      {isLoading && <LoadingIntro onComplete={handleLoadingComplete} />}
+      
+      {!isLoading && (
+        <main className="min-h-screen bg-background font-body">
+          {/* Header fades in first */}
+          <Fade duration={600} triggerOnce>
+            <Header />
+          </Fade>
+
+          {/* Hero section slides up */}
+          <Slide direction="up" duration={800} triggerOnce delay={200}>
+            <HeroSection />
+          </Slide>
+
+          {/* Rest of the sections with staggered reveals */}
+          <Fade duration={600} triggerOnce delay={400}>
+            <CompaniesSection />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={500}>
+            <FeaturedCoursesSection />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={600}>
+            <CourseSearch />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={700}>
+            <ActivitiesSection />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={800}>
+            <K12Section />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={900}>
+            <BlogSection />
+          </Fade>
+
+          <Fade duration={600} triggerOnce delay={1000}>
+            <Footer />
+          </Fade>
+        </main>
+      )}
+    </>
   );
 }
