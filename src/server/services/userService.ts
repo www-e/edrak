@@ -2,7 +2,6 @@ import { db } from "@/server/db";
 import bcrypt from 'bcryptjs';
 import { CreateUserInput, UpdateUserInput, ResetPasswordInput } from '@/types/admin';
 import { DataAccess } from '@/lib/data-access';
-import { cacheData, getCachedData, generateCourseCacheKey } from "@/lib/redis";
 
 /**
  * Service class for admin-related user management.
@@ -30,7 +29,7 @@ export class AdminUserService {
   }
   
   /**
-    * Retrieves all users with pagination and search support with Redis caching.
+    * Retrieves all users with pagination and search support.
     */
    static async getAllUsers(options?: {
      page?: number;
@@ -40,38 +39,6 @@ export class AdminUserService {
      sortOrder?: 'asc' | 'desc';
    }) {
      const { page = 1, limit = 50, search, sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
-
-     // Generate cache key for user listings
-     const cacheKey = generateCourseCacheKey({
-       type: 'users',
-       page,
-       limit,
-       search: search || '',
-       sortBy,
-       sortOrder,
-     });
-
-     // Try Redis cache first (users change moderately)
-     const cachedResult = await getCachedData<{
-       users: Array<{
-         id: string;
-         username: string;
-         firstName: string;
-         lastName: string;
-         role: string;
-         isActive: boolean;
-         createdAt: Date;
-       }>;
-       page: number;
-       limit: number;
-       total: number;
-       totalPages: number;
-       hasNext: boolean;
-       hasPrev: boolean;
-     }>(cacheKey);
-     if (cachedResult) {
-       return cachedResult;
-     }
 
      const searchFields = ['username', 'email', 'firstName', 'lastName'];
      const where = DataAccess.buildSearchQuery(search, searchFields);
@@ -93,9 +60,6 @@ export class AdminUserService {
        users,
        ...pagination
      };
-
-     // Cache for 2 minutes (users change moderately)
-     await cacheData(cacheKey, result, 120);
 
      return result;
    }

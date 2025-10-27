@@ -1,6 +1,7 @@
 /**
  * Advanced caching service for admin dashboard optimization
  * Provides in-memory caching with TTL (Time To Live) support
+ * Note: Redis caching has been removed for performance optimization
  */
 
 interface CacheItem<T> {

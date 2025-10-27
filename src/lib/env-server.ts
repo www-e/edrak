@@ -35,10 +35,6 @@ const serverEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_PAYMOB_IFRAME_ID: z.string(),
 
-  // Redis Configuration (Server-side only)
-  UPSTASH_REDIS_URL: z.string().url("UPSTASH_REDIS_URL must be a valid URL for Redis connection"),
-  UPSTASH_REDIS_TOKEN: z.string().min(1, "UPSTASH_REDIS_TOKEN is required for Redis authentication"),
-
   // Node Environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 });

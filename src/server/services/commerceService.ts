@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { createUserSearchConditions, createCouponSearchConditions } from "@/lib/search";
 import { couponDataTransformer } from "@/lib/data-transform";
 import { DataAccess } from "@/lib/data-access";
-import { cacheData, getCachedData } from "@/lib/redis";
 
 // Placeholder for Zod schemas
 import { Coupon } from "@prisma/client";
@@ -85,7 +84,7 @@ export class AdminCommerceService {
      };
    }
   /**
-    * Retrieves key metrics for the admin dashboard with optimized parallel queries and Redis caching.
+    * Retrieves key metrics for the admin dashboard with optimized parallel queries.
     */
    static async getDashboardMetrics(): Promise<{
      totalUsers: number;
@@ -93,19 +92,6 @@ export class AdminCommerceService {
      activeEnrollments: number;
      totalRevenue: number;
    }> {
-     const cacheKey = 'admin:dashboard:metrics';
-
-     // Try Redis cache first (cross-server consistency)
-     const cachedMetrics = await getCachedData<{
-       totalUsers: number;
-       totalCourses: number;
-       activeEnrollments: number;
-       totalRevenue: number;
-     }>(cacheKey);
-     if (cachedMetrics) {
-       return cachedMetrics;
-     }
-
      // Execute all queries in parallel for maximum performance
      const [userStats, courseStats, enrollmentStats, revenueStats] = await Promise.all([
        db.user.aggregate({
@@ -132,9 +118,6 @@ export class AdminCommerceService {
        activeEnrollments: enrollmentStats._count.id,
        totalRevenue: Number(revenueStats._sum.amount || 0),
      };
-
-     // Cache in Redis for 30 seconds (admin data changes frequently)
-     await cacheData(cacheKey, metrics, 30);
 
      return metrics;
    }

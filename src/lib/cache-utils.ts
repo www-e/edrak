@@ -1,12 +1,7 @@
 /**
  * Cache utility functions for maintenance and monitoring
+ * Note: Caching has been removed to improve performance
  */
-
-import { 
-  clearAllCache, 
-  checkRedisHealth, 
-  getCacheServerStats 
-} from './redis';
 
 /**
  * Clear all cache and perform health check
@@ -17,20 +12,12 @@ export async function resetCacheSystem(): Promise<{
   healthy: boolean;
 }> {
   try {
-    console.log('🔄 Starting cache system reset...');
-
-    // Clear all cache
-    await clearAllCache();
-    console.log('✅ Cache cleared successfully');
-
-    // Check Redis health
-    const isHealthy = await checkRedisHealth();
-    console.log(isHealthy ? '✅ Redis connection healthy' : '❌ Redis connection unhealthy');
+    console.log('🔄 Cache system reset - no caching active');
 
     return {
       success: true,
       cleared: true,
-      healthy: isHealthy
+      healthy: true
     };
   } catch (error) {
     console.error('❌ Cache system reset failed:', error);
@@ -56,23 +43,15 @@ export async function getCacheSystemStatus(): Promise<{
 }> {
   const recommendations: string[] = [];
 
-  // Check Redis health
-  const isHealthy = await checkRedisHealth();
-
-  if (!isHealthy) {
-    recommendations.push('Redis connection is unhealthy - check environment variables');
-  }
-
-  // Get cache stats from server (includes memoryUsage)
-  const serverStats = await getCacheServerStats();
-
-  if (serverStats.keyCount === 0) {
-    recommendations.push('No cache keys found - consider cache warming');
-  }
+  recommendations.push('Caching has been disabled for performance optimization');
 
   return {
-    healthy: isHealthy,
-    stats: serverStats, // ✅ Returns { keyCount, memoryUsage, hitRate }
+    healthy: true,
+    stats: {
+      keyCount: 0,
+      memoryUsage: 0,
+      hitRate: 0
+    },
     recommendations
   };
 }
