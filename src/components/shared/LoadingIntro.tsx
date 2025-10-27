@@ -15,8 +15,8 @@ export default function LoadingIntro({ onComplete }: LoadingIntroProps) {
     // Prevent scroll during loading
     document.body.style.overflow = 'hidden';
 
-    // Smooth counter animation
-    const duration = 2000; // 2 seconds
+    // Faster loading animation - reduce from 2 seconds to 1 second for instant feel
+    const duration = 1000; // 1 second
     const steps = 100;
     const interval = duration / steps;
 
@@ -27,10 +27,10 @@ export default function LoadingIntro({ onComplete }: LoadingIntroProps) {
 
       if (currentCount >= 100) {
         clearInterval(counterInterval);
-        // Wait a bit at 100% before exiting
+        // Minimal delay before exiting
         setTimeout(() => {
           setShouldExit(true);
-        }, 500);
+        }, 200);
       }
     }, interval);
 

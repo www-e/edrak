@@ -12,6 +12,7 @@ export const CourseSearch = () => {
     const formData = new FormData(e.currentTarget);
     const query = formData.get('query');
     if (query) {
+      router.prefetch('/courses');
       router.push(`/courses?query=${encodeURIComponent(query as string)}`);
     }
   };

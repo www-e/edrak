@@ -1,7 +1,4 @@
-'use client';
-
-import { useState } from 'react';
-import { Fade, Slide } from 'react-awesome-reveal';
+import { CourseService } from '@/server/services/courseService';
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
 import { CompaniesSection } from "@/features/landing/components/CompaniesSection";
@@ -11,64 +8,35 @@ import { Footer } from "@/features/landing/components/Footer";
 import { K12Section } from "@/features/landing/components/K12Section";
 import { BlogSection } from "@/features/landing/components/BlogSection";
 import { CourseSearch } from "@/features/landing/components/CourseSearch";
-import LoadingIntro from '@/components/shared/LoadingIntro';
 
-export default function LandingPage() {
-  const [isLoading, setIsLoading] = useState(true);
+// Enable ISR - regenerate every 30 minutes for fresh content
+export const revalidate = 1800;
 
-  const handleLoadingComplete = () => {
-    // Small delay to ensure smooth transition
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-  };
+export default async function LandingPage() {
+  // Pre-fetch featured courses server-side for instant loading
+  const featuredCourses = await CourseService.getPublishedCourses({
+    limit: 3
+  });
 
   return (
-    <>
-      {isLoading && <LoadingIntro onComplete={handleLoadingComplete} />}
-      
-      {!isLoading && (
-        <main className="min-h-screen bg-background font-body">
-          {/* Header fades in first */}
-          <Fade duration={600} triggerOnce>
-            <Header />
-          </Fade>
+    <main className="min-h-screen bg-background font-body">
+      <Header />
 
-          {/* Hero section slides up */}
-          <Slide direction="up" duration={800} triggerOnce delay={200}>
-            <HeroSection />
-          </Slide>
+      <HeroSection />
 
-          {/* Rest of the sections with staggered reveals */}
-          <Fade duration={600} triggerOnce delay={400}>
-            <CompaniesSection />
-          </Fade>
+      <CompaniesSection />
 
-          <Fade duration={600} triggerOnce delay={500}>
-            <FeaturedCoursesSection />
-          </Fade>
+      <FeaturedCoursesSection initialCourses={featuredCourses.courses} />
 
-          <Fade duration={600} triggerOnce delay={600}>
-            <CourseSearch />
-          </Fade>
+      <CourseSearch />
 
-          <Fade duration={600} triggerOnce delay={700}>
-            <ActivitiesSection />
-          </Fade>
+      <ActivitiesSection />
 
-          <Fade duration={600} triggerOnce delay={800}>
-            <K12Section />
-          </Fade>
+      <K12Section />
 
-          <Fade duration={600} triggerOnce delay={900}>
-            <BlogSection />
-          </Fade>
+      <BlogSection />
 
-          <Fade duration={600} triggerOnce delay={1000}>
-            <Footer />
-          </Fade>
-        </main>
-      )}
-    </>
+      <Footer />
+    </main>
   );
 }

@@ -6,8 +6,8 @@
  import { Suspense } from 'react';
  import { Skeleton } from '@/components/ui/skeleton';
 
-// Enable ISR - regenerate every hour
-export const revalidate = 3600;
+// Enable ISR - regenerate every 30 minutes for better freshness
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: 'Explore Courses - Sportology Plus Learning Platform',

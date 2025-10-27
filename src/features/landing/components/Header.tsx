@@ -12,10 +12,10 @@ export const Header = () => {
   const { data: session, status } = useSession();
 
   const navLinks = [
-    { href: "/courses", label: "Courses" },
-    { href: "/services", label: "Services" },
-    { href: "/faq", label: "FAQ" },
-    { href: "/about", label: "About" },
+    { href: "/courses", label: "Courses", prefetch: true },
+    { href: "/services", label: "Services", prefetch: false },
+    { href: "/faq", label: "FAQ", prefetch: false },
+    { href: "/about", label: "About", prefetch: false },
   ];
 
   return (
@@ -42,7 +42,7 @@ export const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  prefetch={true}
+                  prefetch={link.prefetch}
                   className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-lg"
                 >
                   {link.label}
@@ -145,7 +145,7 @@ export const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  prefetch={true}
+                  prefetch={link.prefetch}
                   className="block px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >

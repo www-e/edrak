@@ -46,12 +46,14 @@ export const HeroSection = () => {
               <div className="flex flex-col sm:flex-row gap-4 mt-8">
                 <Link
                   href="/services"
+                  prefetch={false}
                   className="inline-block py-4 px-8 bg-primary text-primary-foreground font-semibold text-base rounded-lg shadow-md hover:bg-primary/90 transition-colors text-center"
                 >
                   Browse Services
                 </Link>
                 <Link
                   href="/courses"
+                  prefetch={true}
                   className="inline-block py-4 px-8 border-2 border-primary text-primary font-semibold text-base rounded-lg shadow-md hover:bg-primary hover:text-primary-foreground transition-colors text-center"
                 >
                   Subscribe to Course

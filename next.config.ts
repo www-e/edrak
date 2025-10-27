@@ -45,7 +45,13 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
 
-  // Performance optimizations for Next.js 15
+  // Performance optimizations for instant feel
+  experimental: {
+    optimizeCss: true,
+    scrollRestoration: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
@@ -53,15 +59,24 @@ const nextConfig: NextConfig = {
   // Standalone output for Vercel deployment
   output: 'standalone',
 
-  // Enhanced caching headers for performance
+  // Enhanced caching headers for instant feel
   async headers() {
     return [
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=1800, stale-while-revalidate=3600'
+          }
+        ]
+      },
       {
         source: '/courses/:slug',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=3600, stale-while-revalidate=86400'
+            value: 'public, max-age=1800, stale-while-revalidate=7200'
           }
         ]
       },
@@ -70,7 +85,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=300, stale-while-revalidate=3600'
+            value: 'public, max-age=300, stale-while-revalidate=1800'
           }
         ]
       },
