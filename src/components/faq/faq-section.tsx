@@ -284,11 +284,6 @@ const faqData: Record<string, FAQItem[]> = {
       answer: 'We support multiple currencies including USD, EUR, GBP, and regional currencies like SAR, AED, EGP depending on your location. The platform automatically detects and displays prices in your local currency when possible.'
     },
     {
-      id: 'payment-refunds',
-      question: 'What is your refund policy?',
-      answer: 'We offer a 30-day money-back guarantee for most courses and programs. Refunds are processed within 5-7 business days and are subject to our terms and conditions. Some services may have different refund policies.'
-    },
-    {
       id: 'payment-installments',
       question: 'Can I pay in installments?',
       answer: 'Yes, we offer installment payment options for many of our courses and programs. The number of installments and terms vary depending on the total cost and duration of the service.'

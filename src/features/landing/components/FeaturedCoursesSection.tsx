@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CourseCard } from "@/components/shared/CourseCard";
+import { CourseCard, CourseCardSkeleton } from "@/components/shared/CourseCard";
 
 interface FeaturedCoursesSectionProps {
   initialCourses: Array<{
@@ -31,9 +31,16 @@ export const FeaturedCoursesSection = ({ initialCourses }: FeaturedCoursesSectio
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {initialCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
+          {initialCourses.length > 0 ? (
+            initialCourses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))
+          ) : (
+            // Show skeleton loading while courses load
+            Array.from({ length: 3 }).map((_, i) => (
+              <CourseCardSkeleton key={i} />
+            ))
+          )}
         </div>
         <div className="mt-12 flex items-center justify-center gap-4">
           <Link
