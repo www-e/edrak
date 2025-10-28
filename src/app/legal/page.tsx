@@ -149,7 +149,7 @@ export default function LegalPage() {
                     <h3 className="!text-2xl !font-semibold !pt-4">Third: Cases where a refund is not accepted:</h3>
                     <ul>
                       <li>Receiving the full service or more than 10% of it.</li>
-                      <li>A refund request due to the customer's personal preference without a technical reason or a real problem with the service.</li>
+                      <li>A refund request due to the customer personal preference without a technical reason or a real problem with the service.</li>
                       <li>Refund requests after more than 3 days from the purchase.</li>
                     </ul>
 

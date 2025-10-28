@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { CourseService } from '@/server/services/courseService';
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
@@ -9,18 +8,32 @@ import { Footer } from "@/features/landing/components/Footer";
 import { K12Section } from "@/features/landing/components/K12Section";
 import { BlogSection } from "@/features/landing/components/BlogSection";
 import { CourseSearch } from "@/features/landing/components/CourseSearch";
-import LoadingIntro from '@/components/shared/LoadingIntro';
 
 // Enable ISR - regenerate every 30 minutes for fresh content
 export const revalidate = 1800;
 
-function LandingContent() {
+type FeaturedCourse = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  language: string;
+  slug: string;
+  rating: number;
+  ratingCount: number;
+  createdAt: Date;
+  category: { name: string } | null;
+  professor: { firstName: string; lastName: string };
+  _count: { enrollments: number };
+};
+
+function LandingContent({ featuredCourses }: { featuredCourses: FeaturedCourse[] }) {
   return (
     <main className="min-h-screen bg-background font-body">
       <Header />
       <HeroSection />
       <CompaniesSection />
-      <FeaturedCoursesSection initialCourses={[]} />
+      <FeaturedCoursesSection initialCourses={featuredCourses} />
       <CourseSearch />
       <ActivitiesSection />
       <K12Section />
@@ -32,13 +45,9 @@ function LandingContent() {
 
 export default async function LandingPage() {
   // Pre-fetch featured courses server-side for instant loading
-  const featuredCourses = await CourseService.getPublishedCourses({
+  const { courses: featuredCourses } = await CourseService.getPublishedCourses({
     limit: 3
   });
 
-  return (
-    <Suspense fallback={<LoadingIntro />}>
-      <LandingContent />
-    </Suspense>
-  );
+  return <LandingContent featuredCourses={featuredCourses} />;
 }
