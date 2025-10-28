@@ -48,7 +48,7 @@ export function AuthLayout({
             <div className="w-16 h-16 bg-primary/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 mx-auto">
               <BookOpen className="w-8 h-8 text-primary" />
             </div>
-            <h2 className="text-3xl font-bold mb-4">Welcome to Edraak</h2>
+            <h2 className="text-3xl font-bold mb-4">Welcome to S+</h2>
             <p className="text-white/90 text-lg max-w-md">
               Join thousands of learners advancing their careers with our comprehensive courses
             </p>
@@ -97,7 +97,7 @@ export function AuthLayout({
             <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
               <BookOpen className="w-6 h-6 text-primary" />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Edraak</h2>
+            <h2 className="text-xl font-bold text-foreground">S+</h2>
           </div>
 
           <div className="bg-card/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-border/50 p-8">

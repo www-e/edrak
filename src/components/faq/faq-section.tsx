@@ -86,7 +86,7 @@ const faqData: Record<string, FAQItem[]> = {
     {
       id: 'certificates',
       question: 'Are the certificates accredited?',
-      answer: 'Yes, trainees receive a certified digital certificate from SportologyPlus that can be added to employment files and professional platforms like LinkedIn.'
+      answer: 'Yes, the trainee receives:\n1. A digital certificate accredited by SportologyPlus and the Professional Syndicate for Injuries and Rehabilitation. If you are a graduate of the College of Sports Science or medical colleges, you can obtain a professional practice card after passing the professional practice exam at the syndicate, and you can also change your profession on your ID card.\nThe certificate can also be added to employment files and professional platforms like LinkedIn.'
     },
     {
       id: 'course-format',
@@ -107,11 +107,6 @@ const faqData: Record<string, FAQItem[]> = {
       id: 'course-prerequisites',
       question: 'Are there prerequisites for enrolling in courses?',
       answer: 'Prerequisites vary by course. Basic courses usually have no prerequisites, while advanced courses may require prior knowledge or experience in the field. All requirements are clearly stated in the course description.'
-    },
-    {
-      id: 'course-access',
-      question: 'How long do I have access to course materials?',
-      answer: 'Once enrolled, you have lifetime access to course materials. You can revisit lessons, download resources, and access updates whenever you need them.'
     },
     {
       id: 'course-structure',
@@ -292,6 +287,11 @@ const faqData: Record<string, FAQItem[]> = {
       id: 'payment-receipts',
       question: 'How do I get payment receipts?',
       answer: 'Payment receipts are automatically sent to your email address after successful transactions. You can also access all your receipts and invoices in your account dashboard under the billing section.'
+    },
+    {
+      id: 'cashback-credits',
+      question: 'How do the cashback credits work?',
+      answer: 'For every course you purchase, you will receive a certain amount of credits back to your account. You can use these credits as a discount on future course purchases. The more you learn, the more you earn!'
     }
   ],
   security: [

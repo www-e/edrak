@@ -85,9 +85,7 @@ export const Footer = () => {
         <div className="flex flex-col-reverse md:flex-row justify-between items-center text-center md:text-left gap-y-4">
             <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Sportology Plus. All rights reserved</p>
             <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                <Link href="/terms-of-service" className="text-gray-300 hover:text-white transition-colors text-sm">Terms of Service</Link>
-                <Link href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors text-sm">Privacy Policy</Link>
-                <Link href="/data-analytics-agreement" className="text-gray-300 hover:text-white transition-colors text-sm">Data Analytics Agreement</Link>
+                <Link href="/legal" className="text-gray-300 hover:text-white transition-colors text-sm">Legal & Privacy</Link>
             </div>
         </div>
       </div>

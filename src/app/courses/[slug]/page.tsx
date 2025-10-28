@@ -5,6 +5,7 @@ import { CourseCurriculum } from './CourseCurriculum';
 import { CourseEnroll } from './CourseEnroll';
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import CashbackAnnouncement from '@/components/services/cashback-announcement';
 
 interface Props {
   params: Promise<{
@@ -25,6 +26,7 @@ export default async function CourseDetailPage({ params }: Props) {
       <Suspense fallback={<CourseDetailSkeleton />}>
         <CourseHero course={course} />
         <CourseEnroll course={course} />
+        <CashbackAnnouncement />
         <CourseCurriculum course={course} />
       </Suspense>
     </div>

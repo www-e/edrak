@@ -126,7 +126,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
       await AuthService.signup(completeData);
 
       // If signup is successful, show message and trigger completion callback
-      showSnackbar("Account created successfully! Welcome to Edraak!", "success");
+      showSnackbar("Account created successfully! Welcome to S+!", "success");
       onSignupComplete();
     } catch (error) {
       // Catch errors thrown by the service

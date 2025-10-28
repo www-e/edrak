@@ -7,6 +7,7 @@ import CourseShowcase from '@/components/services/course-showcase';
 import ServiceSection from '@/components/services/service-section';
 import ContentMediaSection from '@/components/services/content-media-section';
 import EmploymentSection from '@/components/services/employment-section';
+import CashbackAnnouncement from '@/components/services/cashback-announcement';
 
 export const metadata: Metadata = {
   title: 'Our Services | SportologyPlus',
@@ -21,6 +22,8 @@ export default function ServicesPage() {
         <ServicesHero />
         <EcosystemGrid />
         <CourseShowcase />
+
+        <CashbackAnnouncement />
 
         <ServiceSection
           id="training"

@@ -88,7 +88,7 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
     });
   };
 
-  const benefits = [ "Full lifetime access", "Access on mobile and TV", "Certificate of completion" ];
+  const benefits = [ "Access on mobile and TV", "Certificate of completion" ];
   const isFree = course.price <= 0;
   const isEnrolled = enrollmentData?.isEnrolled;
 
@@ -112,7 +112,7 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
                   {isFree ? 'Enroll for FREE' : `Just ${appliedCoupon ? appliedCoupon.finalAmount.toFixed(2) : course.price.toFixed(2)} EGP`}
                 </h3>
                 <p className="text-primary-foreground/90 text-lg">
-                  One-time payment for lifetime access
+                  One-time payment
                   {appliedCoupon && (
                     <span className="block text-sm text-green-200 mt-1">
                       You saved {appliedCoupon.discount.toFixed(2)} EGP with coupon {appliedCoupon.code}

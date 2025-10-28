@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, BookOpen, Star, Users } from "lucide-react";
+import { CheckCircle, BookOpen, Star, Users, Clock } from "lucide-react";
 import Link from "next/link";
 
 export default function WelcomePage() {
@@ -55,7 +55,7 @@ export default function WelcomePage() {
               </div>
             </div>
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              Welcome to Edraak!
+              Welcome to S+!
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Your account has been created successfully. You are now ready to start your learning journey with thousands of courses.
@@ -95,13 +95,13 @@ export default function WelcomePage() {
             <Card className="text-center">
               <CardHeader>
                 <div className="flex justify-center mb-2">
-                  <Star className="h-8 w-8 text-primary" />
+                  <Clock className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="text-lg">Lifetime Access</CardTitle>
+                <CardTitle className="text-lg">Flexible Learning</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Once enrolled, enjoy lifetime access to your courses and materials.
+                  Learn at your own pace from anywhere, on any device.
                 </p>
               </CardContent>
             </Card>

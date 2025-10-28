@@ -14,13 +14,12 @@ export default function SignupPage() {
 
   return (
     <AuthLayout
-      title="Join Edraak Today"
+      title="Join S+ Today"
       subtitle="Start your learning journey with thousands of courses"
       imagePosition="right"
       features={[
         "300+ Free Courses",
         "Expert Instructors",
-        "Lifetime Access",
         "Certificate of Completion"
       ]}
     >
