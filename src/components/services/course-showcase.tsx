@@ -1,9 +1,15 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { Check, ArrowRight, Play, FileText, Award, TrendingUp } from 'lucide-react';
+import FeatureGrid from '@/components/shared/FeatureGrid';
+import ContentCards from '@/components/shared/ContentCards';
+import { Play, FileText, Award, TrendingUp, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+
+const features = [
+  { icon: <Play className="w-5 h-5" />, text: 'High-quality video lectures (HD) – simple and clear practical explanations' },
+  { icon: <FileText className="w-5 h-5" />, text: 'Downloadable educational materials – PDF files, presentations, and scientific references' },
+  { icon: <TrendingUp className="w-5 h-5" />, text: 'Interactive activities and assessment tests to enhance understanding and application' },
+  { icon: <Award className="w-5 h-5" />, text: 'Certified digital certificates upon successful course completion' },
+];
 
 const specializations = [
   'Sports Training Sciences',
@@ -16,13 +22,6 @@ const specializations = [
   'And More...'
 ];
 
-const features = [
-  { icon: Play, text: 'High-quality video lectures (HD) – simple and clear practical explanations' },
-  { icon: FileText, text: 'Downloadable educational materials – PDF files, presentations, and scientific references' },
-  { icon: TrendingUp, text: 'Interactive activities and assessment tests to enhance understanding and application' },
-  { icon: Award, text: 'Certified digital certificates upon successful course completion' },
-];
-
 const targetAudience = [
   'Sports Coaches',
   'Professional and Amateur Athletes',
@@ -33,6 +32,47 @@ const targetAudience = [
 ];
 
 export default function CourseShowcase() {
+  const featureGridItems = features.map((feature, index) => ({
+    icon: feature.icon,
+    title: `Feature ${index + 1}`,
+    description: feature.text,
+    color: "from-primary to-primary/70"
+  }));
+
+  const cards = [
+    {
+      title: "Available Specializations",
+      content: (
+        <div className="grid grid-cols-1 gap-3">
+          {specializations.map((spec, index) => (
+            <div key={index} className="flex items-center gap-3 text-sm">
+              <Check className="w-4 h-4 text-primary flex-shrink-0" />
+              <span className="text-muted-foreground">{spec}</span>
+            </div>
+          ))}
+        </div>
+      ),
+      icon: <span className="text-2xl">🏋️</span>,
+      color: "from-primary/10 to-secondary/10"
+    },
+    {
+      title: "Who is this service for?",
+      content: (
+        <div className="space-y-3">
+          {targetAudience.map((audience, index) => (
+            <div key={index} className="flex items-center gap-3 text-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+              <span className="text-foreground">{audience}</span>
+            </div>
+          ))}
+        </div>
+      ),
+      icon: <span className="text-2xl">👨‍🏫</span>,
+      color: "from-primary to-accent",
+      background: "gradient"
+    }
+  ];
+
   return (
     <section id="courses" className="py-32 relative overflow-hidden">
       {/* Background decoration */}
@@ -41,13 +81,7 @@ export default function CourseShowcase() {
       <div className="container max-w-[1400px] mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-5 gap-16 items-center">
           {/* Left: Content (3 columns) */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-3"
-          >
+          <div className="lg:col-span-3">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <span className="text-xl">🎓</span>
@@ -64,25 +98,15 @@ export default function CourseShowcase() {
             </p>
 
             {/* Features grid */}
-            <div className="space-y-4 mb-12">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="flex items-start gap-4 group"
-                >
-                  <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <feature.icon className="w-5 h-5" />
-                  </div>
-                  <p className="text-foreground leading-relaxed pt-1">
-                    {feature.text}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+            <FeatureGrid
+              title=""
+              description=""
+              items={featureGridItems}
+              columns={2}
+              showIcon={true}
+              centerContent={false}
+              cardStyle="default"
+            />
 
             {/* Pricing */}
             <div className="bg-white/60 border border-border rounded-2xl p-6 mb-8">
@@ -105,10 +129,9 @@ export default function CourseShowcase() {
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gap-2 group" asChild>
+              <Button size="lg" className="gap-2" asChild>
                 <Link href="/courses">
                   <span>Browse Courses Now</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="gap-2" asChild>
@@ -117,62 +140,18 @@ export default function CourseShowcase() {
                 </Link>
               </Button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right: Info Cards (2 columns) */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            {/* Specializations Card */}
-            <div className="bg-white/60 border border-border rounded-2xl p-8 hover:shadow-xl transition-shadow">
-              <h3 className="text-xl font-bold font-heading mb-6 flex items-center gap-2">
-                <span className="text-2xl">🏋️</span>
-                Available Specializations
-              </h3>
-              <div className="grid grid-cols-1 gap-3">
-                {specializations.map((spec, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="flex items-center gap-3 text-sm"
-                  >
-                    <Check className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{spec}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            {/* Target Audience Card */}
-            <div className="bg-gradient-to-br from-primary to-accent text-white rounded-2xl p-8 hover:shadow-xl transition-shadow">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="text-2xl">👨‍🏫</span>
-                Who is this service for?
-              </h3>
-              <div className="space-y-3">
-                {targetAudience.map((audience, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="flex items-center gap-3 text-sm"
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full bg-white flex-shrink-0" />
-                    <span className="text-white/90">{audience}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
+          <div className="lg:col-span-2">
+            <ContentCards
+              cards={cards}
+              columns={2}
+              spacing="large"
+              background="glass"
+              hoverEffect={true}
+            />
+          </div>
         </div>
       </div>
     </section>

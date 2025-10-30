@@ -34,7 +34,7 @@ const services = [
     title: "Customized Nutrition Programs",
     subtitle: "",
     description: "Enjoy nutrition plans designed specifically for your goals, whether you are a professional athlete or seeking a healthy and balanced lifestyle.",
-    link: "/services/nutrition",
+    link: "/nutrition",
     linkText: "Start your program →",
   },
   {

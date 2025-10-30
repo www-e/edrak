@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Check, Dumbbell, Apple, Brain, LucideIcon } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 interface ServiceSectionProps {
@@ -15,6 +16,8 @@ interface ServiceSectionProps {
   icon: 'dumbbell' | 'apple' | 'brain';
   gradient: string;
   reverse?: boolean;
+  ctaText?: string;
+  ctaHref?: string;
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -33,7 +36,9 @@ export default function ServiceSection({
   price,
   icon,
   gradient,
-  reverse = false
+  reverse = false,
+  ctaText = "Book Now",
+  ctaHref
 }: ServiceSectionProps) {
   const Icon = iconMap[icon];
 
@@ -100,9 +105,17 @@ export default function ServiceSection({
                 <p className="text-sm text-muted-foreground mb-1">Price</p>
                 <p className="text-3xl font-bold text-foreground">{price}</p>
               </div>
-              <Button size="lg" className={`gap-2 bg-gradient-to-r ${gradient} text-white border-0 hover:opacity-90`}>
-                Book Now
-              </Button>
+              {ctaHref ? (
+                <Link href={ctaHref}>
+                  <Button size="lg" className={`gap-2 bg-gradient-to-r ${gradient} text-white border-0 hover:opacity-90`}>
+                    {ctaText}
+                  </Button>
+                </Link>
+              ) : (
+                <Button size="lg" className={`gap-2 bg-gradient-to-r ${gradient} text-white border-0 hover:opacity-90`}>
+                  {ctaText}
+                </Button>
+              )}
             </div>
           </motion.div>
 

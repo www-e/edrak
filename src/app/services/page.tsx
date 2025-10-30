@@ -57,6 +57,8 @@ export default function ServicesPage() {
           icon="apple"
           gradient="from-green-500 to-emerald-600"
           reverse={true}
+          ctaText="View Nutrition Packages"
+          ctaHref="/nutrition"
         />
 
         <ServiceSection
