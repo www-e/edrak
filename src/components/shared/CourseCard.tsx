@@ -47,7 +47,7 @@ export function CourseCard({ course }: CourseCardProps) {
       <Card className="group overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
         <div className="relative h-48 w-full">
           <Image
-            src={`/images/course${(course.id.charCodeAt(0) % 3) + 1}.png`}
+            src={course.thumbnailUrl || `/images/course${(course.id.charCodeAt(0) % 3) + 1}.png`}
             alt={course.title}
             fill
             className="object-cover rounded-t-lg"

@@ -53,3 +53,5 @@ project-milestone/
 package-lock.json
 
 rules/
+
+docs/

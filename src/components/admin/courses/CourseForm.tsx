@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Category } from "@prisma/client";
+import { FileUpload } from "@/components/admin/media/file-upload";
 
 interface CourseFormProps {
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -24,6 +25,7 @@ interface CourseFormProps {
   categories: Category[] | null | undefined;
   submitButtonText?: string;
   handleTitleChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  courseId?: string;
 }
 
 export function CourseForm({
@@ -34,6 +36,7 @@ export function CourseForm({
   categories,
   submitButtonText = "Submit",
   handleTitleChange,
+  courseId,
 }: CourseFormProps) {
   return (
     <Form {...form}>
@@ -171,6 +174,43 @@ export function CourseForm({
             />
           </div>
         </div>
+
+        {/* Thumbnail Upload Section - Only show for edit mode */}
+        {courseId && (
+          <div className="space-y-4">
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold mb-4">Course Thumbnail</h3>
+              <FileUpload
+                courseId={courseId}
+                lessonId={undefined} // For course thumbnails, no lesson ID
+                onUploadComplete={(attachment) => {
+                  form.setValue('thumbnailUrl', attachment.bunnyCdnUrl);
+                }}
+                acceptedFileTypes={['image/*']}
+                maxFileSize={5} // 5MB for thumbnails
+              />
+              {form.watch('thumbnailUrl') && (
+                <div className="mt-4 p-3 bg-muted rounded-md">
+                  <p className="text-sm font-medium mb-2">Current Thumbnail:</p>
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={form.watch('thumbnailUrl') || ''} 
+                      alt="Current thumbnail" 
+                      className="w-16 h-16 object-cover rounded-md border"
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => form.setValue('thumbnailUrl', null)}
+                      className="text-destructive hover:underline text-sm"
+                    >
+                      Remove thumbnail
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" variant="outline" onClick={() => window.history.back()} disabled={isPending}>

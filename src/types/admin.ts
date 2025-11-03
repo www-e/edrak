@@ -58,6 +58,7 @@ export const CreateCourseInputSchema = z.object({
   visibility: z.nativeEnum(CourseVisibility),
   professorId: z.string().uuid(),
   categoryId: z.string().uuid().nullable().optional(), // Prisma: String? => nullable and optional
+  thumbnailUrl: z.string().url().optional().nullable(),
 });
 export type CreateCourseInput = z.infer<typeof CreateCourseInputSchema>;
 
@@ -96,6 +97,7 @@ export const UpdateCourseInputSchema = z.object({
   visibility: z.nativeEnum(CourseVisibility).optional(),
   professorId: z.string().uuid().optional(),
   categoryId: z.string().uuid().nullable().optional(),
+  thumbnailUrl: z.string().url().optional().nullable(),
 });
 export type UpdateCourseInput = z.infer<typeof UpdateCourseInputSchema>;
 export const UpdateLessonInputSchema = z.object({

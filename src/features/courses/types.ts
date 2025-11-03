@@ -32,6 +32,7 @@ export interface Course {
   slug: string;
   rating: number;
   ratingCount: number;
+  thumbnailUrl?: string | null;
   category: Category | null;
   professor: Professor;
   lessons?: Lesson[];
@@ -48,6 +49,7 @@ export interface CourseListing {
   slug: string;
   rating: number;
   ratingCount: number;
+  thumbnailUrl?: string | null;
   createdAt: Date;
   category: Category | null;
   professor: Professor;

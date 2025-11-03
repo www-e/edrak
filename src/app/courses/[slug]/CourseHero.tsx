@@ -146,7 +146,7 @@ export function CourseHero({ course }: CourseHeroProps) {
               <div className="relative w-full max-w-lg">
                 <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-2xl border border-border/50">
                   <Image
-                    src={`/images/course${(course.id.charCodeAt(0) % 3) + 1}.png`}
+                    src={course.thumbnailUrl || `/images/course${(course.id.charCodeAt(0) % 3) + 1}.png`}
                     alt={course.title}
                     fill
                     className="object-cover"

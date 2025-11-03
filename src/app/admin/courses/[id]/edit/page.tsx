@@ -103,6 +103,7 @@ export default function EditCoursePage() {
         professors={professors}
         categories={categories}
         submitButtonText="Save Changes"
+        courseId={courseId}
       />
     </div>
   );
