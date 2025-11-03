@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/features/landing/components/Header";
 import { Footer } from "@/features/landing/components/Footer";
 import { Award, Target, Users, TrendingUp, Globe, BookOpen } from 'lucide-react';
@@ -206,26 +207,57 @@ export default function AboutPage() {
 
       {/* Our Story */}
       <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Our Story</h2>
-          <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-200">
-            <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-              <p>
-                Founded by a team of sports science experts and digital education specialists, 
-                SportologyPlus emerged from a clear market need: the absence of high-quality, 
-                research-based sports education content in Arabic.
-              </p>
-              <p>
-                What began as a small initiative has evolved into a comprehensive platform serving 
-                athletes, coaches, nutritionists, and sports professionals across 15+ countries. 
-                Our growth reflects the market need for accessible, science-backed sports education.
-              </p>
-              <p>
-                Today, SportologyPlus stands as a trusted authority in sports science education, 
-                combining academic rigor with practical application through our digital-first approach. 
-                We continue to expand our course offerings, enhance our platform technology, and 
-                build partnerships with leading sports institutions.
-              </p>
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-4xl font-bold text-gray-900 mb-12 text-center">Our Story</h2>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Story Content */}
+            <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-200">
+              <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+                <p>
+                  Founded by a team of sports science experts and digital education specialists,
+                  SportologyPlus emerged from a clear market need: the absence of high-quality,
+                  research-based sports education content in Arabic.
+                </p>
+                <p>
+                  What began as a small initiative has evolved into a comprehensive platform serving
+                  athletes, coaches, nutritionists, and sports professionals across 15+ countries.
+                  Our growth reflects the market need for accessible, science-backed sports education.
+                </p>
+                <p>
+                  Today, SportologyPlus stands as a trusted authority in sports science education,
+                  combining academic rigor with practical application through our digital-first approach.
+                  We continue to expand our course offerings, enhance our platform technology, and
+                  build partnerships with leading sports institutions.
+                </p>
+              </div>
+            </div>
+            
+            {/* Certifications Image */}
+            <div className="relative">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <Image
+                  src="/images/proof-of-certifications.jpg"
+                  alt="Professional certifications and credentials"
+                  fill
+                  className="object-cover rounded-2xl"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  unoptimized={true}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+              </div>
+              
+              {/* Floating badge */}
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Award className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Certified Quality</p>
+                    <p className="text-xs text-muted-foreground">International Standards</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

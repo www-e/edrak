@@ -41,6 +41,8 @@ export default function ServicesPage() {
           icon="dumbbell"
           gradient="from-primary to-blue-500"
           reverse={false}
+          imageSrc="/images/our-gym.jpg"
+          imageAlt="Professional gym facility"
         />
 
         <ServiceSection
@@ -59,6 +61,8 @@ export default function ServicesPage() {
           reverse={true}
           ctaText="View Nutrition Packages"
           ctaHref="/nutrition"
+          imageSrc="/images/nutrition-specialist.jpg"
+          imageAlt="Nutrition specialist consultation"
         />
 
         <ServiceSection
@@ -75,6 +79,8 @@ export default function ServicesPage() {
           icon="brain"
           gradient="from-purple-500 to-pink-500"
           reverse={false}
+          imageSrc="/images/milkshake-product.jpg"
+          imageAlt="Mental wellness and psychology consultation"
         />
 
         <ContentMediaSection />

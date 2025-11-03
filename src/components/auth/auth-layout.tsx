@@ -17,7 +17,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   children,
-  imageSrc = "https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/8e9b55875528c3338eef2de87c4a112f-2.png?",
+  imageSrc = "/images/auth-placeholder.jpg",
   imageAlt = "Students learning together",
   title,
   subtitle,

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Check, Dumbbell, Apple, Brain, LucideIcon } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 interface ServiceSectionProps {
@@ -18,6 +19,8 @@ interface ServiceSectionProps {
   reverse?: boolean;
   ctaText?: string;
   ctaHref?: string;
+  imageSrc?: string;
+  imageAlt?: string;
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -38,7 +41,9 @@ export default function ServiceSection({
   gradient,
   reverse = false,
   ctaText = "Book Now",
-  ctaHref
+  ctaHref,
+  imageSrc,
+  imageAlt = "Service illustration"
 }: ServiceSectionProps) {
   const Icon = iconMap[icon];
 
@@ -127,20 +132,47 @@ export default function ServiceSection({
             transition={{ duration: 0.6, delay: 0.2 }}
             className={reverse ? 'lg:order-1' : ''}
           >
-            <div className={`relative aspect-square rounded-3xl bg-gradient-to-br ${gradient} p-1 group hover:scale-105 transition-transform duration-300`}>
-              <div className="w-full h-full rounded-3xl bg-background p-12 flex items-center justify-center">
-                <Icon className={`w-full h-full text-transparent bg-clip-text bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
+            {imageSrc ? (
+              /* Image-based visual */
+              <div className={`relative aspect-[4/3] rounded-3xl bg-gradient-to-br ${gradient} p-1 group hover:scale-105 transition-transform duration-300`}>
+                <div className="w-full h-full rounded-3xl bg-background relative overflow-hidden">
+                  <Image
+                    src={imageSrc}
+                    alt={imageAlt}
+                    fill
+                    className="object-cover rounded-3xl"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    unoptimized={true}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                </div>
+                
+                {/* Floating badge */}
+                <motion.div
+                  className="absolute -top-4 -right-4 w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Icon className={`w-12 h-12 bg-gradient-to-br ${gradient} text-transparent bg-clip-text`} />
+                </motion.div>
               </div>
-              
-              {/* Floating elements */}
-              <motion.div
-                className="absolute -top-4 -right-4 w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center"
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Icon className={`w-12 h-12 bg-gradient-to-br ${gradient} text-transparent bg-clip-text`} />
-              </motion.div>
-            </div>
+            ) : (
+              /* Icon-based visual (original design) */
+              <div className={`relative aspect-square rounded-3xl bg-gradient-to-br ${gradient} p-1 group hover:scale-105 transition-transform duration-300`}>
+                <div className="w-full h-full rounded-3xl bg-background p-12 flex items-center justify-center">
+                  <Icon className={`w-full h-full text-transparent bg-clip-text bg-gradient-to-br ${gradient} opacity-10 group-hover:opacity-20 transition-opacity`} />
+                </div>
+                
+                {/* Floating elements */}
+                <motion.div
+                  className="absolute -top-4 -right-4 w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Icon className={`w-12 h-12 bg-gradient-to-br ${gradient} text-transparent bg-clip-text`} />
+                </motion.div>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

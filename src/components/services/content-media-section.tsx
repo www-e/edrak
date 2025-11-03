@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Play, Youtube, Podcast as PodcastIcon, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const platforms = [
   { name: 'YouTube', icon: Youtube, link: '#' },
@@ -28,8 +29,18 @@ export default function ContentMediaSection() {
           >
             <div className="aspect-video rounded-3xl bg-gradient-to-br from-orange-500 to-red-500 p-1 shadow-2xl">
               <div className="w-full h-full rounded-3xl bg-dark-navy relative overflow-hidden">
-                {/* Mockup content */}
-                <div className="absolute inset-0 flex items-center justify-center">
+                {/* Podcast Image */}
+                <Image
+                  src="/images/podcast-image.jpg"
+                  alt="Podcast recording session"
+                  fill
+                  className="object-cover rounded-3xl"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  unoptimized={true}
+                />
+                
+                {/* Play overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                   <motion.div
                     whileHover={{ scale: 1.1 }}
                     className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center cursor-pointer group"

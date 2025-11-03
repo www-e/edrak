@@ -69,12 +69,12 @@ export const Footer = () => {
                 <a href="https://play.google.com/store/apps/details?id=org.edraak.android" target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play" className="block w-[160px] h-[48px]">
                     <div className="bg-black border border-gray-700 rounded-md flex items-center justify-center h-full w-full">
                          {/* Placeholder for Google Play Badge */}
-                         <Image src="https://www.edraak.org/static/images/google-play-badge.f8d429a39f28.png" width={160} height={48} alt="Get it on Google Play" />
+                         <Image src="/images/google-play-badge-ar.svg" width={160} height={48} alt="Get it on Google Play" />
 
                     </div>
                 </a>
                  <a href="https://apps.apple.com/us/app/edraak/id1062539639" target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store" className="block w-[160px] h-[48px]">
-                    <Image src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/ios.624bd34de543-12.svg?" width={160} height={48} alt="Download on the App Store" />
+                    <Image src="/images/apple-store-badge-ar.svg" width={160} height={48} alt="Download on the App Store" />
                  </a>
              </div>
           </div>
