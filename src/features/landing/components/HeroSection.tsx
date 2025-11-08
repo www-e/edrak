@@ -8,15 +8,15 @@ import { Fade, Slide } from 'react-awesome-reveal';
 const features = [
   {
     text: 'Educational Courses',
-    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1df27a1f65d7a11c430110d8c0b19059-3.svg?',
+    icon: '/globe.svg',
   },
   {
     text: 'Expert Consultations',
-    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/24a5b0927f8bfdee096f8788396076ef-4.svg?',
+    icon: '/file.svg',
   },
   {
     text: 'Personalized Programs',
-    icon: 'https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/1b5b8c5bbcaaa4382cf7d3656fd0d067-5.svg?',
+    icon: '/window.svg',
   },
 ];
 
@@ -26,8 +26,8 @@ export const HeroSection = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative pt-16 pb-12 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           
-          {/* Left side - Text content */}
-          <div className="z-10">
+          {/* Left side - Text content - should be last on mobile */}
+          <div className="z-10 order-2 lg:order-none">
             <Fade direction="up" cascade damping={0.1} triggerOnce>
               <h1 className="text-5xl font-bold font-display text-foreground leading-tight">
                 Sportology Plus – Ambition, Science, Progress
@@ -85,28 +85,18 @@ export const HeroSection = () => {
             </Fade>
           </div>
           
-          {/* Right side - Images */}
-          <Fade direction="right" delay={400} triggerOnce>
-            <div className="relative h-[450px] lg:h-[550px] order-first lg:order-last">
-              <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/52c174da636f73477b63e89dc2f23932-6.svg?"
-                alt="Decorative background shape"
-                fill
-                style={{ objectFit: 'contain' }}
-                className="absolute -top-4 -left-16"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/images/8e9b55875528c3338eef2de87c4a112f-2.png?"
-                alt="Two students, a woman and a man, smiling"
-                fill
-                style={{ objectFit: 'contain' }}
-                className="relative z-10"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority={true}
-              />
-            </div>
-          </Fade>
+          {/* Right side - Images - should be first on mobile */}
+          <div className="relative h-[450px] lg:h-[550px] order-1 lg:order-none">
+            <Image
+              src="/images/hero-image-Splus.png"
+              alt="Hero image for Sportology Plus"
+              fill
+              style={{ objectFit: 'contain' }}
+              className="relative z-10"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority={true}
+            />
+          </div>
 
         </div>
       </div>

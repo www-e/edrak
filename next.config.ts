@@ -11,12 +11,6 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'slelguoygbfzlpylpxfs.supabase.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
         hostname: 'edraak-marketing-uploads.edraak.org',
         port: '',
         pathname: '/**',

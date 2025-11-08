@@ -17,7 +17,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({
   children,
-  imageSrc = "/images/auth-placeholder.jpg",
+  imageSrc = "/images/hero-image-Splus.png",
   imageAlt = "Students learning together",
   title,
   subtitle,

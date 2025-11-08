@@ -16,7 +16,7 @@ export const K12Section = () => {
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="relative lg:w-1/2 flex justify-center items-center">
               <Image
-                src="https://slelguoygbfzlpylpxfs.supabase.co/storage/v1/object/public/test-clones/14c4138d-f12b-415d-bee8-dbce5980a4b7-edraak-org/assets/svgs/e427e8539d92d9026baa5ce2625a1a2d-11.svg?"
+                src="/images/our-gym.jpg"
                 alt="Illustration of a student learning on a laptop with educational icons around"
                 width={488}
                 height={350}
