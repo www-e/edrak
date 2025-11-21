@@ -6,6 +6,7 @@ import PsychologyPackages from '@/components/psychology/psychology-packages';
 import PsychologyForm from '@/components/psychology/psychology-form';
 import PsychologyFAQ from '@/components/psychology/psychology-faq';
 import CallToActionSection from '@/components/shared/CallToAction';
+import ImageGallery from '@/components/services/ImageGallery';
 
 export const metadata: Metadata = {
   title: 'Sports Psychology Consultations | SportologyPlus',
@@ -18,6 +19,27 @@ export default function PsychologyPage() {
       <Header />
       <main className="relative">
         <PsychologyHero />
+        <ImageGallery
+          title="Psychology Consultation Gallery"
+          subtitle="Visual insights into our sports psychology services"
+          images={[
+            {
+              src: "/images/doctor-talks-with-client.png",
+              alt: "Sports psychologist talking with client",
+              caption: "One-on-one consultation session"
+            },
+            {
+              src: "/images/client-talks-with-doctor.png",
+              alt: "Client speaking with sports psychologist",
+              caption: "Understanding mental performance needs"
+            },
+            {
+              src: "/images/male-doctor-with-client.png",
+              alt: "Male sports psychologist with client",
+              caption: "Professional psychological support"
+            }
+          ]}
+        />
         <PsychologyPackages />
         <PsychologyForm />
         <PsychologyFAQ />
