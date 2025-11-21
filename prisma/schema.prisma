@@ -333,3 +333,130 @@ model ProgressMilestone {
   @@index([courseId])
   @@index([milestoneType])
 }
+
+// Psychology Application System
+model PsychologyApplication {
+  id                    String                    @id @default(uuid())
+  
+  // Personal Data
+  fullName              String
+  gender                String
+  age                   Int
+  email                 String
+  phone                 String?
+  country               String
+  city                  String
+  previousTrainer       String
+  previousPsychologist  String
+  medications           String
+  injuries              String
+  
+  // Sports Data
+  primarySport          String
+  trainingAge           String
+  weeklyDays            String
+  workoutDuration       String
+  preparingForCompetition String
+  competitionDate       String?
+  
+  // Current Mental State
+  affectingPerformance  String
+  previousBreakdown     String
+  generalMentalState    String
+  sleepDifficulties     String
+  anxietyEpisodes       String
+  
+  // Goals
+  primaryGoal           String
+  sessionPreference     String
+  combineWithTraining   String?
+  
+  // Application Management
+  status                ApplicationStatus        @default(PENDING)
+  notes                 String?
+  assignedPsychologist  String?
+  firstSessionDate      DateTime?
+  
+  // Metadata
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([primarySport])
+}
+
+// Training Application System  
+model TrainingApplication {
+  id                    String                    @id @default(uuid())
+  
+  // Personal Data
+  fullName              String
+  gender                String
+  age                   Int
+  email                 String
+  phone                 String?
+  country               String
+  city                  String
+  previousTrainer       String
+  injuries              String
+  
+  // Training Data
+  trainingAge           String
+  weeklyDays            String
+  dailyExercises        String
+  workoutDuration       String
+  exerciseTypes         String
+  primarySport          String?
+  
+  // Body Measurements
+  weight                String
+  height                String
+  chestCircumference    String?
+  waistCircumference    String?
+  hipCircumference      String?
+  armCircumference      String?
+  thighCircumference    String?
+  
+  // Fitness Tests
+  squatTest             String?
+  pushupTest            String?
+  enduranceTest         String?
+  flexibilityTest       String?
+  
+  // Body Photos (stored as JSON metadata)
+  frontPhoto            String? // file path/URL
+  sidePhoto             String? // file path/URL
+  backPhoto             String? // file path/URL
+  
+  // Goals
+  primaryGoal           String
+  timeframe             String?
+  nutritionPlan         String?
+  
+  // Application Management
+  status                ApplicationStatus        @default(PENDING)
+  notes                 String?
+  assignedTrainer       String?
+  preferredProgram      String? // Home, Gym, Sport-Specific
+  
+  // Metadata
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([primaryGoal])
+  @@index([preferredProgram])
+}
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}

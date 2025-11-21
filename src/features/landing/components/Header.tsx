@@ -15,6 +15,8 @@ export const Header = () => {
   const navLinks = [
     { href: "/courses", label: "Courses", prefetch: true },
     { href: "/nutrition", label: "Nutrition", prefetch: true },
+    { href: "/psychology", label: "Psychology", prefetch: true },
+    { href: "/training", label: "Training", prefetch: true },
     { href: "/services", label: "Services", prefetch: false },
     { href: "/faq", label: "FAQ", prefetch: false },
     { href: "/about", label: "About", prefetch: false },

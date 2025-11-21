@@ -3,6 +3,7 @@ import { adminUserRouter } from "./user";
 import { adminCourseRouter } from "./course";
 import { adminCommerceRouter } from "./commerce";
 import { adminCategoryRouter } from "./category"; 
+import { adminApplicationsRouter } from "./applications";
 
 /**
  * This is the primary router for all admin-related API endpoints.
@@ -15,4 +16,5 @@ export const adminRouter = createTRPCRouter({
   course: adminCourseRouter,
   commerce: adminCommerceRouter,
   category: adminCategoryRouter,
+  applications: adminApplicationsRouter,
 });

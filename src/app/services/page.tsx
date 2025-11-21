@@ -41,6 +41,8 @@ export default function ServicesPage() {
           icon="dumbbell"
           gradient="from-primary to-blue-500"
           reverse={false}
+          ctaText="Get Started"
+          ctaHref="/training"
           imageSrc="/images/our-gym.jpg"
           imageAlt="Professional gym facility"
         />
@@ -79,6 +81,8 @@ export default function ServicesPage() {
           icon="brain"
           gradient="from-purple-500 to-pink-500"
           reverse={false}
+          ctaText="Book Consultation"
+          ctaHref="/psychology"
           imageSrc="/images/milkshake-product.jpg"
           imageAlt="Mental wellness and psychology consultation"
         />

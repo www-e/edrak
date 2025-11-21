@@ -134,3 +134,134 @@ export const courseLessonParamsSchema = z.object({
  * Schema for lesson creation within a course
  */
 export const createLessonInCourseSchema = createLessonSchema.omit({ courseId: true });
+
+/**
+ * Psychology Application Validation Schema
+ */
+export const psychologyApplicationSchema = z.object({
+  // Personal Data
+  fullName: z.string().min(1, "Full name is required"),
+  gender: z.enum(["male", "female"]),
+  age: z.number().int().min(16, "Must be at least 16 years old").max(100, "Must be under 100 years old"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  country: z.string().min(1, "Country is required"),
+  city: z.string().min(1, "City is required"),
+  previousTrainer: z.enum(["yes", "no"]),
+  previousPsychologist: z.enum(["yes", "no"]),
+  medications: z.string().min(1, "Please specify medications or write 'No'"),
+  injuries: z.string().min(1, "Please specify injuries or write 'No'"),
+
+  // Sports Data
+  primarySport: z.string().min(1, "Primary sport is required"),
+  trainingAge: z.string().min(1, "Training age is required"),
+  weeklyDays: z.string().min(1, "Weekly training days is required"),
+  workoutDuration: z.string().min(1, "Workout duration is required"),
+  preparingForCompetition: z.enum(["yes", "no"]),
+  competitionDate: z.string().optional(),
+
+  // Current Mental State
+  affectingPerformance: z.string().min(1, "Please describe what affects your performance"),
+  previousBreakdown: z.enum(["yes", "no"]),
+  generalMentalState: z.enum(["stable", "unstable", "stressed", "unclear"]),
+  sleepDifficulties: z.enum(["yes", "no"]),
+  anxietyEpisodes: z.enum(["yes", "no"]),
+
+  // Goals
+  primaryGoal: z.enum([
+    "performance-improvement",
+    "stress-management",
+    "confidence-building",
+    "pre-competition-support",
+    "psychological-rehabilitation"
+  ]),
+  sessionPreference: z.enum(["individual", "general"]),
+  combineWithTraining: z.string().optional(),
+});
+
+/**
+ * Training Application Validation Schema
+ */
+export const trainingApplicationSchema = z.object({
+  // Personal Data
+  fullName: z.string().min(1, "Full name is required"),
+  gender: z.enum(["male", "female"]),
+  age: z.number().int().min(16, "Must be at least 16 years old").max(100, "Must be under 100 years old"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  country: z.string().min(1, "Country is required"),
+  city: z.string().min(1, "City is required"),
+  previousTrainer: z.enum(["yes", "no"]),
+  injuries: z.string().min(1, "Please specify injuries or write 'No'"),
+  
+  // Training Data
+  trainingAge: z.string().min(1, "Training age is required"),
+  weeklyDays: z.string().min(1, "Weekly training days is required"),
+  dailyExercises: z.string().min(1, "Daily exercises count is required"),
+  workoutDuration: z.string().min(1, "Workout duration is required"),
+  exerciseTypes: z.enum(["cardio", "resistance", "flexibility", "mixed"]),
+  primarySport: z.string().optional(),
+  
+  // Body Measurements
+  weight: z.string().min(1, "Weight is required"),
+  height: z.string().min(1, "Height is required"),
+  chestCircumference: z.string().optional(),
+  waistCircumference: z.string().optional(),
+  hipCircumference: z.string().optional(),
+  armCircumference: z.string().optional(),
+  thighCircumference: z.string().optional(),
+  
+  // Fitness Tests
+  squatTest: z.string().optional(),
+  pushupTest: z.string().optional(),
+  enduranceTest: z.string().optional(),
+  flexibilityTest: z.string().optional(),
+  
+  // Body Photos (will be handled separately for file uploads)
+  frontPhoto: z.string().optional(),
+  sidePhoto: z.string().optional(),
+  backPhoto: z.string().optional(),
+  
+  // Goals
+  primaryGoal: z.enum([
+    "muscle-gain",
+    "weight-loss",
+    "performance",
+    "rehabilitation",
+    "general-fitness"
+  ]),
+  timeframe: z.string().optional(),
+  nutritionPlan: z.string().optional(),
+});
+
+/**
+ * Application Status Enum
+ */
+export const ApplicationStatusEnum = z.enum([
+  "PENDING",
+  "UNDER_REVIEW", 
+  "APPROVED",
+  "REJECTED",
+  "IN_PROGRESS",
+  "COMPLETED"
+]);
+
+/**
+ * Schema for updating psychology application status
+ */
+export const updatePsychologyApplicationSchema = z.object({
+  status: ApplicationStatusEnum,
+  notes: z.string().optional(),
+  assignedPsychologist: z.string().optional(),
+  firstSessionDate: z.date().optional(),
+});
+
+/**
+ * Schema for updating training application status
+ */
+export const updateTrainingApplicationSchema = z.object({
+  status: ApplicationStatusEnum,
+  notes: z.string().optional(),
+  assignedTrainer: z.string().optional(),
+  preferredProgram: z.enum(["home", "gym", "sportSpecific"]).optional(),
+});
