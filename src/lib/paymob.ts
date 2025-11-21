@@ -2,6 +2,7 @@ import { serverEnv } from "@/lib/env-server";
 import { db } from "@/server/db";
 import { Course, User, EnrollmentStatus } from "@prisma/client";
 import crypto from "crypto";
+import { WalletService } from "@/lib/wallet-service";
 
 const PAYMOB_API_URL = serverEnv.PAYMOB_BASE_URL;
 
@@ -184,50 +185,92 @@ export class PayMobService {
   public static async processPaymentUpdate(paymobOrderId: string, success: boolean, transactionId?: number) {
     const payment = await db.payment.findFirst({
       where: { paymobOrderId: paymobOrderId } as Record<string, unknown>,
-      include: { user: { select: { id: true, firstName: true, lastName: true } }, course: { select: { id: true, title: true } } }
+      include: { 
+        user: { select: { id: true, firstName: true, lastName: true } }, 
+        course: { 
+          select: { 
+            id: true, 
+            title: true, 
+            cashbackType: true, 
+            cashbackValue: true,
+            price: true
+          } 
+        } 
+      }
     });
 
     if (!payment) return null;
 
     const newStatus = success ? "COMPLETED" : "FAILED";
 
-    const result = await db.$transaction(async (tx) => {
-      const updatedPayment = await tx.payment.update({
+    let enrollmentId: string | undefined;
+    let enrollmentCreated = false;
+
+    // Use transaction to ensure atomicity of payment update, enrollment, and cashback
+    await db.$transaction(async (tx) => {
+      // 1. Update Payment Status
+      await tx.payment.update({
         where: { id: payment.id },
-        data: { status: newStatus }
+        data: { 
+          status: newStatus,
+          completedAt: success ? new Date() : null
+        }
       });
 
-      let enrollmentResult = null;
       if (success) {
-        const existingEnrollment = await tx.enrollment.findUnique({
-          where: { userId_courseId: { userId: payment.userId, courseId: payment.courseId! } }
+        // 2. Create Enrollment (Idempotent check)
+        const existingEnrollment = await tx.enrollment.findFirst({
+          where: { userId: payment.userId, courseId: payment.courseId }
         });
 
         if (!existingEnrollment) {
-          const newEnrollment = await tx.enrollment.create({
+          const enrollment = await tx.enrollment.create({
             data: {
               userId: payment.userId,
-              courseId: payment.courseId!,
+              courseId: payment.courseId,
               status: EnrollmentStatus.ACTIVE,
               completionPercentage: 0,
-              lastAccessedAt: null
             }
           });
-          enrollmentResult = { success: true, enrollmentId: newEnrollment.id, created: true };
+          enrollmentCreated = true;
+          enrollmentId = enrollment.id;
         } else {
-          enrollmentResult = { success: true, enrollmentId: existingEnrollment.id, created: false };
+          enrollmentId = existingEnrollment.id;
+        }
+
+        // 3. Credit Cashback (if applicable)
+        const cashbackAmount = WalletService.calculateCashback(payment.course, payment.amount.toNumber());
+        
+        if (cashbackAmount > 0) {
+          // Check if cashback already credited for this payment to ensure idempotency
+          const existingCashback = await tx.walletTransaction.findFirst({
+            where: {
+              relatedPaymentId: payment.id,
+              type: "CASHBACK_CREDIT"
+            }
+          });
+
+          if (!existingCashback) {
+            await WalletService.creditCashback(
+              payment.userId,
+              cashbackAmount,
+              payment.id,
+              payment.course.title,
+              tx // Pass the transaction client
+            );
+          }
         }
       }
-
-      return { payment: updatedPayment, enrollment: enrollmentResult };
     });
 
     return {
       paymentId: payment.id,
       status: newStatus,
-      success,
-      enrollment: result.enrollment,
-      transactionId
+      transactionId: transactionId,
+      enrollment: {
+        success: enrollmentCreated,
+        enrollmentId: enrollmentId
+      }
     };
   }
 }

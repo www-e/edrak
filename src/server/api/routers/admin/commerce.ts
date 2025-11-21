@@ -4,8 +4,12 @@ import { UpdateCouponInputSchema } from "@/types/admin";
 import {
   createCouponSchema,
   listQuerySchema,
-  idParamSchema
+  idParamSchema,
+  adminWalletAdjustmentSchema,
+  walletTransactionQuerySchema,
+  cashbackConfigSchema,
 } from "@/lib/validation-schemas";
+import { z } from "zod";
 
 // Use shared schemas
 const CouponInputSchema = createCouponSchema;
@@ -69,5 +73,77 @@ export const adminCommerceRouter = createTRPCRouter({
     .input(idParamSchema)
     .query(async ({ input }) => {
       return AdminCommerceService.getCouponById(input.id);
+    }),
+
+  // ==================== WALLET MANAGEMENT ====================
+
+  /**
+   * Adjust user wallet balance (add or remove funds)
+   */
+  adjustUserWallet: adminProcedure
+    .input(adminWalletAdjustmentSchema)
+    .mutation(async ({ ctx, input }) => {
+      const adminId = ctx.session.user?.id;
+      if (!adminId) {
+        throw new Error("Admin ID not found in session");
+      }
+
+      return AdminCommerceService.adjustUserWallet(
+        input.userId,
+        input.amount,
+        input.reason,
+        adminId
+      );
+    }),
+
+  /**
+   * Get user wallet balance
+   */
+  getUserWalletBalance: adminProcedure
+    .input(z.object({ userId: z.string().uuid() }))
+    .query(async ({ input }) => {
+      return AdminCommerceService.getUserWalletBalance(input.userId);
+    }),
+
+  /**
+   * Get user wallet transaction history
+   */
+  getUserWalletTransactions: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+        page: z.number().min(1).optional(),
+        limit: z.number().min(1).max(100).optional(),
+        type: walletTransactionQuerySchema.shape.type,
+      })
+    )
+    .query(async ({ input }) => {
+      return AdminCommerceService.getUserWalletTransactions(
+        input.userId,
+        {
+          page: input.page,
+          limit: input.limit,
+          type: input.type,
+        }
+      );
+    }),
+
+  /**
+   * Update course cashback configuration
+   */
+  updateCourseCashback: adminProcedure
+    .input(
+      z.object({
+        courseId: z.string().uuid(),
+        cashbackType: cashbackConfigSchema.shape.cashbackType,
+        cashbackValue: cashbackConfigSchema.shape.cashbackValue,
+      })
+    )
+    .mutation(async ({ input }) => {
+      return AdminCommerceService.updateCourseCashback(
+        input.courseId,
+        input.cashbackType,
+        input.cashbackValue
+      );
     }),
 });

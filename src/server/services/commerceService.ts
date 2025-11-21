@@ -163,4 +163,114 @@ export class AdminCommerceService {
       where: { id },
     });
   }
+
+  // ==================== WALLET MANAGEMENT ====================
+
+  /**
+   * Adjust user wallet balance (admin operation)
+   */
+  static async adjustUserWallet(
+    userId: string,
+    amount: number,
+    reason: string,
+    adminId: string
+  ) {
+    const { WalletService } = await import("@/lib/wallet-service");
+    await WalletService.adminAdjustBalance(userId, amount, reason, adminId);
+
+    return {
+      success: true,
+      message: `Wallet adjusted by ${amount} EGP`,
+      newBalance: await WalletService.getBalance(userId),
+    };
+  }
+
+  /**
+   * Get user wallet balance
+   */
+  static async getUserWalletBalance(userId: string) {
+    const { WalletService } = await import("@/lib/wallet-service");
+    const balance = await WalletService.getBalance(userId);
+
+    return {
+      balance,
+      currency: "EGP",
+    };
+  }
+
+  /**
+   * Get user wallet transaction history
+   */
+  static async getUserWalletTransactions(
+    userId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      type?: "PURCHASE_DEBIT" | "CASHBACK_CREDIT" | "ADMIN_CREDIT" | "ADMIN_DEBIT" | "REFUND_CREDIT";
+    }
+  ) {
+    const { WalletService } = await import("@/lib/wallet-service");
+    const result = await WalletService.getTransactionHistory(userId, options);
+
+    return {
+      transactions: result.transactions.map((tx) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: Number(tx.amount),
+        balanceBefore: Number(tx.balanceBefore),
+        balanceAfter: Number(tx.balanceAfter),
+        description: tx.description,
+        createdAt: tx.createdAt,
+        adminId: tx.adminId,
+        relatedPayment: tx.relatedPayment
+          ? {
+              id: tx.relatedPayment.id,
+              status: tx.relatedPayment.status,
+              courseTitle: tx.relatedPayment.course?.title || "Unknown Course",
+            }
+          : null,
+      })),
+      pagination: result.pagination,
+    };
+  }
+
+  /**
+   * Update course cashback configuration
+   */
+  static async updateCourseCashback(
+    courseId: string,
+    cashbackType: "NONE" | "PERCENTAGE" | "FIXED",
+    cashbackValue?: number
+  ) {
+    if (cashbackType !== "NONE" && (cashbackValue === undefined || cashbackValue === null)) {
+      throw new Error("Cashback value is required when cashback type is not NONE");
+    }
+
+    if (cashbackType === "PERCENTAGE" && cashbackValue && cashbackValue > 100) {
+      throw new Error("Percentage cashback cannot exceed 100%");
+    }
+
+    const course = await db.course.update({
+      where: { id: courseId },
+      data: {
+        cashbackType,
+        cashbackValue: cashbackValue ?? 0,
+      },
+      select: {
+        id: true,
+        title: true,
+        cashbackType: true,
+        cashbackValue: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: `Cashback configuration updated for course: ${course.title}`,
+      course: {
+        ...course,
+        cashbackValue: Number(course.cashbackValue),
+      },
+    };
+  }
 }

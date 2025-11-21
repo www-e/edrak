@@ -25,7 +25,7 @@ export default function CoursesPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [limit] = useState(20);
 
-  const { data: coursesData, isLoading, refetch } = api.admin.course.getAll.useQuery(
+  const { data: coursesData, isLoading } = api.admin.course.getAll.useQuery(
     {
       page,
       limit,

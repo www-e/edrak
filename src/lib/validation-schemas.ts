@@ -265,3 +265,56 @@ export const updateTrainingApplicationSchema = z.object({
   assignedTrainer: z.string().optional(),
   preferredProgram: z.enum(["home", "gym", "sportSpecific"]).optional(),
 });
+
+/**
+ * Wallet Usage Schema - For using wallet balance in course purchase
+ */
+export const walletUsageSchema = z.object({
+  walletAmountToUse: z.number()
+    .min(0, "Wallet amount cannot be negative")
+    .optional(),
+});
+
+/**
+ * Admin Wallet Adjustment Schema - For admin adding/removing funds
+ */
+export const adminWalletAdjustmentSchema = z.object({
+  userId: uuidSchema,
+  amount: z.number()
+    .refine((val) => val !== 0, "Amount cannot be zero"),
+  reason: z.string()
+    .min(5, "Please provide a reason (minimum 5 characters)")
+    .max(500, "Reason too long (maximum 500 characters)"),
+});
+
+/**
+ * Cashback Configuration Schema - For setting course cashback
+ */
+export const cashbackConfigSchema = z.object({
+  cashbackType: z.enum(["NONE", "PERCENTAGE", "FIXED"]),
+  cashbackValue: z.number()
+    .min(0, "Cashback value cannot be negative")
+    .optional(),
+}).refine(
+  (data) => {
+    // If cashbackType is not NONE, cashbackValue is required
+    if (data.cashbackType !== "NONE" && (data.cashbackValue === undefined || data.cashbackValue === null)) {
+      return false;
+    }
+    // If cashbackType is PERCENTAGE, value must be between 0 and 100
+    if (data.cashbackType === "PERCENTAGE" && data.cashbackValue && data.cashbackValue > 100) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Invalid cashback configuration",
+  }
+);
+
+/**
+ * Wallet Transaction Query Schema - For filtering transaction history
+ */
+export const walletTransactionQuerySchema = paginationSchema.extend({
+  type: z.enum(["PURCHASE_DEBIT", "CASHBACK_CREDIT", "ADMIN_CREDIT", "ADMIN_DEBIT", "REFUND_CREDIT"]).optional(),
+});

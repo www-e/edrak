@@ -22,7 +22,7 @@ function PaymentStatusContent() {
       try {
         const paramsObj = Object.fromEntries(searchParams.entries());
         const result = await processPaymentReturnAction(paramsObj);
-        setStatus(result.success && result.data?.success ? 'success' : 'failed');
+        setStatus(result.success && result.data?.status === 'COMPLETED' ? 'success' : 'failed');
       } catch (error) {
         setStatus('failed');
       } finally {

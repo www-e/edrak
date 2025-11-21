@@ -21,6 +21,7 @@ model User {
    referralSource     String?
    role               Role         @default(STUDENT)
    isActive           Boolean      @default(true)
+   walletBalance      Decimal      @default(0) @db.Decimal(10, 2)
    lastLoginAt        DateTime?    @updatedAt
    createdAt          DateTime     @default(now())
    updatedAt          DateTime     @updatedAt
@@ -30,6 +31,7 @@ model User {
    progressMilestones ProgressMilestone[]
    certificates       Certificate[]
    studentProfile     StudentProfile?
+   walletTransactions WalletTransaction[]
  }
 
 model Category {
@@ -53,6 +55,8 @@ model Course {
    categoryId     String?
    professorId    String
    thumbnailUrl   String?
+   cashbackType   CashbackType     @default(NONE)
+   cashbackValue  Decimal          @default(0) @db.Decimal(10, 2)
    createdAt      DateTime         @default(now())
    updatedAt      DateTime         @updatedAt
    publishedAt    DateTime?
@@ -155,6 +159,10 @@ model Payment {
     completedAt           DateTime?     // When payment was completed
     failureReason         String?       // Reason for payment failure
 
+    // Wallet and Cashback tracking
+    walletAmountUsed      Decimal?      @default(0) @db.Decimal(10, 2)
+    cashbackEarned        Decimal?      @default(0) @db.Decimal(10, 2)
+
     userId                String
     user                  User          @relation(fields: [userId], references: [id])
 
@@ -169,6 +177,7 @@ model Payment {
 
     // Relations
     webhooks              PaymentWebhook[]
+    walletTransactions    WalletTransaction[]
 
     createdAt             DateTime      @default(now())
     updatedAt             DateTime      @updatedAt
@@ -459,4 +468,46 @@ enum ApplicationStatus {
   REJECTED
   IN_PROGRESS
   COMPLETED
+}
+
+enum CashbackType {
+  NONE
+  PERCENTAGE
+  FIXED
+}
+
+enum TransactionType {
+  PURCHASE_DEBIT
+  CASHBACK_CREDIT
+  ADMIN_CREDIT
+  ADMIN_DEBIT
+  REFUND_CREDIT
+}
+
+model WalletTransaction {
+  id              String          @id @default(cuid())
+  userId          String
+  type            TransactionType
+  amount          Decimal         @db.Decimal(10, 2)
+  balanceBefore   Decimal         @db.Decimal(10, 2)
+  balanceAfter    Decimal         @db.Decimal(10, 2)
+  description     String
+  
+  // Optional references
+  relatedPaymentId String?
+  relatedPayment   Payment?       @relation(fields: [relatedPaymentId], references: [id])
+  
+  adminId         String?         // If admin-initiated transaction
+  
+  metadata        Json?           // Additional data (e.g., course name, admin notes)
+  
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([relatedPaymentId])
 }

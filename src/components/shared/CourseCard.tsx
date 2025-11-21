@@ -5,9 +5,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Course } from '@/features/courses/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CashbackBadge } from '@/components/shared/CashbackBadge';
+
+// Extend the Course type to include cashback fields if they aren't already there
+interface ExtendedCourse extends Course {
+  cashbackType?: "NONE" | "PERCENTAGE" | "FIXED";
+  cashbackValue?: number;
+}
 
 interface CourseCardProps {
-  course: Course;
+  course: ExtendedCourse;
 }
 
 export function CourseCardSkeleton() {
@@ -44,7 +51,7 @@ export function CourseCardSkeleton() {
 export function CourseCard({ course }: CourseCardProps) {
   return (
     <Link href={`/courses/${course.slug}`}>
-      <Card className="group overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+      <Card className="group overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col relative">
         <div className="relative h-48 w-full">
           <Image
             src={course.thumbnailUrl || `/images/course${(course.id.charCodeAt(0) % 3) + 1}.png`}
@@ -55,6 +62,16 @@ export function CourseCard({ course }: CourseCardProps) {
             priority={false}
             unoptimized={true}
           />
+          {/* Cashback Badge Overlay */}
+          {course.cashbackType && course.cashbackType !== 'NONE' && (
+            <div className="absolute top-2 right-2 z-10">
+              <CashbackBadge 
+                cashbackType={course.cashbackType} 
+                cashbackValue={Number(course.cashbackValue)} 
+                className="shadow-md"
+              />
+            </div>
+          )}
         </div>
         <CardContent className="p-5 flex flex-col flex-1">
           <div className="flex justify-between items-start mb-2">
