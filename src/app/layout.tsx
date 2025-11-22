@@ -3,6 +3,7 @@ import { Space_Grotesk, IBM_Plex_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SnackbarProvider } from "@/components/shared/snackbar-context";
 import { TRPCProvider } from "@/components/admin/trpc-provider";
+import { Toaster } from "@/components/ui/toaster";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -50,6 +51,7 @@ export default async function RootLayout({
               <TRPCProvider>
                 <ErrorBoundary>
                   {children}
+                  <Toaster />
                 </ErrorBoundary>
               </TRPCProvider>
             </SnackbarProvider>

@@ -32,6 +32,9 @@ model User {
    certificates       Certificate[]
    studentProfile     StudentProfile?
    walletTransactions WalletTransaction[]
+   notes              Note[]       // Add notes created by user
+   sentMessages       ProfessorMessage[]  @relation("SentMessages") // Messages sent by user
+   receivedMessages   ProfessorMessage[]  @relation("ReceivedMessages") // Messages received by user
  }
 
 model Category {
@@ -71,6 +74,8 @@ model Course {
    payments       Payment[]
    certificates   Certificate[]
    progressMilestones ProgressMilestone[]
+   notes          Note[]           // Notes for this course
+   messages       ProfessorMessage[] // Messages for this course
 
    @@index([professorId, visibility])
    @@index([categoryId, visibility])
@@ -93,6 +98,8 @@ model Lesson {
     lessonProgress        LessonProgress[]
     duration              Int?             // Duration in minutes
     youtubeUrl            String?          // YouTube video URL for free courses
+    notes                 Note[]           // Notes for this lesson
+    messages              ProfessorMessage[] // Messages for this lesson
   }
 
 model Attachment {
@@ -346,7 +353,7 @@ model ProgressMilestone {
 // Psychology Application System
 model PsychologyApplication {
   id                    String                    @id @default(uuid())
-  
+
   // Personal Data
   fullName              String
   gender                String
@@ -359,7 +366,7 @@ model PsychologyApplication {
   previousPsychologist  String
   medications           String
   injuries              String
-  
+
   // Sports Data
   primarySport          String
   trainingAge           String
@@ -367,39 +374,39 @@ model PsychologyApplication {
   workoutDuration       String
   preparingForCompetition String
   competitionDate       String?
-  
+
   // Current Mental State
   affectingPerformance  String
   previousBreakdown     String
   generalMentalState    String
   sleepDifficulties     String
   anxietyEpisodes       String
-  
+
   // Goals
   primaryGoal           String
   sessionPreference     String
   combineWithTraining   String?
-  
+
   // Application Management
   status                ApplicationStatus        @default(PENDING)
   notes                 String?
   assignedPsychologist  String?
   firstSessionDate      DateTime?
-  
+
   // Metadata
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
-  
+
   @@index([status])
   @@index([email])
   @@index([createdAt])
   @@index([primarySport])
 }
 
-// Training Application System  
+// Training Application System
 model TrainingApplication {
   id                    String                    @id @default(uuid())
-  
+
   // Personal Data
   fullName              String
   gender                String
@@ -410,7 +417,7 @@ model TrainingApplication {
   city                  String
   previousTrainer       String
   injuries              String
-  
+
   // Training Data
   trainingAge           String
   weeklyDays            String
@@ -418,7 +425,7 @@ model TrainingApplication {
   workoutDuration       String
   exerciseTypes         String
   primarySport          String?
-  
+
   // Body Measurements
   weight                String
   height                String
@@ -427,33 +434,33 @@ model TrainingApplication {
   hipCircumference      String?
   armCircumference      String?
   thighCircumference    String?
-  
+
   // Fitness Tests
   squatTest             String?
   pushupTest            String?
   enduranceTest         String?
   flexibilityTest       String?
-  
+
   // Body Photos (stored as JSON metadata)
   frontPhoto            String? // file path/URL
   sidePhoto             String? // file path/URL
   backPhoto             String? // file path/URL
-  
+
   // Goals
   primaryGoal           String
   timeframe             String?
   nutritionPlan         String?
-  
+
   // Application Management
   status                ApplicationStatus        @default(PENDING)
   notes                 String?
   assignedTrainer       String?
   preferredProgram      String? // Home, Gym, Sport-Specific
-  
+
   // Metadata
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
-  
+
   @@index([status])
   @@index([email])
   @@index([createdAt])
@@ -492,22 +499,73 @@ model WalletTransaction {
   balanceBefore   Decimal         @db.Decimal(10, 2)
   balanceAfter    Decimal         @db.Decimal(10, 2)
   description     String
-  
+
   // Optional references
   relatedPaymentId String?
   relatedPayment   Payment?       @relation(fields: [relatedPaymentId], references: [id])
-  
+
   adminId         String?         // If admin-initiated transaction
-  
+
   metadata        Json?           // Additional data (e.g., course name, admin notes)
-  
+
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-  
+
   @@index([userId])
   @@index([type])
   @@index([createdAt])
   @@index([relatedPaymentId])
+}
+
+// Models for student notes and professor messaging
+model Note {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  courseId    String
+  content     String
+  timestamp   Float    // Video timestamp in seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId])
+  @@index([courseId])
+  @@index([createdAt])
+}
+
+model ProfessorMessage {
+  id          String   @id @default(cuid())
+  senderId    String   // Student ID
+  recipientId String   // Professor ID
+  courseId    String
+  lessonId    String?
+  title       String
+  content     String
+  status      MessageStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  repliedAt   DateTime?
+  reply       String?
+
+  sender      User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient   User    @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson      Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, recipientId])
+  @@index([courseId])
+  @@index([status, createdAt])
+}
+
+enum MessageStatus {
+  PENDING
+  READ
+  REPLIED
+  ARCHIVED
 }

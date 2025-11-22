@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, Volume2, VolumeX, Maximize, Loader2, AlertCircle } from "lucide-react";
@@ -11,12 +11,18 @@ interface VideoPlayerProps {
   className?: string;
 }
 
-export function VideoPlayer({
+export interface VideoPlayerHandle {
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  formatTime: (seconds: number) => string;
+}
+
+export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
   src,
   title,
   className = ""
-}: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+}, ref) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +32,106 @@ export function VideoPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(false);
 
+  // Expose video player methods to parent
+  useImperativeHandle(ref, () => ({
+    getCurrentTime: () => videoRef.current?.currentTime || 0,
+    getDuration: () => videoRef.current?.duration || 0,
+    formatTime: (seconds: number) => {
+      const minutes = Math.floor(seconds / 60);
+      const secondsRemainder = Math.floor(seconds % 60);
+      return `${minutes}:${secondsRemainder.toString().padStart(2, '0')}`;
+    },
+  } as VideoPlayerHandle), []);
+
+  // Update current time when video plays
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const updateTime = () => {
+      setCurrentTime(video.currentTime);
+    };
+
+    video.addEventListener('timeupdate', updateTime);
+    return () => {
+      video.removeEventListener('timeupdate', updateTime);
+    };
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secondsRemainder = Math.floor(seconds % 60);
+    return `${minutes}:${secondsRemainder.toString().padStart(2, '0')}`;
+  };
+
+  // Add anti-screenshot and anti-screen recording CSS styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      video {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-pointer-events: none;
+        pointer-events: none;
+      }
+      .video-controls {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .video-content {
+        position: relative;
+      }
+      .video-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.01);
+        z-index: 9999;
+        pointer-events: none;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Add event listeners to prevent context menu and screenshot-related events
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent common screenshot keys (Print Screen, Alt+Print Screen, etc.)
+      if (e.key === 'PrintScreen') {
+        e.preventDefault();
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      // Prevent context menu on video area
+      if (videoRef.current?.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+
+    const handleSelectStart = (e: Event) => {
+      // Prevent text selection
+      e.preventDefault();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('selectstart', handleSelectStart);
+
+    return () => {
+      document.head.removeChild(style);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('selectstart', handleSelectStart);
+    };
+  }, []);
+
   // Handle video loading with performance optimizations
   useEffect(() => {
     const video = videoRef.current;
@@ -34,10 +140,6 @@ export function VideoPlayer({
     const handleLoadedMetadata = () => {
       setIsLoading(false);
       setDuration(video.duration);
-    };
-
-    const handleTimeUpdate = () => {
-      setCurrentTime(video.currentTime);
     };
 
     const handleError = (e: Event) => {
@@ -74,14 +176,12 @@ export function VideoPlayer({
     };
 
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('error', handleError);
     video.addEventListener('loadstart', handleLoadStart);
     video.addEventListener('canplay', handleCanPlay);
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('error', handleError);
       video.removeEventListener('loadstart', handleLoadStart);
       video.removeEventListener('canplay', handleCanPlay);
@@ -109,12 +209,6 @@ export function VideoPlayer({
   };
 
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
   if (error) {
     return (
       <Card className={`aspect-video ${className}`}>
@@ -130,18 +224,20 @@ export function VideoPlayer({
 
   return (
     <Card className={`relative overflow-hidden group ${className}`}>
-      <video
-        ref={videoRef}
-        src={src}
-        className="w-full h-full object-contain bg-black"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
-        onMouseEnter={() => setShowControls(true)}
-        onMouseLeave={() => setShowControls(false)}
-        preload="metadata"
-        playsInline
-      />
+      <div className="video-content">
+        <video
+          ref={videoRef}
+          src={src}
+          className="w-full h-full object-contain bg-black"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
+          onMouseEnter={() => setShowControls(true)}
+          onMouseLeave={() => setShowControls(false)}
+          preload="metadata"
+          playsInline
+        />
+      </div>
 
       {/* Loading overlay */}
       {isLoading && (
@@ -153,7 +249,7 @@ export function VideoPlayer({
       {/* Video controls */}
       <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 transition-opacity duration-300 ${
         showControls || isPlaying ? 'opacity-100' : 'opacity-0'
-      }`}>
+      } video-controls`}>
         {/* Controls */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -197,4 +293,6 @@ export function VideoPlayer({
       )}
     </Card>
   );
-}
+});
+
+VideoPlayer.displayName = "VideoPlayer";

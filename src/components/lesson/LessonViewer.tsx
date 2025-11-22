@@ -4,11 +4,14 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Video, Download, FileText, Image } from "lucide-react";
+import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Video, Download, FileText, Image, MessageCircle, StickyNote, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { VideoPlayer } from "@/components/ui/video-player";
-import { YouTubePlayer } from "@/components/ui/youtube-player";
+import { VideoPlayerWithNotes } from "@/components/ui/video-player-with-notes";
+import { YouTubePlayerWithNotes } from "@/components/ui/youtube-player-with-notes";
 import { getFileIcon, formatFileSize } from "@/lib/file-utils";
+import { NoteTakingPanel } from "@/components/lesson/NoteTakingPanel";
+import { ProfessorMessagingPanel } from "@/components/lesson/ProfessorMessagingPanel";
+import { api } from "@/trpc/react";
 
 interface LessonViewerProps {
   courseId: string;
@@ -37,6 +40,11 @@ interface LessonData {
      id: string;
      title: string;
      slug: string;
+     professor: {
+       id: string;
+       firstName: string;
+       lastName: string;
+     }
    };
  }
 
@@ -64,6 +72,8 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNotePanel, setShowNotePanel] = useState(false);
+  const [showMessagingPanel, setShowMessagingPanel] = useState(false);
 
   // Fetch lesson data and progress from API
   useEffect(() => {
@@ -230,9 +240,11 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
                     Zero Bandwidth Cost
                   </Badge>
                 </div>
-                <YouTubePlayer
+                <YouTubePlayerWithNotes
                   url={lesson.youtubeUrl}
                   title={lesson.title}
+                  onAddNote={() => setShowNotePanel(true)}
+                  onSendMessage={() => setShowMessagingPanel(true)}
                 />
               </div>
             </div>
@@ -255,9 +267,11 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
                     {formatFileSize(mainVideoAttachment.fileSize)}
                   </Badge>
                 </div>
-                <VideoPlayer
+                <VideoPlayerWithNotes
                   src={mainVideoAttachment.bunnyCdnUrl}
                   title={`${lesson.title} - ${mainVideoAttachment.name}`}
+                  onAddNote={() => setShowNotePanel(true)}
+                  onSendMessage={() => setShowMessagingPanel(true)}
                 />
               </div>
 
@@ -301,6 +315,45 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
           </Card>
         );
       })()}
+
+      {/* Note Taking & Messaging Panel Buttons */}
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setShowNotePanel(!showNotePanel)}
+        >
+          {showNotePanel ? <ChevronUp className="w-4 h-4 mr-2" /> : <ChevronDown className="w-4 h-4 mr-2" />}
+          <StickyNote className="w-4 h-4 mr-2" />
+          Notes ({showNotePanel ? 'Hide' : 'Show'})
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setShowMessagingPanel(!showMessagingPanel)}
+        >
+          {showMessagingPanel ? <ChevronUp className="w-4 h-4 mr-2" /> : <ChevronDown className="w-4 h-4 mr-2" />}
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Message Professor ({showMessagingPanel ? 'Hide' : 'Show'})
+        </Button>
+      </div>
+
+      {/* Note Taking Panel */}
+      {showNotePanel && (
+        <NoteTakingPanel
+          courseId={courseId}
+          lessonId={lessonId}
+          className="w-full"
+        />
+      )}
+
+      {/* Professor Messaging Panel */}
+      {showMessagingPanel && lesson.course.professor && (
+        <ProfessorMessagingPanel
+          courseId={courseId}
+          lessonId={lessonId}
+          professorId={lesson.course.professor.id}
+          className="w-full"
+        />
+      )}
 
       {/* Lesson Content */}
       <Card>
