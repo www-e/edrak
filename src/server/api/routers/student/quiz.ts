@@ -188,4 +188,65 @@ export const studentQuizRouter = createTRPCRouter({
 
       return QuizService.getUserQuizAttempts(input.quizId, userId);
     }),
+
+  /**
+   * Get quiz attempt review data (includes question details without revealing correct answers)
+   */
+  getAttemptReview: protectedProcedure
+    .input(z.object({
+      quizId: z.string().uuid(),
+      attemptId: z.string().uuid()
+    }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not authenticated",
+        });
+      }
+
+      // Verify enrollment in the course
+      const quiz = await QuizService.getQuizById(input.quizId);
+      if (!quiz) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Quiz not found",
+        });
+      }
+
+      if (quiz.courseId) {
+        const isEnrolled = await EnrollmentVerification.verifyEnrollment(userId, quiz.courseId);
+        if (!isEnrolled) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You must be enrolled in this course to access quiz review",
+          });
+        }
+      }
+
+      // Get the specific attempt
+      const attempt = await QuizService.getQuizAttempt(input.attemptId, userId);
+      if (!attempt || attempt.quizId !== input.quizId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Quiz attempt not found",
+        });
+      }
+
+      // Get quiz questions (this will not include correct answers to maintain quiz integrity)
+      const quizForStudent = await QuizService.getQuizForStudent(input.quizId);
+      if (!quizForStudent) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Quiz not found",
+        });
+      }
+
+      return {
+        attempt,
+        quiz: quizForStudent,
+      };
+    }),
 });

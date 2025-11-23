@@ -16,6 +16,8 @@ interface QuizModalProps {
   courseId: string;
   quizTitle: string;
   onQuizPassed?: () => void;
+  reviewMode?: boolean; // When true, allows reviewing previous attempts
+  attemptId?: string; // For review mode, specify which attempt to review
 }
 
 interface QuizQuestion {
@@ -23,9 +25,10 @@ interface QuizQuestion {
   question: string;
   options: Prisma.JsonValue;
   order: number;
+  correctAnswer?: number; // Optional for student view, available in admin view
 }
 
-export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPassed }: QuizModalProps) {
+export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPassed, reviewMode = false, attemptId }: QuizModalProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [result, setResult] = useState<{
@@ -36,13 +39,24 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
   } | null>(null);
 
   // Fetch quiz data
-  const { data: quizData, isLoading } = api.student.quiz.getById.useQuery(
+  const { data: quizData, isLoading: quizLoading } = api.student.quiz.getById.useQuery(
     { quizId, courseId },
-    { enabled: open } // Only fetch when modal is open
+    { enabled: open && !reviewMode } // Only fetch when modal is open and not in review mode
   );
 
-  const questions = quizData?.questions || [];
-  const passingScore = quizData?.passingScore || 70;
+  // Fetch specific attempt for review mode
+  const { data: reviewData, isLoading: reviewLoading } = api.student.quiz.getAttemptReview.useQuery(
+    { quizId, attemptId: attemptId! },
+    { enabled: reviewMode && !!attemptId } // Only fetch when in review mode with attempt ID
+  );
+
+  const questions = reviewMode && reviewData ? reviewData.quiz.questions : quizData?.questions || [];
+  const passingScore = reviewMode && reviewData ? reviewData.quiz.passingScore : quizData?.passingScore || 70;
+
+  // For review mode, get the specific attempt
+  const reviewAttempt = reviewMode && reviewData ? reviewData.attempt : null;
+
+  const isLoading = quizLoading || reviewLoading;
 
   const submitAttemptMutation = api.student.quiz.submitAttempt.useMutation({
     onSuccess: (data) => {
@@ -160,8 +174,95 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
               )}
             </div>
           </div>
+        ) : reviewMode ? (
+          // Review Mode View
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">Review Quiz Attempt</h3>
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                reviewAttempt?.passed
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}>
+                {reviewAttempt?.score}% - {reviewAttempt?.passed ? "Passed" : "Failed"}
+              </div>
+            </div>
+
+            {questions.map((question, questionIndex) => {
+              const userAnswerIndex = reviewAttempt?.answers ? (reviewAttempt.answers as number[])[questionIndex] ?? -1 : -1;
+
+              return (
+                <Card key={question.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-3 mb-4">
+                      <Badge variant="outline" className="mt-1">
+                        Q{questionIndex + 1}
+                      </Badge>
+                      <p className="text-lg font-medium flex-1">{question.question}</p>
+                    </div>
+
+                    <div className="space-y-2 ml-12">
+                      {(question.options as string[]).map((option: string, optionIndex: number) => (
+                        <div
+                          key={optionIndex}
+                          className={`w-full text-left p-4 rounded-lg border-2 ${
+                            optionIndex === userAnswerIndex
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-border"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                optionIndex === userAnswerIndex
+                                  ? "border-blue-600 bg-blue-600"
+                                  : "border-border"
+                              }`}
+                            >
+                              {optionIndex === userAnswerIndex && (
+                                <div className="w-2 h-2 rounded-full bg-white"></div>
+                              )}
+                            </div>
+                            <span className={
+                              optionIndex === userAnswerIndex
+                                ? "text-blue-700 font-medium"
+                                : ""
+                            }>
+                              {option}
+                            </span>
+                          </div>
+
+                          {optionIndex === userAnswerIndex && (
+                            <div className="ml-8 mt-2 text-sm text-blue-600 flex items-center gap-1">
+                              <CheckCircle className="w-4 h-4" />
+                              Your selected answer
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+
+            {questions.length === 0 && (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No questions available for this quiz.</p>
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="flex gap-3 justify-end sticky bottom-0 bg-background pt-4 border-t">
+              <Button onClick={handleClose}>
+                Close
+              </Button>
+            </div>
+          </div>
         ) : (
-          // Quiz Questions View
+          // Quiz Taking Mode View
           <div className="space-y-6">
             {questions.map((question, questionIndex) => (
               <Card key={question.id}>

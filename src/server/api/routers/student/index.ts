@@ -8,6 +8,7 @@ import { walletRouter } from "./wallet"; // Import the wallet router
 import { notesRouter } from "./notes"; // Import the notes router
 import { messagesRouter } from "./messages"; // Import the messages router
 import { studentQuizRouter } from "./quiz"; // Import the quiz router
+import { studentProgressRouter } from "./progress"; // Import the progress router
 
 /**
  * This is the primary router for all student-related API endpoints.
@@ -23,4 +24,5 @@ export const studentRouter = createTRPCRouter({
   notes: notesRouter, // Register the notes router
   messages: messagesRouter, // Register the messages router
   quiz: studentQuizRouter, // Register the quiz router
+  progress: studentProgressRouter, // Register the progress router
 });

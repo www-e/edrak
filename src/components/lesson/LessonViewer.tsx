@@ -76,12 +76,31 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   const [showNotePanel, setShowNotePanel] = useState(false);
   const [showMessagingPanel, setShowMessagingPanel] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showQuizHistory, setShowQuizHistory] = useState(false);
 
   // Check if lesson has a quiz
   const { data: quizData } = api.student.quiz.getByLesson.useQuery(
     { lessonId, courseId },
     { enabled: !!lessonId && !!courseId }
   );
+
+  // Fetch quiz attempts for history view
+  const { data: quizAttempts } = api.student.quiz.getMyAttempts.useQuery(
+    { quizId: quizData?.id || '' },
+    { enabled: !!quizData?.id && showQuizHistory }
+  );
+
+  // Mutation to mark lesson as complete
+  const markLessonCompleteMutation = api.student.progress.markLessonComplete.useMutation({
+    onSuccess: () => {
+      console.log('Lesson marked as complete');
+      // Optionally refresh lesson data or update UI to reflect completion
+    },
+    onError: (error) => {
+      console.error('Failed to mark lesson as complete:', error);
+      // Optionally show an error message to the user
+    }
+  });
 
   // Fetch lesson data and progress from API
   useEffect(() => {
@@ -148,8 +167,8 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   // Handle quiz passed - close modal and mark lesson complete
   const handleQuizPassed = () => {
     setShowQuizModal(false);
-    // TODO: Call API to mark lesson progress as complete
-    console.log('Quiz passed! Lesson marked as complete');
+    // Mark lesson as complete after passing quiz
+    markLessonCompleteMutation.mutate({ lessonId, courseId });
   };
 
   if (loading) {
@@ -308,13 +327,23 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
                   </Button>
                 </div>
 
-                <Button
-                  onClick={handleMarkComplete}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Mark as Complete
-                </Button>
+                <div className="flex gap-2">
+                  {quizData?.hasPassed && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowQuizHistory(true)}
+                    >
+                      View Quiz History
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleMarkComplete}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Mark as Complete
+                  </Button>
+                </div>
               </div>
             </div>
           );
@@ -530,6 +559,19 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
           courseId={courseId}
           quizTitle={quizData.title}
           onQuizPassed={handleQuizPassed}
+        />
+      )}
+
+      {/* Quiz History Modal */}
+      {quizData && showQuizHistory && (
+        <QuizModal
+          open={showQuizHistory}
+          onClose={() => setShowQuizHistory(false)}
+          quizId={quizData.id}
+          courseId={courseId}
+          quizTitle={`${quizData.title} - History`}
+          reviewMode={true}
+          attemptId={quizAttempts?.[0]?.id} // Show the latest attempt by default
         />
       )}
     </div>

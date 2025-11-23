@@ -342,4 +342,16 @@ export class QuizService {
       },
     });
   }
+
+  /**
+   * Get specific quiz attempt for a user
+   */
+  static async getQuizAttempt(attemptId: string, userId: string) {
+    return db.quizAttempt.findUnique({
+      where: {
+        id: attemptId,
+        userId,
+      },
+    });
+  }
 }
