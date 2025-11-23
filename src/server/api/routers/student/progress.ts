@@ -51,95 +51,100 @@ export const studentProgressRouter = createTRPCRouter({
         });
       }
 
-      // Upsert lesson progress (create if doesn't exist, update if exists)
-      const lessonProgress = await db.lessonProgress.upsert({
-        where: {
-          enrollmentId_lessonId: {
-            enrollmentId: enrollment.id,
-            lessonId: input.lessonId,
-          },
-        },
-        update: {
-          isCompleted: true,
-          completedAt: new Date(),
-          videoWatchedPercentage: 100, // Mark as fully watched since it's being completed
-        },
-        create: {
-          enrollmentId: enrollment.id,
-          lessonId: input.lessonId,
-          isCompleted: true,
-          completedAt: new Date(),
-          videoWatchedPercentage: 100,
-        },
-      });
-
-      // Update enrollment completion percentage
-      const courseLessons = await db.lesson.findMany({
-        where: {
-          courseId: input.courseId,
-          isVisible: true,
-          isDeleted: false,
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      const completedLessons = await db.lessonProgress.count({
-        where: {
-          enrollmentId: enrollment.id,
-          lessonId: {
-            in: courseLessons.map(lesson => lesson.id),
-          },
-          isCompleted: true,
-        },
-      });
-
-      const completionPercentage = Math.round(
-        (completedLessons / Math.max(1, courseLessons.length)) * 100
-      );
-
-      await db.enrollment.update({
-        where: { id: enrollment.id },
-        data: { completionPercentage, lastAccessedAt: new Date() },
-      });
-
-      // If all lessons are completed, update enrollment status to COMPLETED
-      if (completionPercentage === 100) {
-        await db.enrollment.update({
-          where: { id: enrollment.id },
-          data: {
-            status: "COMPLETED",
-            completedAt: new Date(),
-          },
-        });
-
-        // Create a course completion milestone
-        await db.progressMilestone.upsert({
+      // Use a transaction to ensure data consistency
+      const result = await db.$transaction(async (tx) => {
+        // Upsert lesson progress (create if doesn't exist, update if exists)
+        const lessonProgress = await tx.lessonProgress.upsert({
           where: {
-            userId_courseId_milestoneType: {
-              userId,
-              courseId: input.courseId,
-              milestoneType: "COURSE_COMPLETE",
-            },
-          },
-          create: {
-            userId,
-            courseId: input.courseId,
-            milestoneType: "COURSE_COMPLETE",
-            metadata: {
-              completedAt: new Date(),
+            enrollmentId_lessonId: {
+              enrollmentId: enrollment.id,
+              lessonId: input.lessonId,
             },
           },
           update: {
-            metadata: {
-              completedAt: new Date(),
-            },
+            isCompleted: true,
+            completedAt: new Date(),
+            videoWatchedPercentage: 100, // Mark as fully watched since it's being completed
+          },
+          create: {
+            enrollmentId: enrollment.id,
+            lessonId: input.lessonId,
+            isCompleted: true,
+            completedAt: new Date(),
+            videoWatchedPercentage: 100,
           },
         });
-      }
 
-      return lessonProgress;
+        // Update enrollment completion percentage
+        const courseLessons = await tx.lesson.findMany({
+          where: {
+            courseId: input.courseId,
+            isVisible: true,
+            isDeleted: false,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        const completedLessons = await tx.lessonProgress.count({
+          where: {
+            enrollmentId: enrollment.id,
+            lessonId: {
+              in: courseLessons.map(lesson => lesson.id),
+            },
+            isCompleted: true,
+          },
+        });
+
+        const completionPercentage = Math.round(
+          (completedLessons / Math.max(1, courseLessons.length)) * 100
+        );
+
+        await tx.enrollment.update({
+          where: { id: enrollment.id },
+          data: { completionPercentage, lastAccessedAt: new Date() },
+        });
+
+        // If all lessons are completed, update enrollment status to COMPLETED
+        if (completionPercentage === 100) {
+          await tx.enrollment.update({
+            where: { id: enrollment.id },
+            data: {
+              status: "COMPLETED",
+              completedAt: new Date(),
+            },
+          });
+
+          // Create a course completion milestone
+          await tx.progressMilestone.upsert({
+            where: {
+              userId_courseId_milestoneType: {
+                userId,
+                courseId: input.courseId,
+                milestoneType: "COURSE_COMPLETE",
+              },
+            },
+            create: {
+              userId,
+              courseId: input.courseId,
+              milestoneType: "COURSE_COMPLETE",
+              metadata: {
+                completedAt: new Date(),
+              },
+            },
+            update: {
+              metadata: {
+                completedAt: new Date(),
+              },
+            },
+          });
+        }
+
+        return lessonProgress;
+      });
+
+      return result;
     }),
 
   /**

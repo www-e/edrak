@@ -189,7 +189,9 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
             </div>
 
             {questions.map((question, questionIndex) => {
-              const userAnswerIndex = reviewAttempt?.answers ? (reviewAttempt.answers as number[])[questionIndex] ?? -1 : -1;
+              const userAnswerIndex = reviewAttempt?.answers && Array.isArray(reviewAttempt.answers)
+                ? (reviewAttempt.answers as number[])[questionIndex] ?? -1
+                : -1;
 
               return (
                 <Card key={question.id}>

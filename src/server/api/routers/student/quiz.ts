@@ -207,7 +207,24 @@ export const studentQuizRouter = createTRPCRouter({
         });
       }
 
-      // Verify enrollment in the course
+      // Get the specific attempt first to verify it belongs to the user
+      const attempt = await QuizService.getQuizAttempt(input.attemptId, userId);
+      if (!attempt) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Quiz attempt not found",
+        });
+      }
+
+      // Ensure the attempt belongs to the requested quiz
+      if (attempt.quizId !== input.quizId) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Unauthorized access to quiz attempt",
+        });
+      }
+
+      // Verify enrollment in the course containing the quiz
       const quiz = await QuizService.getQuizById(input.quizId);
       if (!quiz) {
         throw new TRPCError({
@@ -224,15 +241,6 @@ export const studentQuizRouter = createTRPCRouter({
             message: "You must be enrolled in this course to access quiz review",
           });
         }
-      }
-
-      // Get the specific attempt
-      const attempt = await QuizService.getQuizAttempt(input.attemptId, userId);
-      if (!attempt || attempt.quizId !== input.quizId) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Quiz attempt not found",
-        });
       }
 
       // Get quiz questions (this will not include correct answers to maintain quiz integrity)

@@ -77,6 +77,7 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   const [showMessagingPanel, setShowMessagingPanel] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [showQuizHistory, setShowQuizHistory] = useState(false);
+  const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null);
 
   // Check if lesson has a quiz
   const { data: quizData } = api.student.quiz.getByLesson.useQuery(
@@ -328,10 +329,14 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
                 </div>
 
                 <div className="flex gap-2">
-                  {quizData?.hasPassed && (
+                  {quizData?.hasPassed && quizAttempts && quizAttempts.length > 0 && (
                     <Button
                       variant="outline"
-                      onClick={() => setShowQuizHistory(true)}
+                      onClick={() => {
+                        // Set the default selected attempt to the most recent one
+                        setSelectedAttemptId(quizAttempts[0]?.id);
+                        setShowQuizHistory(true);
+                      }}
                     >
                       View Quiz History
                     </Button>
@@ -563,16 +568,32 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
       )}
 
       {/* Quiz History Modal */}
-      {quizData && showQuizHistory && (
-        <QuizModal
-          open={showQuizHistory}
-          onClose={() => setShowQuizHistory(false)}
-          quizId={quizData.id}
-          courseId={courseId}
-          quizTitle={`${quizData.title} - History`}
-          reviewMode={true}
-          attemptId={quizAttempts?.[0]?.id} // Show the latest attempt by default
-        />
+      {quizData && showQuizHistory && quizAttempts && quizAttempts.length > 0 && (
+        <div>
+          <div className="mb-4 p-4 bg-muted rounded-md">
+            <label className="block text-sm font-medium mb-2">Select Attempt:</label>
+            <select
+              value={selectedAttemptId || ''}
+              onChange={(e) => setSelectedAttemptId(e.target.value)}
+              className="w-full p-2 border rounded-md"
+            >
+              {quizAttempts.map((attempt) => (
+                <option key={attempt.id} value={attempt.id}>
+                  Attempt on {new Date(attempt.completedAt).toLocaleDateString()} - Score: {attempt.score}% ({attempt.passed ? 'Passed' : 'Failed'})
+                </option>
+              ))}
+            </select>
+          </div>
+          <QuizModal
+            open={showQuizHistory}
+            onClose={() => setShowQuizHistory(false)}
+            quizId={quizData.id}
+            courseId={courseId}
+            quizTitle={`${quizData.title} - History`}
+            reviewMode={true}
+            attemptId={selectedAttemptId || quizAttempts[0]?.id}
+          />
+        </div>
       )}
     </div>
   );
