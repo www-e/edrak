@@ -11,6 +11,7 @@ import { YouTubePlayerWithNotes } from "@/components/ui/youtube-player-with-note
 import { getFileIcon, formatFileSize } from "@/lib/file-utils";
 import { NoteTakingPanel } from "@/components/lesson/NoteTakingPanel";
 import { ProfessorMessagingPanel } from "@/components/lesson/ProfessorMessagingPanel";
+import { QuizModal } from "@/components/quiz/QuizModal";
 import { api } from "@/trpc/react";
 
 interface LessonViewerProps {
@@ -74,6 +75,13 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [showNotePanel, setShowNotePanel] = useState(false);
   const [showMessagingPanel, setShowMessagingPanel] = useState(false);
+  const [showQuizModal, setShowQuizModal] = useState(false);
+
+  // Check if lesson has a quiz
+  const { data: quizData } = api.student.quiz.getByLesson.useQuery(
+    { lessonId, courseId },
+    { enabled: !!lessonId && !!courseId }
+  );
 
   // Fetch lesson data and progress from API
   useEffect(() => {
@@ -124,10 +132,24 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
     return `${hours}:${mins.toString().padStart(2, '0')}`;
   };
 
-  // Handle lesson completion - just mark as complete locally
+  // Handle lesson completion - check for quiz first
   const handleMarkComplete = () => {
-    // Mark lesson as completed (no API call needed as per requirements)
+    // If there's a quiz and user hasn't passed it, show quiz modal
+    if (quizData && !quizData.hasPassed) {
+      setShowQuizModal(true);
+      return;
+    }
+
+    // Otherwise, mark lesson as complete
+    // TODO: Call API to mark lesson progress as complete
     console.log('Lesson marked as complete');
+  };
+
+  // Handle quiz passed - close modal and mark lesson complete
+  const handleQuizPassed = () => {
+    setShowQuizModal(false);
+    // TODO: Call API to mark lesson progress as complete
+    console.log('Quiz passed! Lesson marked as complete');
   };
 
   if (loading) {
@@ -496,8 +518,20 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
              </div>
            </CardContent>
          </Card>
-       );
-     })()}
+        );
+      })()}
+
+      {/* Quiz Modal */}
+      {quizData && (
+        <QuizModal
+          open={showQuizModal}
+          onClose={() => setShowQuizModal(false)}
+          quizId={quizData.id}
+          courseId={courseId}
+          quizTitle={quizData.title}
+          onQuizPassed={handleQuizPassed}
+        />
+      )}
     </div>
   );
 }
