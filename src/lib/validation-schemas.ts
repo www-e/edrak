@@ -177,6 +177,7 @@ export const psychologyApplicationSchema = z.object({
   ]),
   sessionPreference: z.enum(["individual", "general"]),
   combineWithTraining: z.string().optional(),
+  selectedPackage: z.enum(["silver", "gold", "diamond"]).optional(),
 });
 
 /**
@@ -232,6 +233,48 @@ export const trainingApplicationSchema = z.object({
   ]),
   timeframe: z.string().optional(),
   nutritionPlan: z.string().optional(),
+  selectedPackage: z.enum(["silver", "gold", "diamond"]).optional(),
+});
+
+/**
+ * Nutrition Application Validation Schema
+ */
+export const nutritionApplicationSchema = z.object({
+  // Personal Data
+  fullName: z.string().min(1, "Full name is required"),
+  gender: z.enum(["male", "female"]),
+  age: z.number().int().min(16, "Must be at least 16 years old").max(100, "Must be under 100 years old"),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().optional(),
+  country: z.string().min(1, "Country is required"),
+  city: z.string().min(1, "City is required"),
+
+  // Health Data
+  injuries: z.string().min(1, "Please specify injuries or write 'No'"),
+  medications: z.string().optional(),
+  allergies: z.string().optional(),
+  medicalConditions: z.string().optional(),
+
+  // Nutrition Data
+  currentWeight: z.string().min(1, "Current weight is required"),
+  currentHeight: z.string().min(1, "Current height is required"),
+  targetWeight: z.string().optional(),
+  dietaryRestrictions: z.string().optional(),
+  currentEatingHabits: z.string().min(1, "Please describe your current eating habits"),
+  mealsPerDay: z.string().min(1, "Number of meals per day is required"),
+  waterIntake: z.string().optional(),
+  activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very-active"]),
+
+  // Goals
+  primaryGoal: z.enum([
+    "weight-loss",
+    "muscle-gain",
+    "performance",
+    "health-improvement",
+    "body-recomposition"
+  ]),
+  timeframe: z.string().optional(),
+  selectedPackage: z.enum(["silver", "gold", "diamond"]).optional(),
 });
 
 /**
@@ -254,6 +297,15 @@ export const updatePsychologyApplicationSchema = z.object({
   notes: z.string().optional(),
   assignedPsychologist: z.string().optional(),
   firstSessionDate: z.date().optional(),
+});
+
+/**
+ * Schema for updating nutrition application
+ */
+export const updateNutritionApplicationSchema = z.object({
+  status: ApplicationStatusEnum,
+  notes: z.string().optional(),
+  assignedNutritionist: z.string().optional(),
 });
 
 /**

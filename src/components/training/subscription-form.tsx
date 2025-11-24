@@ -48,15 +48,16 @@ interface FormData {
   flexibilityTest: string;
 
   // Body Photos
-  frontPhoto: File | null;
-  sidePhoto: File | null;
-  backPhoto: File | null;
+  frontPhoto: string;
+  sidePhoto: string;
+  backPhoto: string;
 
   // Goals
   primaryGoal: "muscle-gain" | "weight-loss" | "performance" | "rehabilitation" | "general-fitness";
   timeframe: string;
   nutritionPlan: string;
   psychologicalSupport: string;
+  selectedPackage: "silver" | "gold" | "diamond";
 }
 
 const initialFormData: FormData = {
@@ -86,19 +87,21 @@ const initialFormData: FormData = {
   pushupTest: '',
   enduranceTest: '',
   flexibilityTest: '',
-  frontPhoto: null,
-  sidePhoto: null,
-  backPhoto: null,
+  frontPhoto: '',
+  sidePhoto: '',
+  backPhoto: '',
   primaryGoal: 'muscle-gain',
   timeframe: '',
   nutritionPlan: '',
-  psychologicalSupport: ''
+  psychologicalSupport: '',
+  selectedPackage: 'gold'
 };
 
 export default function SubscriptionForm() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const { mutate: createTrainingApplication } = api.public.applications.createTrainingApplication.useMutation();
   const { showSnackbar } = useSnackbar();
@@ -107,7 +110,7 @@ export default function SubscriptionForm() {
     { icon: User, title: 'Personal Data', description: 'Basic information about you' },
     { icon: Dumbbell, title: 'Training Data', description: 'Your fitness background' },
     { icon: Target, title: 'Body Measurements', description: 'Physical assessments' },
-    { icon: Camera, title: 'Body Photos', description: 'Visual documentation (optional)' },
+    { icon: Camera, title: 'Body Photos', description: 'Visual documentation (required)' },
     { icon: FileText, title: 'Goals & Preferences', description: 'Your objectives' }
   ];
 
@@ -115,8 +118,38 @@ export default function SubscriptionForm() {
     setFormData(prev => ({ ...prev, [field]: value as FormData[keyof FormData] }));
   };
 
-  const handleFileChange = (field: 'frontPhoto' | 'sidePhoto' | 'backPhoto', file: File | null) => {
-    setFormData(prev => ({ ...prev, [field]: file }));
+  const handleFileChange = async (field: 'frontPhoto' | 'sidePhoto' | 'backPhoto', file: File | null) => {
+    if (!file) {
+      setFormData(prev => ({ ...prev, [field]: '' }));
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('courseId', 'training-application'); // Temporary course ID for organization
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Upload failed');
+      }
+
+      // Store the BunnyCDN URL in form state
+      setFormData(prev => ({ ...prev, [field]: result.attachment.bunnyCdnUrl }));
+      showSnackbar(`${field === 'frontPhoto' ? 'Front' : field === 'sidePhoto' ? 'Side' : 'Back'} photo uploaded successfully!`, 'success');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      showSnackbar('Error uploading photo. Please try again.', 'error');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const nextStep = () => {
@@ -135,14 +168,8 @@ export default function SubscriptionForm() {
     setIsSubmitting(true);
 
     try {
-      // For file uploads, we'd need to implement a separate upload process
-      // For now, we'll submit the form without file data
-      await createTrainingApplication({
-        ...formData,
-        frontPhoto: undefined, // File upload would need special handling
-        sidePhoto: undefined,
-        backPhoto: undefined,
-      });
+      // Submit form with photo URLs
+      await createTrainingApplication(formData);
 
       showSnackbar('Training program request submitted successfully! We will contact you soon.', 'success');
 
@@ -471,41 +498,61 @@ export default function SubscriptionForm() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold mb-6">Body Photos (Optional but Recommended)</h3>
+            <h3 className="text-2xl font-bold mb-6">Body Photos (Required)</h3>
             <p className="text-muted-foreground mb-6">
-              Please send 3 clear body photos for assessment: Front, Side, and Back. 
+              Please upload 3 clear body photos for assessment: Front, Side, and Back.
               Example: Front photo in mirror with sportswear showing body clearly, without editing or filters.
             </p>
+            {isUploadingPhoto && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-blue-800 text-sm">📤 Uploading photo...</p>
+              </div>
+            )}
             <div className="grid md:grid-cols-3 gap-6">
               <div>
-                <Label htmlFor="frontPhoto">Front Photo</Label>
+                <Label htmlFor="frontPhoto">Front Photo *</Label>
                 <input
                   id="frontPhoto"
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileChange('frontPhoto', e.target.files?.[0] || null)}
                   className="w-full p-3 border border-gray-300 rounded-md"
+                  disabled={isUploadingPhoto}
+                  required
                 />
+                {formData.frontPhoto && (
+                  <p className="text-sm text-green-600 mt-2">✓ Uploaded</p>
+                )}
               </div>
               <div>
-                <Label htmlFor="sidePhoto">Side Photo</Label>
+                <Label htmlFor="sidePhoto">Side Photo *</Label>
                 <input
                   id="sidePhoto"
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileChange('sidePhoto', e.target.files?.[0] || null)}
                   className="w-full p-3 border border-gray-300 rounded-md"
+                  disabled={isUploadingPhoto}
+                  required
                 />
+                {formData.sidePhoto && (
+                  <p className="text-sm text-green-600 mt-2">✓ Uploaded</p>
+                )}
               </div>
               <div>
-                <Label htmlFor="backPhoto">Back Photo</Label>
+                <Label htmlFor="backPhoto">Back Photo *</Label>
                 <input
                   id="backPhoto"
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleFileChange('backPhoto', e.target.files?.[0] || null)}
                   className="w-full p-3 border border-gray-300 rounded-md"
+                  disabled={isUploadingPhoto}
+                  required
                 />
+                {formData.backPhoto && (
+                  <p className="text-sm text-green-600 mt-2">✓ Uploaded</p>
+                )}
               </div>
             </div>
           </div>
@@ -533,7 +580,7 @@ export default function SubscriptionForm() {
                   <option value="general-fitness">General fitness</option>
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="timeframe">Expected timeframe to achieve goal</Label>
                 <Input
@@ -552,6 +599,24 @@ export default function SubscriptionForm() {
                   onChange={(e) => handleInputChange('nutritionPlan', e.target.value)}
                   placeholder="Please specify your preferences"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="selectedPackage">Select Package *</Label>
+                <select
+                  id="selectedPackage"
+                  value={formData.selectedPackage}
+                  onChange={(e) => handleInputChange('selectedPackage', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="silver">🥈 Silver Package</option>
+                  <option value="gold">🥇 Gold Package (Most Popular)</option>
+                  <option value="diamond">💎 Diamond Package</option>
+                </select>
+                <p className="text-sm text-muted-foreground mt-2">
+                  You selected the <strong className="capitalize">{formData.selectedPackage}</strong> package.
+                </p>
               </div>
             </div>
           </div>
@@ -586,8 +651,8 @@ export default function SubscriptionForm() {
             {steps.map((step, index) => (
               <div key={index} className="flex items-center">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-                  index <= currentStep 
-                    ? 'bg-primary text-white border-primary' 
+                  index <= currentStep
+                    ? 'bg-primary text-white border-primary'
                     : 'bg-gray-100 text-gray-400 border-gray-300'
                 }`}>
                   <step.icon className="w-6 h-6" />
@@ -615,13 +680,13 @@ export default function SubscriptionForm() {
             >
               Previous
             </Button>
-            
+
             {currentStep < steps.length - 1 ? (
               <Button onClick={nextStep}>
                 Next
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="bg-gradient-to-r from-primary to-green-500 text-white"

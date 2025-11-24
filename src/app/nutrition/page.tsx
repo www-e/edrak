@@ -7,6 +7,7 @@ import PackagesSection from '@/components/nutrition/packages-section';
 import WhatYouGetSection from '@/components/nutrition/what-you-get-section';
 import FAQSection from '@/components/nutrition/faq-section';
 import CallToActionSection from '@/components/nutrition/call-to-action-section';
+import NutritionForm from '@/components/nutrition/nutrition-form';
 
 export const metadata: Metadata = {
   title: 'Nutrition Programs | SportologyPlus',
@@ -21,6 +22,7 @@ export default function NutritionPage() {
         <NutritionHero />
         <WhyChooseSection />
         <PackagesSection />
+        <NutritionForm />
         <WhatYouGetSection />
         <FAQSection />
         <CallToActionSection />

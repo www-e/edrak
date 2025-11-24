@@ -44,6 +44,7 @@ interface FormData {
   primaryGoal: "performance-improvement" | "stress-management" | "confidence-building" | "pre-competition-support" | "psychological-rehabilitation";
   sessionPreference: "individual" | "general";
   combineWithTraining: string;
+  selectedPackage: "silver" | "gold" | "diamond";
 }
 
 const initialFormData: FormData = {
@@ -71,7 +72,8 @@ const initialFormData: FormData = {
   anxietyEpisodes: 'yes',
   primaryGoal: 'performance-improvement',
   sessionPreference: 'individual',
-  combineWithTraining: ''
+  combineWithTraining: '',
+  selectedPackage: 'gold'
 };
 
 export default function PsychologyForm() {
@@ -350,7 +352,7 @@ export default function PsychologyForm() {
                   required
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="previousBreakdown">Have you ever experienced a psychological breakdown or loss of confidence during competitions? *</Label>
                 <select
@@ -365,7 +367,7 @@ export default function PsychologyForm() {
                   <option value="no">No</option>
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="generalMentalState">How do you describe your general mental state? *</Label>
                 <select
@@ -382,7 +384,7 @@ export default function PsychologyForm() {
                   <option value="unclear">Unclear</option>
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="sleepDifficulties">Do you have difficulty sleeping or waking up? *</Label>
                 <select
@@ -397,7 +399,7 @@ export default function PsychologyForm() {
                   <option value="no">No</option>
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="anxietyEpisodes">Do you suffer from anxiety attacks or excessive thinking? *</Label>
                 <select
@@ -438,7 +440,7 @@ export default function PsychologyForm() {
                   <option value="psychological-rehabilitation">Psychological rehabilitation</option>
                 </select>
               </div>
-              
+
               <div>
                 <Label htmlFor="sessionPreference">Do you prefer individual sessions or general guidance? *</Label>
                 <select
@@ -463,6 +465,24 @@ export default function PsychologyForm() {
                   placeholder="Please specify your preferences"
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="selectedPackage">Select Package *</Label>
+                <select
+                  id="selectedPackage"
+                  value={formData.selectedPackage}
+                  onChange={(e) => handleInputChange('selectedPackage', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="silver">🥈 Silver Package</option>
+                  <option value="gold">🥇 Gold Package (Most Popular)</option>
+                  <option value="diamond">💎 Diamond Package</option>
+                </select>
+                <p className="text-sm text-muted-foreground mt-2">
+                  You selected the <strong className="capitalize">{formData.selectedPackage}</strong> package.
+                </p>
               </div>
             </div>
           </div>
@@ -497,8 +517,8 @@ export default function PsychologyForm() {
             {steps.map((step, index) => (
               <div key={index} className="flex items-center">
                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-                  index <= currentStep 
-                    ? 'bg-purple-500 text-white border-purple-500' 
+                  index <= currentStep
+                    ? 'bg-purple-500 text-white border-purple-500'
                     : 'bg-gray-100 text-gray-400 border-gray-300'
                 }`}>
                   <step.icon className="w-6 h-6" />
@@ -526,13 +546,13 @@ export default function PsychologyForm() {
             >
               Previous
             </Button>
-            
+
             {currentStep < steps.length - 1 ? (
               <Button onClick={nextStep} className="bg-purple-500 hover:bg-purple-600">
                 Next
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"

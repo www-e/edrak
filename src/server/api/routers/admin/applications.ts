@@ -1,7 +1,7 @@
 import { createTRPCRouter, adminProcedure } from "@/server/api/trpc";
 import { db } from "@/server/db";
 import { z } from "zod";
-import { ApplicationStatusEnum, psychologyApplicationSchema, trainingApplicationSchema, updatePsychologyApplicationSchema, updateTrainingApplicationSchema } from "@/lib/validation-schemas";
+import { ApplicationStatusEnum, psychologyApplicationSchema, trainingApplicationSchema, updatePsychologyApplicationSchema, updateTrainingApplicationSchema, updateNutritionApplicationSchema } from "@/lib/validation-schemas";
 import { TRPCError } from "@trpc/server";
 
 export const adminApplicationsRouter = createTRPCRouter({
@@ -257,6 +257,119 @@ export const adminApplicationsRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await db.trainingApplication.create({
         data: input,
+      });
+    }),
+
+  /**
+   * Get all nutrition applications with pagination and search
+   */
+  getNutritionApplications: adminProcedure
+    .input(z.object({
+      page: z.number().min(1).optional(),
+      limit: z.number().min(1).max(100).optional(),
+      search: z.string().optional(),
+      status: ApplicationStatusEnum.optional(),
+      sortBy: z.string().optional(),
+      sortOrder: z.enum(['asc', 'desc']).optional(),
+    }).optional())
+    .query(async ({ input }) => {
+      const page = input?.page ?? 1;
+      const limit = input?.limit ?? 20;
+      const skip = (page - 1) * limit;
+      const search = input?.search;
+      const status = input?.status;
+      const sortBy = input?.sortBy ?? 'createdAt';
+      const sortOrder = input?.sortOrder ?? 'desc';
+
+      // Build where clause
+      const where: {
+        OR?: Array<{
+          fullName?: { contains: string; mode: 'insensitive' };
+          email?: { contains: string; mode: 'insensitive' };
+          primaryGoal?: { contains: string; mode: 'insensitive' };
+        }>;
+        status?: "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "COMPLETED";
+      } = {};
+      if (search) {
+        where.OR = [
+          { fullName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { primaryGoal: { contains: search, mode: 'insensitive' } },
+        ];
+      }
+      if (status) {
+        where.status = status as "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "COMPLETED";
+      }
+
+      // Get total count
+      const total = await db.nutritionApplication.count({ where });
+
+      // Get applications
+      const applications = await db.nutritionApplication.findMany({
+        where,
+        orderBy: { [sortBy]: sortOrder },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          primaryGoal: true,
+          selectedPackage: true,
+          status: true,
+          assignedNutritionist: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        applications,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      };
+    }),
+
+  /**
+   * Get a single nutrition application by ID
+   */
+  getNutritionApplicationById: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ input }) => {
+      const application = await db.nutritionApplication.findUnique({
+        where: { id: input.id },
+      });
+
+      if (!application) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Nutrition application not found',
+        });
+      }
+
+      return application;
+    }),
+
+  /**
+   * Update nutrition application
+   */
+  updateNutritionApplication: adminProcedure
+    .input(updateNutritionApplicationSchema.extend({
+      id: z.string().uuid(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...updateData } = input;
+
+      return await db.nutritionApplication.update({
+        where: { id },
+        data: {
+          ...updateData,
+          updatedAt: new Date(),
+        },
       });
     }),
 

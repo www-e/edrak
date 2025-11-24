@@ -130,4 +130,57 @@ export const publicApplicationsRouter = createTRPCRouter({
         data: processedInput,
       });
     }),
+
+  /**
+   * Create nutrition application (public submission)
+   */
+  createNutritionApplication: publicProcedure
+    .input(z.object({
+      // Personal Data
+      fullName: z.string().min(1, "Full name is required"),
+      gender: z.enum(["male", "female"]),
+      age: z.string().min(1, "Age is required"),
+      email: z.string().email("Valid email is required"),
+      phone: z.string().optional(),
+      country: z.string().min(1, "Country is required"),
+      city: z.string().min(1, "City is required"),
+
+      // Health Data
+      injuries: z.string().min(1, "Please specify injuries or write 'No'"),
+      medications: z.string().optional(),
+      allergies: z.string().optional(),
+      medicalConditions: z.string().optional(),
+
+      // Nutrition Data
+      currentWeight: z.string().min(1, "Current weight is required"),
+      currentHeight: z.string().min(1, "Current height is required"),
+      targetWeight: z.string().optional(),
+      dietaryRestrictions: z.string().optional(),
+      currentEatingHabits: z.string().min(1, "Please describe your current eating habits"),
+      mealsPerDay: z.string().min(1, "Number of meals per day is required"),
+      waterIntake: z.string().optional(),
+      activityLevel: z.enum(["sedentary", "light", "moderate", "active", "very-active"]),
+
+      // Goals
+      primaryGoal: z.enum([
+        "weight-loss",
+        "muscle-gain",
+        "performance",
+        "health-improvement",
+        "body-recomposition"
+      ]),
+      timeframe: z.string().optional(),
+      selectedPackage: z.enum(["silver", "gold", "diamond"]).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      // Process input (convert string values to required types)
+      const processedInput = {
+        ...input,
+        age: parseInt(input.age) || 0,
+      };
+
+      return await db.nutritionApplication.create({
+        data: processedInput,
+      });
+    }),
 });

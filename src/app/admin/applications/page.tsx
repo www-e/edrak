@@ -11,12 +11,13 @@ import { PageHeader } from "@/components/admin/shared/page-header";
 import { SearchFilter } from "@/components/admin/shared/search-filter";
 import { DataTable, type DataTableColumn } from "@/components/admin/shared/data-table";
 import { StatusBadge } from "@/components/admin/shared/status-badge";
-import { Brain, Dumbbell } from "lucide-react";
+import { Brain, Dumbbell, Apple } from "lucide-react";
 
 // This is the robust, correct way to get the type from the tRPC router.
 type RouterOutput = inferRouterOutputs<AppRouter>;
 type PsychologyApplication = RouterOutput["admin"]["applications"]["getPsychologyApplications"]["applications"][number];
 type TrainingApplication = RouterOutput["admin"]["applications"]["getTrainingApplications"]["applications"][number];
+type NutritionApplication = RouterOutput["admin"]["applications"]["getNutritionApplications"]["applications"][number];
 
 export default function ApplicationsPage() {
   const router = useRouter();
@@ -30,6 +31,11 @@ export default function ApplicationsPage() {
   const [trainingPage, setTrainingPage] = useState(1);
   const [trainingSearch, setTrainingSearch] = useState("");
   const [trainingStatus, setTrainingStatus] = useState<string | undefined>();
+
+  // Nutrition applications state
+  const [nutritionPage, setNutritionPage] = useState(1);
+  const [nutritionSearch, setNutritionSearch] = useState("");
+  const [nutritionStatus, setNutritionStatus] = useState<string | undefined>();
 
   const { data: psychologyData, isLoading: psychologyLoading } = api.admin.applications.getPsychologyApplications.useQuery({
     page: psychologyPage,
@@ -45,8 +51,16 @@ export default function ApplicationsPage() {
     status: trainingStatus as "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "COMPLETED" | undefined,
   });
 
+  const { data: nutritionData, isLoading: nutritionLoading } = api.admin.applications.getNutritionApplications.useQuery({
+    page: nutritionPage,
+    limit: 20,
+    search: nutritionSearch || undefined,
+    status: nutritionStatus as "PENDING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "IN_PROGRESS" | "COMPLETED" | undefined,
+  });
+
   const psychologyApplications = psychologyData?.applications ?? [];
   const trainingApplications = trainingData?.applications ?? [];
+  const nutritionApplications = nutritionData?.applications ?? [];
 
   const psychologyColumns: DataTableColumn<PsychologyApplication>[] = [
     {
@@ -143,11 +157,65 @@ export default function ApplicationsPage() {
     },
   ];
 
+  const nutritionColumns: DataTableColumn<NutritionApplication>[] = [
+    {
+      key: "fullName" as keyof NutritionApplication,
+      title: "Full Name",
+    },
+    {
+      key: "email" as keyof NutritionApplication,
+      title: "Email",
+    },
+    {
+      key: "primaryGoal" as keyof NutritionApplication,
+      title: "Goal",
+      render: (value: NutritionApplication[keyof NutritionApplication]) => (
+        <span className="text-sm capitalize">
+          {String(value).replace(/-/g, ' ')}
+        </span>
+      ),
+    },
+    {
+      key: "selectedPackage" as keyof NutritionApplication,
+      title: "Package",
+      render: (value: NutritionApplication[keyof NutritionApplication]) => (
+        <span className="text-sm capitalize">
+          {value ? String(value) : "Not Selected"}
+        </span>
+      ),
+    },
+    {
+      key: "status" as keyof NutritionApplication,
+      title: "Status",
+      render: (value: NutritionApplication[keyof NutritionApplication]) => (
+        <StatusBadge variant={value === 'PENDING' ? 'default' : value === 'APPROVED' ? 'success' : value === 'REJECTED' ? 'destructive' : 'warning'}>
+          {value as string}
+        </StatusBadge>
+      ),
+    },
+    {
+      key: "assignedNutritionist" as keyof NutritionApplication,
+      title: "Nutritionist",
+      render: (value: NutritionApplication[keyof NutritionApplication]) => (
+        <span className="text-sm text-muted-foreground">
+          {value ? String(value) : "Not Assigned"}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt" as keyof NutritionApplication,
+      title: "Applied",
+      render: (value: NutritionApplication[keyof NutritionApplication]) => (
+        (value as Date).toLocaleDateString()
+      ),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Applications"
-        description="Manage psychology and training program applications"
+        description="Manage psychology, training, and nutrition program applications"
         actions={
           <Button onClick={() => router.refresh()}>
             Refresh
@@ -191,6 +259,24 @@ export default function ApplicationsPage() {
               <p className="text-2xl font-bold text-orange-500">{trainingData?.applications?.filter((app: TrainingApplication) => app.status === 'PENDING').length ?? 0}</p>
             </div>
             <Dumbbell className="w-8 h-8 text-orange-500" />
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Nutrition</p>
+              <p className="text-2xl font-bold">{nutritionData?.pagination?.total ?? 0}</p>
+            </div>
+            <Apple className="w-8 h-8 text-green-500" />
+          </div>
+        </div>
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Nutrition Pending</p>
+              <p className="text-2xl font-bold text-orange-500">{nutritionData?.applications?.filter((app: NutritionApplication) => app.status === 'PENDING').length ?? 0}</p>
+            </div>
+            <Apple className="w-8 h-8 text-orange-500" />
           </div>
         </div>
       </div>
@@ -286,6 +372,58 @@ export default function ApplicationsPage() {
             <div className="text-center py-8">
               <Dumbbell className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No training applications found</p>
+            </div>
+          }
+        />
+      </div>
+
+      {/* Nutrition Applications Section */}
+      <div className="bg-white p-6 rounded-lg border shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <Apple className="w-6 h-6 text-green-500" />
+            <h2 className="text-xl font-semibold">Nutrition Applications</h2>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <SearchFilter
+              value={nutritionSearch}
+              onChange={setNutritionSearch}
+              placeholder="Search by name, email, or goal..."
+            />
+          </div>
+          <select
+            value={nutritionStatus || ""}
+            onChange={(e) => setNutritionStatus(e.target.value || undefined)}
+            className="px-4 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="UNDER_REVIEW">Under Review</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+
+        <DataTable
+          data={nutritionApplications}
+          columns={nutritionColumns}
+          loading={nutritionLoading}
+          pagination={{
+            page: nutritionPage,
+            pageSize: 20,
+            total: nutritionData?.pagination?.total ?? 0,
+            onPageChange: setNutritionPage,
+          }}
+          onRowClick={(app) => router.push(`/admin/applications/nutrition/${app.id}`)}
+          emptyState={
+            <div className="text-center py-8">
+              <Apple className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No nutrition applications found</p>
             </div>
           }
         />
