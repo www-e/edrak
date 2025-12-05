@@ -8,22 +8,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { api } from "@/trpc/react";
 
-const categories = [
-  'Career Preparation', 'Technology', 'Self Development', 'Business & Entrepreneurship', 'Languages', 'Art, Design & Media', 'Teacher Education & Training', 'Classroom Environment', 'Humanities'
-];
-
 export const CategoriesSection = () => {
-  const [activeCategory, setActiveCategory] = useState('Career Preparation');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Fetch real courses data using tRPC
-  const { data: courseData, isLoading } = api.public.course.getAllCourses.useQuery();
+
+  // Fetch categories and courses data using tRPC
+  const { data: categoriesData, isLoading: isCategoriesLoading } = api.public.category.getAll.useQuery();
+  const { data: courseData, isLoading: isCoursesLoading } = api.public.course.getAllCourses.useQuery();
+
+  const categories = categoriesData?.map(category => category.name) || [];
   const courses = courseData?.courses || [];
 
+  // Set the first category as default if activeCategory is not set
+  if (!activeCategory && categories.length > 0) {
+    setActiveCategory(categories[0]);
+  }
+
   // Filter courses based on active category
-  const filteredCourses = courses.filter(course =>
-    course.category?.name === activeCategory
-  );
+  const filteredCourses = activeCategory
+    ? courses.filter(course => course.category?.name === activeCategory)
+    : [];
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
@@ -35,7 +39,7 @@ export const CategoriesSection = () => {
     }
   };
 
-  if (isLoading) {
+  if (isCategoriesLoading || isCoursesLoading) {
     return (
       <section className="bg-secondary py-20">
         <div className="container mx-auto px-4">
@@ -45,7 +49,7 @@ export const CategoriesSection = () => {
               Discover a wide collection of over 300 courses, specially designed to meet your skills and interests!
             </h2>
           </div>
-          
+
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {categories.map((category) => (
               <Button
@@ -62,7 +66,7 @@ export const CategoriesSection = () => {
               </Button>
             ))}
           </div>
-          
+
           <div className="flex justify-center items-center h-64">
             <div className="text-2xl font-bold text-primary">Loading courses...</div>
           </div>

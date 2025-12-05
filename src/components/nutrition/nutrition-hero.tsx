@@ -15,10 +15,12 @@ export default function NutritionHero() {
         { label: 'Nutrition Programs' }
       ]}
       primaryButton={{
-        text: "Get Your Program Now"
+        text: "Get Your Program Now",
+        href: "#form"
       }}
       secondaryButton={{
-        text: "View Packages"
+        text: "View Packages",
+        href: "#packages"
       }}
     >
       <NutritionShapes />

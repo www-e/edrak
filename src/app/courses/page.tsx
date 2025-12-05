@@ -1,10 +1,10 @@
- import { Metadata } from 'next';
- import { Header } from '@/features/landing/components/Header';
- import { CourseList } from './CourseList';
- import { CourseService } from '@/server/services/courseService';
- import { AdminCategoryService } from '@/server/services/categoryService';
- import { Suspense } from 'react';
- import { Skeleton } from '@/components/ui/skeleton';
+import { Metadata } from 'next';
+import { Header } from '@/features/landing/components/Header';
+import { CourseList } from './CourseList';
+import { CourseService } from '@/server/services/courseService';
+import { AdminCategoryService } from '@/server/services/categoryService';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Enable ISR - regenerate every 30 minutes for better freshness
 export const revalidate = 1800;
@@ -16,8 +16,9 @@ export const metadata: Metadata = {
 
 // Pre-generate popular course categories for ISR
 export async function generateStaticParams() {
-  const categories = ['Technology', 'Business', 'Self Development'];
-  return categories.map(category => ({ category }));
+  // For the main courses page, we don't need static generation for categories
+  // since they are handled as query parameters (e.g., ?category=xxx)
+  return [];
 }
 
 export default async function CoursesPage({

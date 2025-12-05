@@ -99,36 +99,51 @@ async function main() {
     console.log('✅ Created student user:', student.username);
     createdStudents.push(student);
   }
-  
+
     // Create categories
     const categories = [
       {
-        name: 'Programming',
-        slug: 'programming',
-        description: 'Learn programming languages and software development'
+        name: 'التغذية',
+        slug: 'nutrition',
+        description: 'تعلم التغذية الرياضية واتباع نمط حياة صحي'
       },
       {
-        name: 'Data Science',
-        slug: 'data-science',
-        description: 'Master data analysis, machine learning, and AI'
+        name: 'التأهيل و الاصابات',
+        slug: 'rehabilitation-and-injuries',
+        description: 'تعلم كيفية التعامل مع الاصابات الرياضية'
       },
       {
-        name: 'Business',
-        slug: 'business',
-        description: 'Business management, entrepreneurship, and leadership'
+        name: 'علم النفس الرياضي',
+        slug: 'sports-psychology',
+        description: 'فهم الجوانب النفسية للرياضيين'
       },
       {
-        name: 'Design',
-        slug: 'design',
-        description: 'Graphic design, UI/UX, and creative skills'
+        name: 'الميكانيكا و علم الحركه الرياضيه',
+        slug: 'sports-mechanics-kinesiology',
+        description: 'دراسة حركة الجسم وتحليلها'
       },
       {
-        name: 'Marketing',
-        slug: 'marketing',
-        description: 'Digital marketing, SEO, and social media strategies'
+        name: 'الرياضات التخصصية',
+        slug: 'specialized-sports',
+        description: 'الرياضات المختلفة وتقنياتها'
+      },
+      {
+        name: 'التدريب و الاحمال الرياضية',
+        slug: 'sports-training-and-loading',
+        description: 'التدريب الرياضي وادارة الاحمال'
+      },
+      {
+        name: 'الادارة الرياضية و التسويق',
+        slug: 'sports-management-and-marketing',
+        description: 'ادارة الفرق والتسويق الرياضي'
+      },
+      {
+        name: 'القياسات البدنية و الفسيولوجية',
+        slug: 'physical-and-physiological-measurements',
+        description: 'القياسات والفحوصات البدنية والفيزيولوجية'
       }
     ];
-  
+
     for (const categoryData of categories) {
       const category = await prisma.category.upsert({
         where: { slug: categoryData.slug },
@@ -137,10 +152,10 @@ async function main() {
       });
       console.log('✅ Created category:', category.name);
     }
-  
+
     // Create sample courses
     const programmingCategory = await prisma.category.findUnique({ where: { slug: 'programming' } });
-  
+
     const courses = [
       {
         title: 'Complete Web Development Bootcamp',
@@ -163,7 +178,7 @@ async function main() {
         categoryId: programmingCategory?.id,
       }
     ];
-  
+
     for (const courseData of courses) {
       const course = await prisma.course.upsert({
         where: { slug: courseData.slug },
@@ -171,7 +186,7 @@ async function main() {
         create: courseData,
       });
       console.log('✅ Created course:', course.title);
-  
+
       // Create sample lessons for each course
       const lessons = [
         {
@@ -193,7 +208,7 @@ async function main() {
           isVisible: true,
         }
       ];
-  
+
       for (const lessonData of lessons) {
         const lesson = await prisma.lesson.upsert({
           where: {
@@ -208,10 +223,10 @@ async function main() {
         console.log('  ✅ Created lesson:', lesson.title);
       }
     }
-  
+
     // Enroll students in courses
     const course = await prisma.course.findFirst({ where: { slug: 'complete-web-development-bootcamp' } });
-  
+
     if (course) {
       for (const student of [adminUser, ...createdStudents]) {
         const enrollment = await prisma.enrollment.upsert({
@@ -231,7 +246,7 @@ async function main() {
         console.log('✅ Enrolled student:', student.username, 'in course:', course.title);
       }
     }
-  
+
     console.log('🎉 Database seeding completed successfully!');
   console.log('\n📋 Test User Credentials:');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { api } from '@/trpc/react';
 
 interface CourseFiltersProps {
   filters: {
@@ -18,14 +19,13 @@ export function CourseFilters({ filters, setFilters }: CourseFiltersProps) {
   const [openCategory, setOpenCategory] = useState(true);
   const [openPrice, setOpenPrice] = useState(true);
 
-  const categories = [
-    'Technology',
-    'Business',
-    'Design',
-    'Marketing',
-    'Data Science',
-    'Personal Development'
-  ];
+  // Fetch categories dynamically from the API
+  const { data: categoriesData, isLoading } = api.public.category.getAll.useQuery();
+  const categories = categoriesData?.map(category => category.name) || [];
+
+  if (isLoading) {
+    return <div>Loading categories...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -38,7 +38,7 @@ export function CourseFilters({ filters, setFilters }: CourseFiltersProps) {
           Category
           <span>{openCategory ? '−' : '+'}</span>
         </Button>
-        
+
         {openCategory && (
           <div className="p-4 space-y-3 border-t">
             {categories.map((category) => (
@@ -75,7 +75,7 @@ export function CourseFilters({ filters, setFilters }: CourseFiltersProps) {
           Price
           <span>{openPrice ? '−' : '+'}</span>
         </Button>
-        
+
         {openPrice && (
           <div className="p-4 space-y-3 border-t">
             <div className="flex items-center space-x-2">

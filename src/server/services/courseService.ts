@@ -155,10 +155,15 @@ export class CourseService {
       visibility: CourseVisibility.PUBLISHED
     };
 
-    // Add category filter - get categoryId first if category name is provided
+    // Add category filter - get categoryId first if category name or slug is provided
     if (filters?.category) {
       const category = await db.category.findFirst({
-        where: { name: filters.category },
+        where: {
+          OR: [
+            { name: filters.category },
+            { slug: filters.category }
+          ]
+        },
         select: { id: true }
       });
       if (category) {

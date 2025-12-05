@@ -15,10 +15,12 @@ export default function TrainingHero() {
         { label: 'Training Programs' }
       ]}
       primaryButton={{
-        text: "Choose Your Program"
+        text: "Choose Your Program",
+        href: "#packages"
       }}
       secondaryButton={{
-        text: "View Comparison"
+        text: "View Comparison",
+        href: "#packages"
       }}
     >
       <ServicesShapes />

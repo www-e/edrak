@@ -21,8 +21,12 @@ export default function NutritionPage() {
       <main className="relative">
         <NutritionHero />
         <WhyChooseSection />
-        <PackagesSection />
-        <NutritionForm />
+        <div id="packages">
+          <PackagesSection />
+        </div>
+        <div id="form">
+          <NutritionForm />
+        </div>
         <WhatYouGetSection />
         <FAQSection />
         <CallToActionSection />
