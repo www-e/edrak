@@ -8,8 +8,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ClientToaster } from "@/components/ClientToaster";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css";
 
 // Configure Space Grotesk for headings and IBM Plex Sans for body text
