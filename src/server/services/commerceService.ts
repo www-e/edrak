@@ -206,7 +206,7 @@ export class AdminCommerceService {
     options?: {
       page?: number;
       limit?: number;
-      type?: "PURCHASE_DEBIT" | "CASHBACK_CREDIT" | "ADMIN_CREDIT" | "ADMIN_DEBIT" | "REFUND_CREDIT";
+      type?: "PURCHASE_DEBIT" | "CASHBACK_CREDIT" | "ADMIN_CREDIT" | "ADMIN_DEBIT" | "REFUND_CREDIT" | "CASHBACK_REVERSAL";
     }
   ) {
     const { WalletService } = await import("@/lib/wallet-service");

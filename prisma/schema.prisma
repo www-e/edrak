@@ -543,6 +543,7 @@ enum TransactionType {
   ADMIN_CREDIT
   ADMIN_DEBIT
   REFUND_CREDIT
+  CASHBACK_REVERSAL
 }
 
 model WalletTransaction {

@@ -121,75 +121,81 @@ export default function Hero({
           </motion.nav>
         )}
 
-        {/* Enhanced Hero content */}
-        <div className="max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className={`inline-flex items-center gap-3 px-6 py-3 rounded-full ${iconBackgroundColor} text-primary text-sm font-semibold mb-8 border border-primary/20`}
-          >
-            {iconEmoji && <span className="text-3xl animate-bounce">{iconEmoji}</span>}
-            {icon}
-            <span>{subtitle || 'Service'}</span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-5xl md:text-7xl font-bold font-heading mb-8 leading-tight"
-          >
-            <span className="text-gray-900">{title.split(' ').slice(0, -1).join(' ')}</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-green-600 to-primary mt-3 animate-pulse">
-              {title.split(' ').slice(-1)[0]}
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-xl md:text-2xl text-muted-foreground leading-relaxed mb-12 max-w-4xl"
-          >
-            {description}
-          </motion.p>
-
-          {/* CTA Buttons */}
-          {(primaryButton || secondaryButton) && (
+        {/* Enhanced Hero content with grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          {/* Text content */}
+          <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className={`inline-flex items-center gap-3 px-6 py-3 rounded-full ${iconBackgroundColor} text-primary text-sm font-semibold mb-8 border border-primary/20`}
             >
-              {primaryButton && primaryButton.href ? (
-                <Link href={primaryButton.href} className="px-8 py-4 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-2xl hover:from-primary/90 hover:to-green-600/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
-                  {primaryButton.text}
-                </Link>
-              ) : primaryButton ? (
-                <button
-                  onClick={primaryButton.onClick}
-                  className="px-8 py-4 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-2xl hover:from-primary/90 hover:to-green-600/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  {primaryButton.text}
-                </button>
-              ) : null}
-
-              {secondaryButton && secondaryButton.href ? (
-                <Link href={secondaryButton.href} className="px-8 py-4 bg-white/80 backdrop-blur-sm border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl text-center">
-                  {secondaryButton.text}
-                </Link>
-              ) : secondaryButton ? (
-                <button
-                  onClick={secondaryButton.onClick}
-                  className="px-8 py-4 bg-white/80 backdrop-blur-sm border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl"
-                >
-                  {secondaryButton.text}
-                </button>
-              ) : null}
+              {iconEmoji && <span className="text-3xl animate-bounce">{iconEmoji}</span>}
+              {icon}
+              <span>{subtitle || 'Service'}</span>
             </motion.div>
-          )}
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading mb-6 leading-tight"
+            >
+              <span className="text-gray-900">{title.split(' ').slice(0, -1).join(' ')}</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-green-600 to-primary mt-2 animate-pulse">
+                {title.split(' ').slice(-1)[0]}
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-2xl"
+            >
+              {description}
+            </motion.p>
+
+            {/* CTA Buttons */}
+            {(primaryButton || secondaryButton) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                className="flex flex-col sm:flex-row gap-4"
+              >
+                {primaryButton && primaryButton.href ? (
+                  <Link href={primaryButton.href} className="px-6 py-3 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-2xl hover:from-primary/90 hover:to-green-600/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
+                    {primaryButton.text}
+                  </Link>
+                ) : primaryButton ? (
+                  <button
+                    onClick={primaryButton.onClick}
+                    className="px-6 py-3 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-2xl hover:from-primary/90 hover:to-green-600/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
+                    {primaryButton.text}
+                  </button>
+                ) : null}
+
+                {secondaryButton && secondaryButton.href ? (
+                  <Link href={secondaryButton.href} className="px-6 py-3 bg-white/80 backdrop-blur-sm border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl text-center">
+                    {secondaryButton.text}
+                  </Link>
+                ) : secondaryButton ? (
+                  <button
+                    onClick={secondaryButton.onClick}
+                    className="px-6 py-3 bg-white/80 backdrop-blur-sm border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    {secondaryButton.text}
+                  </button>
+                ) : null}
+              </motion.div>
+            )}
+
+            {/* Additional content */}
+            {children}
+          </div>
 
           {/* Hero image */}
           {imageUrl && (
@@ -197,18 +203,15 @@ export default function Hero({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.7 }}
-              className="mt-12 max-w-2xl mx-auto"
+              className="flex justify-center"
             >
               <img
                 src={imageUrl}
                 alt={imageAlt || 'Hero Image'}
-                className="w-full h-auto rounded-2xl shadow-xl"
+                className="w-full h-auto max-w-full rounded-2xl shadow-xl"
               />
             </motion.div>
           )}
-
-          {/* Additional content */}
-          {children}
         </div>
       </div>
     </section>

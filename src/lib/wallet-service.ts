@@ -305,7 +305,7 @@ export class WalletService {
    * Returns 0 if no cashback configured or if finalAmount is 0 (free course)
    */
   static calculateCashback(
-    course: Pick<Course, 'cashbackType' | 'cashbackValue'>, 
+    course: Pick<Course, 'cashbackType' | 'cashbackValue'>,
     finalAmount: number
   ): number {
     // No cashback on free courses
@@ -323,8 +323,18 @@ export class WalletService {
     if (course.cashbackType === CashbackType.PERCENTAGE) {
       const percentage = Number(course.cashbackValue);
       cashback = (finalAmount * percentage) / 100;
+
+      // Validate that percentage cashback doesn't exceed the payment amount
+      if (cashback > finalAmount) {
+        cashback = finalAmount; // Cap cashback at the payment amount
+      }
     } else if (course.cashbackType === CashbackType.FIXED) {
       cashback = Number(course.cashbackValue);
+
+      // Validate that fixed cashback doesn't exceed the payment amount
+      if (cashback > finalAmount) {
+        cashback = finalAmount; // Cap cashback at the payment amount
+      }
     }
 
     // Round to 2 decimal places

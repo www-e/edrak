@@ -5,23 +5,6 @@ import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 export const Footer = () => {
   return (
     <footer className="bg-[#1a2b3d] text-white">
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary via-primary/95 to-primary text-primary-foreground py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-6">Level Up Your Sports Game Today!</h2>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">Join over 10,000 athletes, coaches, and professionals who have transformed their careers. Get instant access to expert courses and start your journey to success.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link href="/signup" className="inline-block py-4 px-8 bg-primary-foreground text-primary font-bold rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-lg transform hover:scale-105">
-              Start Free Trial
-            </Link>
-            <Link href="/courses" className="inline-block py-4 px-8 bg-transparent border-2 border-primary-foreground text-primary-foreground font-bold rounded-lg hover:bg-primary-foreground hover:text-primary transition-all duration-300">
-              Explore Courses
-            </Link>
-          </div>
-          <p className="text-sm opacity-90">No credit card required • Cancel anytime • 30-day money-back guarantee</p>
-        </div>
-      </div>
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
           

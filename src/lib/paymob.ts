@@ -1,6 +1,6 @@
 import { serverEnv } from "@/lib/env-server";
 import { db } from "@/server/db";
-import { Course, User, EnrollmentStatus } from "@prisma/client";
+import { Prisma, Course, User, EnrollmentStatus, TransactionType } from "@prisma/client";
 import crypto from "crypto";
 import { WalletService } from "@/lib/wallet-service";
 
@@ -98,7 +98,7 @@ export class PayMobService {
 
     return token;
   }
-  
+
   private static async getWalletRedirectUrl(paymentKeyToken: string, walletNumber: string): Promise<string> {
     const response = await fetch(`${PAYMOB_API_URL}/acceptance/payments/pay`, {
       method: 'POST',
@@ -185,17 +185,17 @@ export class PayMobService {
   public static async processPaymentUpdate(paymobOrderId: string, success: boolean, transactionId?: number) {
     const payment = await db.payment.findFirst({
       where: { paymobOrderId: paymobOrderId } as Record<string, unknown>,
-      include: { 
-        user: { select: { id: true, firstName: true, lastName: true } }, 
-        course: { 
-          select: { 
-            id: true, 
-            title: true, 
-            cashbackType: true, 
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+        course: {
+          select: {
+            id: true,
+            title: true,
+            cashbackType: true,
             cashbackValue: true,
             price: true
-          } 
-        } 
+          }
+        }
       }
     });
 
@@ -211,7 +211,7 @@ export class PayMobService {
       // 1. Update Payment Status
       await tx.payment.update({
         where: { id: payment.id },
-        data: { 
+        data: {
           status: newStatus,
           completedAt: success ? new Date() : null
         }
@@ -239,8 +239,10 @@ export class PayMobService {
         }
 
         // 3. Credit Cashback (if applicable)
-        const cashbackAmount = WalletService.calculateCashback(payment.course, payment.amount.toNumber());
-        
+        // Calculate cashback only on the amount actually paid via PayMob (excluding wallet amount used)
+        const actualAmountPaidViaPaymob = payment.amount.toNumber() - (payment.walletAmountUsed?.toNumber() || 0);
+        const cashbackAmount = WalletService.calculateCashback(payment.course, actualAmountPaidViaPaymob);
+
         if (cashbackAmount > 0) {
           // Check if cashback already credited for this payment to ensure idempotency
           const existingCashback = await tx.walletTransaction.findFirst({
@@ -258,7 +260,66 @@ export class PayMobService {
               payment.course.title,
               tx // Pass the transaction client
             );
+
+            // Update payment record with cashback earned amount
+            await tx.payment.update({
+              where: { id: payment.id },
+              data: { cashbackEarned: new Prisma.Decimal(cashbackAmount) }
+            });
           }
+        }
+      } else {
+        // Payment failed - check if cashback was previously credited and needs to be reversed
+        // This handles cases where the payment status changes from completed to failed after cashback was already credited
+
+        // Find any cashback transaction for this payment
+        const existingCashback = await tx.walletTransaction.findFirst({
+          where: {
+            relatedPaymentId: payment.id,
+            type: "CASHBACK_CREDIT"
+          }
+        });
+
+        if (existingCashback) {
+          // If payment failed, we need to reverse the previously credited cashback
+          // This is important for cases where webhook was processed but payment later failed
+
+          // Get the cashback amount to refund
+          const cashbackAmount = Number(existingCashback.amount);
+
+          // Create a reversal transaction by debiting the cashback amount
+          await tx.walletTransaction.create({
+            data: {
+              userId: payment.userId,
+              type: "CASHBACK_REVERSAL", // New transaction type for reversals
+              amount: new Prisma.Decimal(-cashbackAmount), // Negative amount to debit
+              balanceBefore: existingCashback.balanceAfter,
+              balanceAfter: new Prisma.Decimal(Number(existingCashback.balanceAfter) - cashbackAmount),
+              description: `Reversal of cashback for failed payment: ${payment.course.title}`,
+              relatedPaymentId: payment.id,
+              metadata: {
+                courseName: payment.course.title,
+                originalCashbackTransactionId: existingCashback.id,
+                reversedAt: new Date().toISOString(),
+              },
+            },
+          });
+
+          // Update the user's wallet balance by decrementing the cashback amount
+          await tx.user.update({
+            where: { id: payment.userId },
+            data: {
+              walletBalance: {
+                decrement: cashbackAmount,
+              },
+            },
+          });
+
+          // Update payment record to reset cashback earned
+          await tx.payment.update({
+            where: { id: payment.id },
+            data: { cashbackEarned: new Prisma.Decimal(0) }
+          });
         }
       }
     });

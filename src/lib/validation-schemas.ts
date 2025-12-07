@@ -368,5 +368,5 @@ export const cashbackConfigSchema = z.object({
  * Wallet Transaction Query Schema - For filtering transaction history
  */
 export const walletTransactionQuerySchema = paginationSchema.extend({
-  type: z.enum(["PURCHASE_DEBIT", "CASHBACK_CREDIT", "ADMIN_CREDIT", "ADMIN_DEBIT", "REFUND_CREDIT"]).optional(),
+  type: z.enum(["PURCHASE_DEBIT", "CASHBACK_CREDIT", "ADMIN_CREDIT", "ADMIN_DEBIT", "REFUND_CREDIT", "CASHBACK_REVERSAL"]).optional(),
 });
