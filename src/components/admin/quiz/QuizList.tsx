@@ -32,7 +32,7 @@ export function QuizList({ courseId, onCreateQuiz, onEditQuiz }: QuizListProps) 
   });
 
   const handleDelete = (quizId: string) => {
-    if (confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
+    if (window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.")) {
       deleteQuizMutation.mutate({ id: quizId });
     }
   };
@@ -45,8 +45,10 @@ export function QuizList({ courseId, onCreateQuiz, onEditQuiz }: QuizListProps) 
     return (
       <Card>
         <CardContent className="py-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading quizzes...</p>
+          <div className="flex flex-col items-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+            <p className="mt-4 text-muted-foreground">Loading quizzes...</p>
+          </div>
         </CardContent>
       </Card>
     );

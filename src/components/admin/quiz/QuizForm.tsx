@@ -334,7 +334,7 @@ export function QuizForm({ courseId, lessonId, quizId, onSuccess, onCancel }: Qu
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 justify-end">
+      <div className="flex gap-3 justify-end pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
@@ -342,11 +342,16 @@ export function QuizForm({ courseId, lessonId, quizId, onSuccess, onCancel }: Qu
           type="submit"
           disabled={createQuizMutation.isPending || updateQuizMutation.isPending}
         >
-          {createQuizMutation.isPending || updateQuizMutation.isPending
-            ? "Saving..."
-            : quizId
-            ? "Update Quiz"
-            : "Create Quiz"}
+          {createQuizMutation.isPending || updateQuizMutation.isPending ? (
+            <>
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              Saving...
+            </>
+          ) : quizId ? (
+            "Update Quiz"
+          ) : (
+            "Create Quiz"
+          )}
         </Button>
       </div>
     </form>

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, AlertCircle, Trophy, RotateCcw } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Trophy, RotateCcw, Loader2 } from "lucide-react";
 import { api } from "@/trpc/react";
 import type { Prisma } from "@prisma/client";
 
@@ -39,7 +39,7 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
   } | null>(null);
 
   // Fetch quiz data
-  const { data: quizData, isLoading: quizLoading } = api.student.quiz.getById.useQuery(
+  const { data: quizData, isLoading: quizLoading, isError, error } = api.student.quiz.getById.useQuery(
     { quizId, courseId },
     { enabled: open && !reviewMode } // Only fetch when modal is open and not in review mode
   );
@@ -108,6 +108,27 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
 
   const allQuestionsAnswered = questions.length > 0 && questions.every((_, index) => selectedAnswers[index] !== undefined);
 
+  // Display error state if there's an error
+  if (isError) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Error</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <p className="text-muted-foreground mb-2">Failed to load quiz data</p>
+            <p className="text-sm text-muted-foreground">{error?.message || 'Unknown error occurred'}</p>
+          </div>
+          <div className="flex justify-center">
+            <Button onClick={handleClose}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -126,8 +147,10 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
 
         {isLoading ? (
           <div className="py-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Loading quiz...</p>
+            <div className="flex flex-col items-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="mt-4 text-muted-foreground">Loading quiz...</p>
+            </div>
           </div>
         ) : isSubmitted && result ? (
           // Results View
@@ -325,7 +348,12 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
                 onClick={handleSubmit}
                 disabled={!allQuestionsAnswered || submitAttemptMutation.isPending}
               >
-                {submitAttemptMutation.isPending ? "Submitting..." : "Submit Quiz"}
+                {submitAttemptMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : "Submit Quiz"}
               </Button>
             </div>
           </div>
