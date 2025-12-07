@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   BookOpen,
@@ -41,7 +42,7 @@ export default function AdminDashboardPage() {
             {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
@@ -52,7 +53,7 @@ export default function AdminDashboardPage() {
             {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -63,7 +64,7 @@ export default function AdminDashboardPage() {
              {/* You can add percentage change logic here later */}
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Enrollments</CardTitle>
@@ -72,6 +73,77 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.activeEnrollments ?? 0}</div>
              {/* You can add percentage change logic here later */}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Create New Coupon</CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              Generate discount codes for courses
+            </p>
+            <a href="/admin/commerce/coupons/new" className="inline-block">
+              <Button size="sm">
+                Create Coupon
+              </Button>
+            </a>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Create New Quiz</CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              Add assessments to your courses
+            </p>
+            <a href="/admin/courses" className="inline-block">
+              <Button size="sm">
+                Manage Quizzes
+              </Button>
+            </a>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Analytics</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              View reports and insights
+            </p>
+            <a href="/admin/commerce" className="inline-block">
+              <Button size="sm">
+                View Analytics
+              </Button>
+            </a>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Manage Exams</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              Track student evaluations
+            </p>
+            <a href="/admin/courses" className="inline-block">
+              <Button size="sm">
+                Manage Exams
+              </Button>
+            </a>
           </CardContent>
         </Card>
       </div>
@@ -107,7 +179,7 @@ export default function AdminDashboardPage() {
             </Suspense>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Recent Courses</CardTitle>
