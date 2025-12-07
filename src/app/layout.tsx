@@ -8,6 +8,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ClientToaster } from "@/components/ClientToaster";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 // Configure Space Grotesk for headings and IBM Plex Sans for body text
@@ -57,6 +59,8 @@ export default async function RootLayout({
             </SnackbarProvider>
           </ThemeProvider>
         </SessionProviderWrapper>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

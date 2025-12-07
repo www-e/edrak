@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Play, Lock, BookOpen, Clock, Eye, LucideIcon } from 'lucide-react';
+import { Play, Lock, BookOpen, Clock, Eye} from 'lucide-react';
 import { Course } from '@/features/courses/types';
 import Link from 'next/link';
 import { StatCard } from '@/components/shared/StatCard';

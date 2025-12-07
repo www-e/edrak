@@ -1,5 +1,5 @@
 import FeatureGrid from '@/components/shared/FeatureGrid';
-import { BarChart3, Clock, Award, MessageCircle, CheckCircle } from 'lucide-react';
+import { BarChart3, Clock, Award, MessageCircle } from 'lucide-react';
 
 export default function WhyChooseSection() {
   const reasons = [

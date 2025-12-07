@@ -4,7 +4,6 @@ import { db } from "@/server/db";
 import { getToken } from "next-auth/jwt";
 import { type NextRequest } from "next/server";
 import { type SessionUser } from "@/types/auth";
-import { authOptions } from "@/lib/auth";
 
 const createContext = async (req: NextRequest) => {
   // For App Router API routes, we get the JWT token directly from cookies

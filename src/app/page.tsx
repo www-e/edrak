@@ -1,7 +1,6 @@
 import { CourseService } from '@/server/services/courseService';
 import { Header } from "@/features/landing/components/Header";
 import { HeroSection } from "@/features/landing/components/HeroSection";
-import { CompaniesSection } from "@/features/landing/components/CompaniesSection";
 import { FeaturedCoursesSection } from "@/features/landing/components/FeaturedCoursesSection";
 import { ActivitiesSection } from "@/features/landing/components/ActivitiesSection";
 import { Footer } from "@/features/landing/components/Footer";
@@ -32,7 +31,6 @@ function LandingContent({ featuredCourses }: { featuredCourses: FeaturedCourse[]
     <main className="min-h-screen bg-background font-body">
       <Header />
       <HeroSection />
-      <CompaniesSection />
       <FeaturedCoursesSection initialCourses={featuredCourses} />
       <CourseSearch />
       <ActivitiesSection />

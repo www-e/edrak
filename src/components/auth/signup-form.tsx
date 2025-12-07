@@ -321,7 +321,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
                       <FormLabel className="text-foreground font-medium">What would you like to learn? (Optional)</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Technology, Business, Languages..."
+                          placeholder="e.g., Sports Science, Nutrition, Training..."
                           className="h-12 bg-background/50 border-border focus:border-primary focus:ring-primary/20"
                           {...field}
                         />

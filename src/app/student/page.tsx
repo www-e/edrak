@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
 import { BookOpen, Award, CreditCard, TrendingUp } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 import { StatCard, StatCardSkeleton } from "@/components/shared/StatCard";

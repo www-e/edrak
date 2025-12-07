@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, BookOpen, Star, Users, Clock } from "lucide-react";
+import { CheckCircle, BookOpen,Users, Clock } from "lucide-react";
 import Link from "next/link";
 
 export default function WelcomePage() {

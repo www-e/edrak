@@ -19,7 +19,7 @@ async function main() {
       lastName: 'Administrator',
       phoneNumber: '+20123456789',
       secondPhoneNumber: '+20123456788',
-      categoryPreference: 'Technology',
+      categoryPreference: 'Sports Science',
       referralSource: 'Official Website',
       role: 'ADMIN',
       isActive: true,
@@ -40,7 +40,7 @@ async function main() {
       lastName: 'Smith',
       phoneNumber: '+20123456780',
       secondPhoneNumber: '+20123456779',
-      categoryPreference: 'Programming',
+      categoryPreference: 'Sports Science',
       referralSource: 'University Network',
       role: 'PROFESSOR',
       isActive: true,
@@ -58,7 +58,7 @@ async function main() {
       lastName: 'Hassan',
       phoneNumber: '+20123456781',
       secondPhoneNumber: '+20123456784',
-      categoryPreference: 'Programming',
+      categoryPreference: 'Sports Science',
       referralSource: 'Google Search',
     },
     {
@@ -68,7 +68,7 @@ async function main() {
       lastName: 'Ali',
       phoneNumber: '+20123456782',
       secondPhoneNumber: '+20123456785',
-      categoryPreference: 'Data Science',
+      categoryPreference: 'Nutrition',
       referralSource: 'Social Media',
     },
     {
@@ -78,7 +78,7 @@ async function main() {
       lastName: 'Sayed',
       phoneNumber: '+20123456783',
       secondPhoneNumber: '+20123456786',
-      categoryPreference: 'Business',
+      categoryPreference: 'Training',
       referralSource: 'Friend Recommendation',
     },
   ];
@@ -133,9 +133,9 @@ async function main() {
         description: 'التدريب الرياضي وادارة الاحمال'
       },
       {
-        name: 'الادارة الرياضية و التسويق',
-        slug: 'sports-management-and-marketing',
-        description: 'ادارة الفرق والتسويق الرياضي'
+        name: 'الادارة الرياضية',
+        slug: 'sports-management',
+        description: 'ادارة الفرق الرياضية'
       },
       {
         name: 'القياسات البدنية و الفسيولوجية',
@@ -154,28 +154,28 @@ async function main() {
     }
 
     // Create sample courses
-    const programmingCategory = await prisma.category.findUnique({ where: { slug: 'programming' } });
+    const nutritionCategory = await prisma.category.findUnique({ where: { slug: 'nutrition' } });
 
     const courses = [
       {
-        title: 'Complete Web Development Bootcamp',
-        slug: 'complete-web-development-bootcamp',
-        description: 'Learn HTML, CSS, JavaScript, React, Node.js, and MongoDB to become a full-stack web developer. This comprehensive course covers everything from basic web development to advanced topics.',
+        title: 'Complete Sports Nutrition Guide',
+        slug: 'complete-sports-nutrition-guide',
+        description: 'Learn everything about sports nutrition including meal planning, supplements, and hydration strategies to maximize athletic performance. This comprehensive course covers everything from basic nutrition to advanced topics.',
         price: 299.99,
         language: 'English',
         visibility: 'PUBLISHED' as const,
         professorId: professorUser.id,
-        categoryId: programmingCategory?.id,
+        categoryId: nutritionCategory?.id,
       },
       {
-        title: 'Python for Data Science',
-        slug: 'python-for-data-science',
-        description: 'Master Python programming for data analysis, visualization, and machine learning. Learn pandas, NumPy, Matplotlib, and scikit-learn.',
+        title: 'Data Analysis for Athletes',
+        slug: 'data-analysis-for-athletes',
+        description: 'Master data analysis techniques for athlete performance metrics, training optimization, and improvement tracking. Learn how to use data for better performance.',
         price: 199.99,
         language: 'English',
         visibility: 'PUBLISHED' as const,
         professorId: professorUser.id,
-        categoryId: programmingCategory?.id,
+        categoryId: nutritionCategory?.id,
       }
     ];
 
@@ -271,19 +271,19 @@ async function main() {
   console.log('      Email: ahmed.hassan@edraak.com');
   console.log('      Name: Ahmed Hassan');
   console.log('      Phone: +20123456781');
-  console.log('      Interest: Programming');
+  console.log('      Interest: Sports Science');
   console.log('');
   console.log('   2. student2 - student123');
   console.log('      Email: fatima.ali@edraak.com');
   console.log('      Name: Fatima Ali');
   console.log('      Phone: +20123456782');
-  console.log('      Interest: Data Science');
+  console.log('      Interest: Nutrition');
   console.log('');
   console.log('   3. student3 - student123');
   console.log('      Email: mohamed.sayed@edraak.com');
   console.log('      Name: Mohamed Sayed');
   console.log('      Phone: +20123456783');
-  console.log('      Interest: Business');
+  console.log('      Interest: Training');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('\n💳 PayMob Ready: All users have complete billing information!');
 }

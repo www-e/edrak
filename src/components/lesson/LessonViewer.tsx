@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Video, Download, FileText, Image, MessageCircle, StickyNote, ChevronUp, ChevronDown } from "lucide-react";
+import { CheckCircle, ArrowLeft, AlertCircle, Eye, Play, File, Download, FileText, Image, MessageCircle, StickyNote, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { VideoPlayerWithNotes } from "@/components/ui/video-player-with-notes";
 import { YouTubePlayerWithNotes } from "@/components/ui/youtube-player-with-notes";
