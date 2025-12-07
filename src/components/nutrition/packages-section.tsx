@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { CheckCircle, X, Star, Crown, Diamond } from 'lucide-react';
+import { Star, Crown, Diamond } from 'lucide-react';
+import GenericPackage from '@/components/shared/GenericPackage';
 
 export default function PackagesSection() {
   const packages = [
@@ -78,89 +78,11 @@ export default function PackagesSection() {
   ];
 
   return (
-    <section className="py-24 bg-white">
-      <div className="container max-w-[1400px] mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6 text-gray-900">
-            Sportology Plus 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600"> Nutrition Packages</span>
-          </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Choose the perfect package that suits your goals and get comprehensive nutritional support
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {packages.map((pkg, index) => (
-            <motion.div
-              key={pkg.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className={`relative bg-white rounded-3xl border-2 ${pkg.borderColor} shadow-lg hover:shadow-xl transition-all duration-300 ${pkg.popular ? 'transform scale-105 lg:scale-110' : ''}`}
-            >
-              {pkg.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="p-8">
-                {/* Package Header */}
-                <div className="text-center mb-8">
-                  <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-r ${pkg.color} shadow-lg mb-4`}>
-                    <pkg.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold font-heading mb-2 text-gray-900">{pkg.name}</h3>
-                  <p className="text-sm text-gray-500 mb-4">{pkg.tier}</p>
-                  
-                  {/* Pricing */}
-                  <div className="space-y-2">
-                    <div className="text-2xl font-bold text-gray-900">{pkg.price.monthly}<span className="text-sm font-normal text-gray-500">/month</span></div>
-                    <div className="text-sm text-gray-600">{pkg.price.threeMonths} for 3 months</div>
-                    <div className="text-sm text-gray-600">{pkg.price.sixMonths} for 6 months</div>
-                  </div>
-                </div>
-
-                {/* Features */}
-                <div className="space-y-4 mb-8">
-                  {pkg.features.map((feature, featureIndex) => (
-                    <div key={featureIndex} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <X className="w-5 h-5 text-gray-300 mt-0.5 flex-shrink-0" />
-                      )}
-                      <div className="flex-1">
-                        <span className={`text-sm ${feature.included ? 'text-gray-900' : 'text-gray-400'}`}>
-                          {feature.name}
-                        </span>
-                        <div className={`text-xs ${feature.included ? 'text-gray-600' : 'text-gray-400'}`}>
-                          {feature.value}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* CTA Button */}
-                <button className={`w-full py-4 rounded-2xl bg-gradient-to-r ${pkg.buttonColor} text-white font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105`}>
-                  Get {pkg.name} Package
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
+    <GenericPackage
+      title="Sportology Plus Nutrition Packages"
+      description="Choose the perfect package that suits your goals and get comprehensive nutritional support"
+      packages={packages}
+      subtitleGradient="from-green-600 to-emerald-600"
+    />
   );
 }

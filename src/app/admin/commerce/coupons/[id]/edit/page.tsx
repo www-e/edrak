@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { CouponType } from "@prisma/client";
+// Removed import since CouponType is not available from @prisma/client. Using string literals instead.
 
 type CouponFormInput = z.infer<typeof UpdateCouponInputSchema>;
 
@@ -127,8 +127,8 @@ export default function EditCouponPage() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value={CouponType.PERCENTAGE}>Percentage</SelectItem>
-                          <SelectItem value={CouponType.FIXED}>Fixed Amount</SelectItem>
+                          <SelectItem value="PERCENTAGE">Percentage</SelectItem>
+                          <SelectItem value="FIXED">Fixed Amount</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -144,7 +144,7 @@ export default function EditCouponPage() {
                       <div className="relative">
                         <FormControl><Input type="number" step="0.01" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="pl-8" /></FormControl>
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          {couponType === CouponType.PERCENTAGE ? '%' : 'EGP'}
+                          {couponType === 'PERCENTAGE' ? '%' : 'EGP'}
                         </span>
                       </div>
                       <FormMessage />

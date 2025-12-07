@@ -22,6 +22,8 @@ export default function NutritionHero() {
         text: "View Packages",
         href: "#packages"
       }}
+      imageUrl="/images/nutrition-hero.jpg"
+      imageAlt="Nutrition consultation with specialist"
     >
       <NutritionShapes />
     </Hero>

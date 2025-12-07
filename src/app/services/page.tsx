@@ -1,17 +1,11 @@
-import { Metadata } from 'next';
+import { type Metadata } from 'next';
 import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
-import ServicesHero from '@/components/services/services-hero';
-import EcosystemGrid from '@/components/services/ecosystem-grid';
-import CourseShowcase from '@/components/services/course-showcase';
-import ServiceSection from '@/components/services/service-section';
-import ContentMediaSection from '@/components/services/content-media-section';
-import EmploymentSection from '@/components/services/employment-section';
-import CashbackAnnouncement from '@/components/services/cashback-announcement';
+import CallToActionSection from '@/components/shared/CallToAction';
 
 export const metadata: Metadata = {
   title: 'Our Services | SportologyPlus',
-  description: 'Comprehensive solutions for all athletes – from learning to training and employment',
+  description: 'Comprehensive sports development services including training, nutrition, and psychology for athletes of all levels',
 };
 
 export default function ServicesPage() {
@@ -19,76 +13,79 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-white">
       <Header />
       <main className="relative">
-        <ServicesHero />
-        <EcosystemGrid />
-        <CourseShowcase />
+        <div className="py-24 bg-gradient-to-br from-primary/10 via-green-100/50 to-blue-100/50">
+          <div className="container max-w-[1400px] mx-auto px-6 text-center">
+            <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6">
+              <span className="text-gray-900">Comprehensive</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-green-600 to-primary mt-3">
+                Sports Development Services
+              </span>
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mt-6">
+              Everything you need for your sports development in one platform that combines science, experience, and continuous support.
+            </p>
+          </div>
+        </div>
 
-        <CashbackAnnouncement />
+        {/* Services Navigation Section */}
+        <section className="py-20 bg-white">
+          <div className="container max-w-[1400px] mx-auto px-6">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center p-8 rounded-2xl border-2 border-primary/20 hover:shadow-lg transition-all">
+                <h3 className="text-2xl font-bold mb-4">Training Programs</h3>
+                <p className="text-muted-foreground mb-6">
+                  Personalized training programs designed by certified trainers for all levels.
+                </p>
+                <a 
+                  href="/training" 
+                  className="text-primary font-semibold hover:underline inline-flex items-center gap-2"
+                >
+                  Explore Programs
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+              
+              <div className="text-center p-8 rounded-2xl border-2 border-primary/20 hover:shadow-lg transition-all">
+                <h3 className="text-2xl font-bold mb-4">Nutrition Programs</h3>
+                <p className="text-muted-foreground mb-6">
+                  Professional nutrition programs designed specifically for athletes with personalized meal plans.
+                </p>
+                <a 
+                  href="/nutrition" 
+                  className="text-primary font-semibold hover:underline inline-flex items-center gap-2"
+                >
+                  Explore Programs
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+              
+              <div className="text-center p-8 rounded-2xl border-2 border-primary/20 hover:shadow-lg transition-all">
+                <h3 className="text-2xl font-bold mb-4">Psychology Consultations</h3>
+                <p className="text-muted-foreground mb-6">
+                  Sports psychology consultations to support you psychologically in your sports journey.
+                </p>
+                <a 
+                  href="/psychology" 
+                  className="text-primary font-semibold hover:underline inline-flex items-center gap-2"
+                >
+                  Explore Programs
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        <ServiceSection
-          id="training"
-          title="Personal Training & Sports Programs"
-          subtitle="Customized training plans for your level and goals"
-          description="Get a training program designed specifically for you, supervised by a personal trainer who follows you step by step to achieve the best possible results."
-          features={[
-            'Comprehensive physical assessment',
-            'Weekly customized training program',
-            'Continuous monitoring',
-            'Monthly progress reports'
-          ]}
-          targetAudience="Amateur and professional athletes in any sport, and those looking to improve fitness or lose weight"
-          price="Starting from 500 EGP per month"
-          icon="dumbbell"
-          gradient="from-primary to-blue-500"
-          reverse={false}
-          ctaText="Get Started"
-          ctaHref="/training"
-          imageSrc="/images/our-gym.jpg"
-          imageAlt="Professional gym facility"
+        <CallToActionSection
+          title="Ready to Transform Your Athletic Performance?"
+          description="Join thousands of athletes who have improved their performance with our comprehensive programs."
         />
-
-        <ServiceSection
-          id="nutrition"
-          title="Customized Nutrition Programs"
-          subtitle="Scientific diet that suits your athletic goal"
-          description="Balanced nutrition plans designed by sports nutrition specialists, based on the latest studies to ensure optimal performance and energy."
-          features={[
-            'Monthly nutrition plan that changes weekly',
-            'Continuous monitoring and adjustments based on results',
-            'Safe dietary supplement guidance'
-          ]}
-          price="Starting from 500 EGP per month"
-          icon="apple"
-          gradient="from-green-500 to-emerald-600"
-          reverse={true}
-          ctaText="View Nutrition Packages"
-          ctaHref="/nutrition"
-          imageSrc="/images/nutrition-specialist.jpg"
-          imageAlt="Nutrition specialist consultation"
-        />
-
-        <ServiceSection
-          id="psychology"
-          title="Sports Psychology Consultations"
-          subtitle="Develop your mental strength like your physical strength"
-          description="Sports success starts from the mind. We offer psychological and sports support sessions to help you deal with pressure, anxiety, and competition challenges."
-          features={[
-            'Individual online sessions with specialists',
-            'Stress and anxiety management techniques',
-            'Sports confidence building programs'
-          ]}
-          price="Starting from 500 EGP per session"
-          icon="brain"
-          gradient="from-purple-500 to-pink-500"
-          reverse={false}
-          ctaText="Book Consultation"
-          ctaHref="/psychology"
-          imageSrc="/images/milkshake-product.jpg"
-          imageAlt="Mental wellness and psychology consultation"
-        />
-
-        <ContentMediaSection />
-        <EmploymentSection />
       </main>
       <Footer />
     </div>

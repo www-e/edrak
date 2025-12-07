@@ -1,5 +1,4 @@
 import { db } from "@/server/db";
-import type { Prisma } from "@prisma/client";
 
 export interface CreateQuizInput {
   courseId?: string;

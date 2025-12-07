@@ -29,6 +29,8 @@ interface HeroProps {
   iconBackgroundColor?: string;
   className?: string;
   children?: ReactNode;
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 export default function Hero({
@@ -43,7 +45,9 @@ export default function Hero({
   backgroundGradient = 'from-primary/10 to-green-100/50',
   iconBackgroundColor = 'bg-primary/10',
   className = '',
-  children
+  children,
+  imageUrl,
+  imageAlt
 }: HeroProps) {
   return (
     <section className={`relative overflow-hidden pt-32 pb-24 ${className}`}>
@@ -164,7 +168,7 @@ export default function Hero({
                   {primaryButton.text}
                 </Link>
               ) : primaryButton ? (
-                <button 
+                <button
                   onClick={primaryButton.onClick}
                   className="px-8 py-4 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-2xl hover:from-primary/90 hover:to-green-600/90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
@@ -177,13 +181,29 @@ export default function Hero({
                   {secondaryButton.text}
                 </Link>
               ) : secondaryButton ? (
-                <button 
+                <button
                   onClick={secondaryButton.onClick}
                   className="px-8 py-4 bg-white/80 backdrop-blur-sm border-2 border-primary/20 text-primary font-bold rounded-2xl hover:bg-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   {secondaryButton.text}
                 </button>
               ) : null}
+            </motion.div>
+          )}
+
+          {/* Hero image */}
+          {imageUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.7 }}
+              className="mt-12 max-w-2xl mx-auto"
+            >
+              <img
+                src={imageUrl}
+                alt={imageAlt || 'Hero Image'}
+                className="w-full h-auto rounded-2xl shadow-xl"
+              />
             </motion.div>
           )}
 

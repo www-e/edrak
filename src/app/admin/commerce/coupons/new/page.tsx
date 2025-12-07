@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { CouponType } from "@prisma/client";
+// Removed import since CouponType is not available from @prisma/client. Using string literals instead.
 
 // Infer the form type from the Zod schema
 type CouponFormInput = z.infer<typeof CouponInputSchema>;
@@ -34,7 +34,7 @@ export default function CreateCouponPage() {
     resolver: zodResolver(CouponInputSchema),
     defaultValues: {
       code: "",
-      type: CouponType.PERCENTAGE,
+      type: 'PERCENTAGE',
       amount: 10,
       isActive: true,
       maxUsesPerUser: 1,
@@ -96,8 +96,8 @@ export default function CreateCouponPage() {
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                         <SelectContent>
-                          <SelectItem value={CouponType.PERCENTAGE}>Percentage</SelectItem>
-                          <SelectItem value={CouponType.FIXED}>Fixed Amount</SelectItem>
+                          <SelectItem value="PERCENTAGE">Percentage</SelectItem>
+                          <SelectItem value="FIXED">Fixed Amount</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -113,7 +113,7 @@ export default function CreateCouponPage() {
                       <div className="relative">
                         <FormControl><Input type="number" step="0.01" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} className="pl-8" /></FormControl>
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          {couponType === CouponType.PERCENTAGE ? '%' : 'EGP'}
+                          {couponType === 'PERCENTAGE' ? '%' : 'EGP'}
                         </span>
                       </div>
                       <FormMessage />

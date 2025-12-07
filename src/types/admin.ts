@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Role, CourseVisibility, CouponType } from '@prisma/client';
-import { egyptianPhoneNumberSchema, optionalEgyptianPhoneNumberSchema } from '@/lib/validation-schemas';
+import { egyptianPhoneNumberSchema} from '@/lib/validation-schemas';
 
 // ATTACHMENT TYPE DEFINITION
 // Centralized type for Attachment to ensure consistency across components

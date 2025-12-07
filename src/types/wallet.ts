@@ -1,4 +1,4 @@
-import { TransactionType, WalletTransaction, Payment, Course } from "@prisma/client";
+import { TransactionType, WalletTransaction} from "@prisma/client";
 
 /**
  * Wallet transaction with related payment and course information

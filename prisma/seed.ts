@@ -1,4 +1,4 @@
-import { PrismaClient, Role, CourseVisibility } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -21,7 +21,7 @@ async function main() {
       secondPhoneNumber: '+20123456788',
       categoryPreference: 'Technology',
       referralSource: 'Official Website',
-      role: Role.ADMIN,
+      role: 'ADMIN',
       isActive: true,
     },
   });
@@ -42,7 +42,7 @@ async function main() {
       secondPhoneNumber: '+20123456779',
       categoryPreference: 'Programming',
       referralSource: 'University Network',
-      role: Role.PROFESSOR,
+      role: 'PROFESSOR',
       isActive: true,
     },
   });
@@ -92,7 +92,7 @@ async function main() {
       create: {
         ...studentData,
         password: studentPassword,
-        role: Role.STUDENT,
+        role: 'STUDENT',
         isActive: true,
       },
     });
@@ -163,7 +163,7 @@ async function main() {
         description: 'Learn HTML, CSS, JavaScript, React, Node.js, and MongoDB to become a full-stack web developer. This comprehensive course covers everything from basic web development to advanced topics.',
         price: 299.99,
         language: 'English',
-        visibility: CourseVisibility.PUBLISHED,
+        visibility: 'PUBLISHED' as const,
         professorId: professorUser.id,
         categoryId: programmingCategory?.id,
       },
@@ -173,7 +173,7 @@ async function main() {
         description: 'Master Python programming for data analysis, visualization, and machine learning. Learn pandas, NumPy, Matplotlib, and scikit-learn.',
         price: 199.99,
         language: 'English',
-        visibility: CourseVisibility.PUBLISHED,
+        visibility: 'PUBLISHED' as const,
         professorId: professorUser.id,
         categoryId: programmingCategory?.id,
       }
