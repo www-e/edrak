@@ -676,3 +676,41 @@ model QuizAttempt {
   @@index([quizId, userId])
   @@index([userId])
 }
+
+// Service Pricing System for Nutrition, Psychology, Training
+model Service {
+  id          String      @id @default(cuid())
+  name        String      // "Nutrition", "Psychology", "Training"
+  slug        String      @unique
+  description String
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  serviceTiers ServiceTier[]
+}
+
+model ServiceTier {
+  id            String   @id @default(cuid())
+  serviceId     String
+  name          String   // "Silver", "Gold", "Diamond", "Home Training", etc.
+  order         Int      // Display order (1, 2, 3, etc.)
+  isPopular     Boolean  @default(false)
+  price         ServicePrice[]
+
+  service       Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+}
+
+model ServicePrice {
+  id        String   @id @default(cuid())
+  tierId    String
+  duration  String   // "monthly", "threeMonths", "sixMonths"
+  price     Float    // Price in EGP
+
+  tier      ServiceTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@index([tierId])
+  @@unique([tierId, duration])
+}

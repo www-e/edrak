@@ -9,7 +9,8 @@ import {
   Users,
   BookOpen,
   CreditCard,
-  LogOut
+  LogOut,
+  Package
 } from "lucide-react";
 
 const navigation = [
@@ -27,6 +28,11 @@ const navigation = [
     name: "Courses",
     href: "/admin/courses",
     icon: BookOpen,
+  },
+  {
+    name: "Services",
+    href: "/admin/services",
+    icon: Package,
   },
   {
     name: "Commerce",
