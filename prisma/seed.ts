@@ -1,296 +1,200 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting database seeding with complete data structure...');
+  console.log('Seeding services...');
 
-  // Create admin user with complete profile
-  const adminPassword = await bcrypt.hash('admin123', 10);
-  const adminUser = await prisma.user.upsert({
-    where: { username: 'admin' },
+  // Create services if they don't exist
+  const nutritionService = await prisma.service.upsert({
+    where: { slug: 'nutrition' },
     update: {},
     create: {
-      username: 'admin',
-      email: 'admin@edraak.com',
-      password: adminPassword,
-      firstName: 'System',
-      lastName: 'Administrator',
-      phoneNumber: '+20123456789',
-      secondPhoneNumber: '+20123456788',
-      categoryPreference: 'Sports Science',
-      referralSource: 'Official Website',
-      role: 'ADMIN',
-      isActive: true,
+      name: 'Nutrition',
+      slug: 'nutrition',
+      description: 'Professional nutrition programs designed specifically for athletes with personalized meal plans and continuous support.',
     },
   });
-  console.log('✅ Created admin user:', adminUser.username);
 
-  // Create professor user with complete profile
-  const professorPassword = await bcrypt.hash('prof123', 10);
-  const professorUser = await prisma.user.upsert({
-    where: { username: 'professor1' },
+  const psychologyService = await prisma.service.upsert({
+    where: { slug: 'psychology' },
     update: {},
     create: {
-      username: 'professor1',
-      email: 'professor.smith@edraak.com',
-      password: professorPassword,
-      firstName: 'Dr. John',
-      lastName: 'Smith',
-      phoneNumber: '+20123456780',
-      secondPhoneNumber: '+20123456779',
-      categoryPreference: 'Sports Science',
-      referralSource: 'University Network',
-      role: 'PROFESSOR',
-      isActive: true,
+      name: 'Psychology',
+      slug: 'psychology',
+      description: 'Sports psychology consultations to support you psychologically in your sports journey with specialized experts.',
     },
   });
-  console.log('✅ Created professor user:', professorUser.username);
 
-  // Create student users with complete profiles
-  const studentPassword = await bcrypt.hash('student123', 10);
-  const studentUsers = [
-    {
-      username: 'student1',
-      email: 'ahmed.hassan@edraak.com',
-      firstName: 'Ahmed',
-      lastName: 'Hassan',
-      phoneNumber: '+20123456781',
-      secondPhoneNumber: '+20123456784',
-      categoryPreference: 'Sports Science',
-      referralSource: 'Google Search',
+  const trainingService = await prisma.service.upsert({
+    where: { slug: 'training' },
+    update: {},
+    create: {
+      name: 'Training',
+      slug: 'training',
+      description: 'Personalized training programs designed by certified trainers for all levels, from beginners to professional athletes.',
     },
-    {
-      username: 'student2',
-      email: 'fatima.ali@edraak.com',
-      firstName: 'Fatima',
-      lastName: 'Ali',
-      phoneNumber: '+20123456782',
-      secondPhoneNumber: '+20123456785',
-      categoryPreference: 'Nutrition',
-      referralSource: 'Social Media',
+  });
+
+  // Create service tiers for Nutrition
+  const nutritionSilver = await prisma.serviceTier.create({
+    data: {
+      name: 'Silver',
+      order: 1,
+      service: { connect: { id: nutritionService.id } },
     },
-    {
-      username: 'student3',
-      email: 'mohamed.sayed@edraak.com',
-      firstName: 'Mohamed',
-      lastName: 'Sayed',
-      phoneNumber: '+20123456783',
-      secondPhoneNumber: '+20123456786',
-      categoryPreference: 'Training',
-      referralSource: 'Friend Recommendation',
+  });
+
+  const nutritionGold = await prisma.serviceTier.create({
+    data: {
+      name: 'Gold',
+      order: 2,
+      isPopular: true,
+      service: { connect: { id: nutritionService.id } },
     },
-  ];
+  });
 
-  const createdStudents = [];
+  const nutritionDiamond = await prisma.serviceTier.create({
+    data: {
+      name: 'Diamond',
+      order: 3,
+      service: { connect: { id: nutritionService.id } },
+    },
+  });
 
-  for (const studentData of studentUsers) {
-    const student = await prisma.user.upsert({
-      where: { username: studentData.username },
-      update: {},
-      create: {
-        ...studentData,
-        password: studentPassword,
-        role: 'STUDENT',
-        isActive: true,
-      },
-    });
-    console.log('✅ Created student user:', student.username);
-    createdStudents.push(student);
-  }
+  // Create service tiers for Psychology
+  const psychologySilver = await prisma.serviceTier.create({
+    data: {
+      name: 'Silver',
+      order: 1,
+      service: { connect: { id: psychologyService.id } },
+    },
+  });
 
-    // Create categories
-    const categories = [
-      {
-        name: 'التغذية',
-        slug: 'nutrition',
-        description: 'تعلم التغذية الرياضية واتباع نمط حياة صحي'
-      },
-      {
-        name: 'التأهيل و الاصابات',
-        slug: 'rehabilitation-and-injuries',
-        description: 'تعلم كيفية التعامل مع الاصابات الرياضية'
-      },
-      {
-        name: 'علم النفس الرياضي',
-        slug: 'sports-psychology',
-        description: 'فهم الجوانب النفسية للرياضيين'
-      },
-      {
-        name: 'الميكانيكا و علم الحركه الرياضيه',
-        slug: 'sports-mechanics-kinesiology',
-        description: 'دراسة حركة الجسم وتحليلها'
-      },
-      {
-        name: 'الرياضات التخصصية',
-        slug: 'specialized-sports',
-        description: 'الرياضات المختلفة وتقنياتها'
-      },
-      {
-        name: 'التدريب و الاحمال الرياضية',
-        slug: 'sports-training-and-loading',
-        description: 'التدريب الرياضي وادارة الاحمال'
-      },
-      {
-        name: 'الادارة الرياضية',
-        slug: 'sports-management',
-        description: 'ادارة الفرق الرياضية'
-      },
-      {
-        name: 'القياسات البدنية و الفسيولوجية',
-        slug: 'physical-and-physiological-measurements',
-        description: 'القياسات والفحوصات البدنية والفيزيولوجية'
-      }
-    ];
+  const psychologyGold = await prisma.serviceTier.create({
+    data: {
+      name: 'Gold',
+      order: 2,
+      isPopular: true,
+      service: { connect: { id: psychologyService.id } },
+    },
+  });
 
-    for (const categoryData of categories) {
-      const category = await prisma.category.upsert({
-        where: { slug: categoryData.slug },
-        update: {},
-        create: categoryData,
-      });
-      console.log('✅ Created category:', category.name);
-    }
+  const psychologyDiamond = await prisma.serviceTier.create({
+    data: {
+      name: 'Diamond',
+      order: 3,
+      service: { connect: { id: psychologyService.id } },
+    },
+  });
 
-    // Create sample courses
-    const nutritionCategory = await prisma.category.findUnique({ where: { slug: 'nutrition' } });
+  // Create service tiers for Training
+  const trainingSilver = await prisma.serviceTier.create({
+    data: {
+      name: 'Silver',
+      order: 1,
+      service: { connect: { id: trainingService.id } },
+    },
+  });
 
-    const courses = [
-      {
-        title: 'Complete Sports Nutrition Guide',
-        slug: 'complete-sports-nutrition-guide',
-        description: 'Learn everything about sports nutrition including meal planning, supplements, and hydration strategies to maximize athletic performance. This comprehensive course covers everything from basic nutrition to advanced topics.',
-        price: 299.99,
-        language: 'English',
-        visibility: 'PUBLISHED' as const,
-        professorId: professorUser.id,
-        categoryId: nutritionCategory?.id,
-      },
-      {
-        title: 'Data Analysis for Athletes',
-        slug: 'data-analysis-for-athletes',
-        description: 'Master data analysis techniques for athlete performance metrics, training optimization, and improvement tracking. Learn how to use data for better performance.',
-        price: 199.99,
-        language: 'English',
-        visibility: 'PUBLISHED' as const,
-        professorId: professorUser.id,
-        categoryId: nutritionCategory?.id,
-      }
-    ];
+  const trainingGold = await prisma.serviceTier.create({
+    data: {
+      name: 'Gold',
+      order: 2,
+      isPopular: true,
+      service: { connect: { id: trainingService.id } },
+    },
+  });
 
-    for (const courseData of courses) {
-      const course = await prisma.course.upsert({
-        where: { slug: courseData.slug },
-        update: {},
-        create: courseData,
-      });
-      console.log('✅ Created course:', course.title);
+  const trainingDiamond = await prisma.serviceTier.create({
+    data: {
+      name: 'Diamond',
+      order: 3,
+      service: { connect: { id: trainingService.id } },
+    },
+  });
 
-      // Create sample lessons for each course
-      const lessons = [
-        {
-          title: 'Introduction and Setup',
-          order: 1,
-          content: 'Welcome to the course! In this lesson, we will cover the basics and help you set up your development environment.',
-          isVisible: true,
-        },
-        {
-          title: 'Core Concepts',
-          order: 2,
-          content: 'Let\'s dive into the core concepts that form the foundation of this topic. We\'ll explore key principles and best practices.',
-          isVisible: true,
-        },
-        {
-          title: 'Hands-on Practice',
-          order: 3,
-          content: 'Time to apply what you\'ve learned! This lesson includes practical exercises and real-world examples.',
-          isVisible: true,
-        }
-      ];
+  // Create service prices for Nutrition
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 495,
+      tier: { connect: { id: nutritionSilver.id } },
+    },
+  });
 
-      for (const lessonData of lessons) {
-        const lesson = await prisma.lesson.upsert({
-          where: {
-            id: `${course.id}-lesson-${lessonData.order}`
-          },
-          update: {},
-          create: {
-            ...lessonData,
-            courseId: course.id,
-          },
-        });
-        console.log('  ✅ Created lesson:', lesson.title);
-      }
-    }
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 995,
+      tier: { connect: { id: nutritionGold.id } },
+    },
+  });
 
-    // Enroll students in courses
-    const course = await prisma.course.findFirst({ where: { slug: 'complete-web-development-bootcamp' } });
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 1495,
+      tier: { connect: { id: nutritionDiamond.id } },
+    },
+  });
 
-    if (course) {
-      for (const student of [adminUser, ...createdStudents]) {
-        const enrollment = await prisma.enrollment.upsert({
-          where: {
-            userId_courseId: {
-              userId: student.id,
-              courseId: course.id
-            }
-          },
-          update: {},
-          create: {
-            userId: student.id,
-            courseId: course.id,
-            status: 'ACTIVE',
-          },
-        });
-        console.log('✅ Enrolled student:', student.username, 'in course:', course.title);
-      }
-    }
+  // Create service prices for Psychology
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 495,
+      tier: { connect: { id: psychologySilver.id } },
+    },
+  });
 
-    console.log('🎉 Database seeding completed successfully!');
-  console.log('\n📋 Test User Credentials:');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('👑 Admin User:');
-  console.log('   Username: admin');
-  console.log('   Password: admin123');
-  console.log('   Email: admin@edraak.com');
-  console.log('   Full Name: System Administrator');
-  console.log('   Phone: +20123456789');
-  console.log('   Role: ADMIN');
-  console.log('');
-  console.log('👨‍🏫 Professor User:');
-  console.log('   Username: professor1');
-  console.log('   Password: prof123');
-  console.log('   Email: professor.smith@edraak.com');
-  console.log('   Full Name: Dr. John Smith');
-  console.log('   Phone: +20123456780');
-  console.log('   Role: PROFESSOR');
-  console.log('');
-  console.log('🎓 Student Users:');
-  console.log('   1. student1 - student123');
-  console.log('      Email: ahmed.hassan@edraak.com');
-  console.log('      Name: Ahmed Hassan');
-  console.log('      Phone: +20123456781');
-  console.log('      Interest: Sports Science');
-  console.log('');
-  console.log('   2. student2 - student123');
-  console.log('      Email: fatima.ali@edraak.com');
-  console.log('      Name: Fatima Ali');
-  console.log('      Phone: +20123456782');
-  console.log('      Interest: Nutrition');
-  console.log('');
-  console.log('   3. student3 - student123');
-  console.log('      Email: mohamed.sayed@edraak.com');
-  console.log('      Name: Mohamed Sayed');
-  console.log('      Phone: +20123456783');
-  console.log('      Interest: Training');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('\n💳 PayMob Ready: All users have complete billing information!');
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 995,
+      tier: { connect: { id: psychologyGold.id } },
+    },
+  });
+
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 1495,
+      tier: { connect: { id: psychologyDiamond.id } },
+    },
+  });
+
+  // Create service prices for Training
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 495,
+      tier: { connect: { id: trainingSilver.id } },
+    },
+  });
+
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 995,
+      tier: { connect: { id: trainingGold.id } },
+    },
+  });
+
+  await prisma.servicePrice.create({
+    data: {
+      duration: 'monthly',
+      price: 1495,
+      tier: { connect: { id: trainingDiamond.id } },
+    },
+  });
+
+  console.log('Services and pricing created successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during database seeding:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {

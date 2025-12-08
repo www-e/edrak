@@ -227,4 +227,259 @@ export const paymentRouter = createTRPCRouter({
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not initiate payment gateway. Your wallet has been refunded." });
       }
     }),
+
+  initiatePayment: protectedProcedure
+    .input(
+      z.object({
+        courseId: z.string().optional(),
+        serviceId: z.string().optional(),
+        serviceTierId: z.string().optional(),
+        servicePriceId: z.string().optional(),
+        paymentMethod: z.enum(["card", "wallet"]),
+        walletNumber: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      const { courseId, serviceId, serviceTierId, servicePriceId, paymentMethod, walletNumber } = input;
+
+      if (!user?.id) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Session is invalid." });
+      }
+
+      const userId = user.id;
+
+      // Validate required parameters
+      if (!courseId && !serviceId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Either courseId or serviceId must be provided" });
+      }
+
+      if (serviceId && (!serviceTierId || !servicePriceId)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Service tier ID and price ID are required for service payments" });
+      }
+
+      if (paymentMethod === "wallet" && !walletNumber) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "A mobile number is required for wallet payments." });
+      }
+
+      // Course payment flow
+      if (courseId) {
+        const course = await db.course.findUnique({
+          where: { id: courseId, visibility: "PUBLISHED" },
+          include: {
+            professor: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        });
+        if (!course) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Course not found or is not available for purchase." });
+        }
+
+        const existingEnrollment = await db.enrollment.findFirst({
+          where: { userId, courseId: course.id, status: "ACTIVE" }
+        });
+        if (existingEnrollment) {
+          throw new TRPCError({ code: "CONFLICT", message: "You are already enrolled in this course." });
+        }
+
+        // Check if there's already a pending payment
+        const existingPayment = await db.payment.findFirst({
+          where: {
+            userId,
+            courseId,
+            status: "PENDING",
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        if (existingPayment) {
+          throw new TRPCError({ code: "CONFLICT", message: "You have a pending payment for this course." });
+        }
+
+        // Prevent professors from buying their own courses
+        if (course.professorId === userId) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "You cannot purchase your own course." });
+        }
+
+        // Create payment record
+        const payment = await db.payment.create({
+          data: {
+            userId,
+            courseId: course.id,
+            amount: course.price,
+            status: "PENDING",
+            paymentMethod: paymentMethod,
+            paymentType: "COURSE",
+          },
+        });
+
+        // Initiate PayMob payment
+        const result = await PayMobService.initiateCoursePayment(
+          user as User,
+          course,
+          payment.id,
+          paymentMethod,
+          walletNumber
+        );
+
+        if (result.type === 'iframe') {
+          // Build complete iframe URL (matching working project)
+          const baseUrl = process.env.PAYMOB_BASE_URL || "https://accept.paymob.com/api";
+          const iframeId = process.env.PAYMOB_IFRAME_ID || process.env.NEXT_PUBLIC_PAYMOB_IFRAME_ID;
+
+          let iframeUrl = null;
+          if (iframeId && result.token) {
+            iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${result.token}`;
+          }
+
+          return {
+            type: 'iframe' as const,
+            paymentId: payment.id,
+            iframeUrl,
+            course: {
+              id: course.id,
+              title: course.title,
+              professor: `${course.professor.firstName} ${course.professor.lastName}`,
+            },
+          };
+        } else {
+          return {
+            type: 'redirect' as const,
+            redirectUrl: result.url,
+            course: {
+              id: course.id,
+              title: course.title,
+              professor: `${course.professor.firstName} ${course.professor.lastName}`,
+            },
+          };
+        }
+      }
+      // Service payment flow
+      else if (serviceId && serviceTierId && servicePriceId) {
+        const service = await db.service.findUnique({
+          where: {
+            id: serviceId,
+            isActive: true,
+          },
+          include: {
+            serviceTiers: {
+              where: { id: serviceTierId },
+              include: {
+                price: {
+                  where: { id: servicePriceId },
+                },
+              },
+            },
+          },
+        });
+
+        if (!service || !service.serviceTiers.length) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Service not found or inactive." });
+        }
+
+        const serviceTier = service.serviceTiers[0];
+        if (!serviceTier.price.length) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Service tier or price not found." });
+        }
+
+        const servicePrice = serviceTier.price[0];
+
+        if (servicePrice.price <= 0) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Service is free, no payment required." });
+        }
+
+        // Additional validation: Ensure service tier belongs to the service
+        if (serviceTier.serviceId !== serviceId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Tier does not belong to the specified service" });
+        }
+
+        // Additional validation: Ensure price belongs to the service tier
+        if (servicePrice.tierId !== serviceTierId) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Price does not belong to the specified service tier" });
+        }
+
+        // Check if there's already a pending payment for this service
+        const existingPayment = await db.payment.findFirst({
+          where: {
+            userId,
+            serviceId,
+            status: "PENDING",
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
+
+        if (existingPayment) {
+          throw new TRPCError({ code: "CONFLICT", message: "You have a pending payment for this service." });
+        }
+
+        // Create payment record
+        const payment = await db.payment.create({
+          data: {
+            userId,
+            serviceId: service.id,
+            amount: servicePrice.price,
+            status: "PENDING",
+            paymentMethod: paymentMethod,
+            paymentType: "SERVICE",
+          },
+        });
+
+        // Initiate PayMob payment for service
+        const result = await PayMobService.initiateServicePayment(
+          user as User,
+          {
+            id: service.id,
+            name: service.name,
+            tier: serviceTier.name,
+          },
+          payment.id,
+          paymentMethod,
+          walletNumber,
+          servicePrice.price
+        );
+
+        if (result.type === 'iframe') {
+          // Build complete iframe URL (matching working project)
+          const baseUrl = process.env.PAYMOB_BASE_URL || "https://accept.paymob.com/api";
+          const iframeId = process.env.PAYMOB_IFRAME_ID || process.env.NEXT_PUBLIC_PAYMOB_IFRAME_ID;
+
+          let iframeUrl = null;
+          if (iframeId && result.token) {
+            iframeUrl = `${baseUrl.replace('/api', '')}/api/acceptance/iframes/${iframeId}?payment_token=${result.token}`;
+          }
+
+          return {
+            type: 'iframe' as const,
+            paymentId: payment.id,
+            iframeUrl,
+            service: {
+              id: service.id,
+              name: service.name,
+              tier: serviceTier.name,
+            },
+          };
+        } else {
+          return {
+            type: 'redirect' as const,
+            redirectUrl: result.url,
+            service: {
+              id: service.id,
+              name: service.name,
+              tier: serviceTier.name,
+            },
+          };
+        }
+      } else {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid payment parameters" });
+      }
+    }),
 });

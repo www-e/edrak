@@ -3,6 +3,7 @@ import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
 import CallToActionSection from '@/components/shared/CallToAction';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Our Services | SportologyPlus',
@@ -154,19 +155,38 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  {/* CTA Button */}
-                  <a
-                    href="/training"
-                    className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/50"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      Get Started Now
-                      <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                      </svg>
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                  </a>
+                  {/* Pricing Info */}
+                  <div className="mb-4">
+                    <div className="text-2xl font-bold text-gray-900 mb-1">From <span className="text-primary">995 EGP</span>/month</div>
+                    <div className="text-sm text-muted-foreground">Choose from 3 packages</div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="space-y-3">
+                    <a
+                      href="/training"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold rounded-xl overflow-hidden transition-all duration-300"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        View Details
+                        <svg className="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                      </span>
+                    </a>
+                    <Link
+                      href="/pay/service/training"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-primary to-green-600 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/50"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        Buy Now
+                        <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5m6-5V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2"></path>
+                        </svg>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-primary opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -258,19 +278,38 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  {/* CTA Button */}
-                  <a
-                    href="/nutrition"
-                    className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-green-600/50"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      Explore Nutrition Plans
-                      <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                      </svg>
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                  </a>
+                  {/* Pricing Info */}
+                  <div className="mb-4">
+                    <div className="text-2xl font-bold text-gray-900 mb-1">From <span className="text-green-600">995 EGP</span>/month</div>
+                    <div className="text-sm text-muted-foreground">Choose from 3 packages</div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="space-y-3">
+                    <a
+                      href="/nutrition"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold rounded-xl overflow-hidden transition-all duration-300"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        View Details
+                        <svg className="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                      </span>
+                    </a>
+                    <Link
+                      href="/pay/service/nutrition"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-green-600/50"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        Buy Now
+                        <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5m6-5V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2"></path>
+                        </svg>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    </Link>
+                  </div>
                 </div>
               </div>
 
@@ -374,19 +413,38 @@ export default function ServicesPage() {
                     </div>
                   </div>
 
-                  {/* CTA Button */}
-                  <a
-                    href="/psychology"
-                    className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/50"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      Book a Session
-                      <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                      </svg>
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                  </a>
+                  {/* Pricing Info */}
+                  <div className="mb-4">
+                    <div className="text-2xl font-bold text-gray-900 mb-1">From <span className="text-blue-600">995 EGP</span>/month</div>
+                    <div className="text-sm text-muted-foreground">Choose from 3 packages</div>
+                  </div>
+
+                  {/* CTA Buttons */}
+                  <div className="space-y-3">
+                    <a
+                      href="/psychology"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-800 text-white font-bold rounded-xl overflow-hidden transition-all duration-300"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        View Details
+                        <svg className="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                      </span>
+                    </a>
+                    <Link
+                      href="/pay/service/psychology"
+                      className="group/btn relative inline-flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-600/50"
+                    >
+                      <span className="relative z-10 flex items-center gap-2">
+                        Buy Now
+                        <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v5a2 2 0 01-2 2H9a2 2 0 01-2-2v-5m6-5V6a2 2 0 00-2-2H9a2 2 0 00-2 2v2"></path>
+                        </svg>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

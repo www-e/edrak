@@ -158,6 +158,50 @@ export class PayMobService {
     throw new Error("Invalid payment method.");
   }
 
+  public static async initiateServicePayment(user: User, service: { id: string; name: string; tier: string }, paymentId: string, paymentMethod: PaymentMethod, walletNumber?: string, finalAmount?: number): Promise<PaymentInitiationResult> {
+    // For service payments, the amount should be passed as finalAmount
+    const amountCents = Math.round((finalAmount || 0) * 100);
+    const authToken = await this.getAuthToken();
+    const paymobOrderId = await this.registerOrder(authToken, amountCents, paymentId);
+
+    const baseResponse = {
+      orderId: paymobOrderId,
+      initiatedAt: new Date().toISOString()
+    };
+
+    if (paymentMethod === 'card') {
+      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, serverEnv.PAYMOB_INTEGRATION_ID_ONLINE_CARD);
+
+      await db.payment.update({
+        where: { id: paymentId },
+        data: {
+          paymobOrderId: paymobOrderId.toString(),
+          paymobResponse: { ...baseResponse, paymentKey }
+        } as Record<string, unknown>
+      });
+
+      return { type: 'iframe', token: paymentKey };
+    }
+
+    if (paymentMethod === 'wallet') {
+      if (!walletNumber) throw new Error("Wallet number is required.");
+      const paymentKey = await this.getPaymentKey(authToken, amountCents, paymobOrderId, user, serverEnv.PAYMOB_INTEGRATION_ID_MOBILE_WALLET);
+
+      await db.payment.update({
+        where: { id: paymentId },
+        data: {
+          paymobOrderId: paymobOrderId.toString(),
+          paymobResponse: { ...baseResponse, paymentKey, walletNumber }
+        } as Record<string, unknown>
+      });
+
+      const redirectUrl = await this.getWalletRedirectUrl(paymentKey, walletNumber);
+      return { type: 'redirect', url: redirectUrl };
+    }
+
+    throw new Error("Invalid payment method.");
+  }
+
   public static verifyHmac(hmac: string, data: PayMobWebhookData): boolean {
     try {
       const { hmac: _, ...dataWithoutHmac } = data;
@@ -195,6 +239,12 @@ export class PayMobService {
             cashbackValue: true,
             price: true
           }
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+          }
         }
       }
     });
@@ -218,55 +268,67 @@ export class PayMobService {
       });
 
       if (success) {
-        // 2. Create Enrollment (Idempotent check)
-        const existingEnrollment = await tx.enrollment.findFirst({
-          where: { userId: payment.userId, courseId: payment.courseId }
-        });
-
-        if (!existingEnrollment) {
-          const enrollment = await tx.enrollment.create({
-            data: {
-              userId: payment.userId,
-              courseId: payment.courseId,
-              status: EnrollmentStatus.ACTIVE,
-              completionPercentage: 0,
-            }
-          });
-          enrollmentCreated = true;
-          enrollmentId = enrollment.id;
-        } else {
-          enrollmentId = existingEnrollment.id;
-        }
-
-        // 3. Credit Cashback (if applicable)
-        // Calculate cashback only on the amount actually paid via PayMob (excluding wallet amount used)
-        const actualAmountPaidViaPaymob = payment.amount.toNumber() - (payment.walletAmountUsed?.toNumber() || 0);
-        const cashbackAmount = WalletService.calculateCashback(payment.course, actualAmountPaidViaPaymob);
-
-        if (cashbackAmount > 0) {
-          // Check if cashback already credited for this payment to ensure idempotency
-          const existingCashback = await tx.walletTransaction.findFirst({
-            where: {
-              relatedPaymentId: payment.id,
-              type: "CASHBACK_CREDIT"
-            }
+        // Handle course enrollment or service completion based on payment type
+        if (payment.paymentType === 'COURSE' && payment.courseId) {
+          // 2. Create Enrollment for course (Idempotent check)
+          const existingEnrollment = await tx.enrollment.findFirst({
+            where: { userId: payment.userId, courseId: payment.courseId }
           });
 
-          if (!existingCashback) {
-            await WalletService.creditCashback(
-              payment.userId,
-              cashbackAmount,
-              payment.id,
-              payment.course.title,
-              tx // Pass the transaction client
-            );
-
-            // Update payment record with cashback earned amount
-            await tx.payment.update({
-              where: { id: payment.id },
-              data: { cashbackEarned: new Prisma.Decimal(cashbackAmount) }
+          if (!existingEnrollment) {
+            const enrollment = await tx.enrollment.create({
+              data: {
+                userId: payment.userId,
+                courseId: payment.courseId,
+                status: EnrollmentStatus.ACTIVE,
+                completionPercentage: 0,
+              }
             });
+            enrollmentCreated = true;
+            enrollmentId = enrollment.id;
+          } else {
+            enrollmentId = existingEnrollment.id;
           }
+
+          // 3. Credit Cashback (if applicable for course)
+          // Calculate cashback only on the amount actually paid via PayMob (excluding wallet amount used)
+          if (payment.course) {
+            const actualAmountPaidViaPaymob = payment.amount.toNumber() - (payment.walletAmountUsed?.toNumber() || 0);
+            const cashbackAmount = WalletService.calculateCashback(payment.course, actualAmountPaidViaPaymob);
+
+            if (cashbackAmount > 0) {
+              // Check if cashback already credited for this payment to ensure idempotency
+              const existingCashback = await tx.walletTransaction.findFirst({
+                where: {
+                  relatedPaymentId: payment.id,
+                  type: "CASHBACK_CREDIT"
+                }
+              });
+
+              if (!existingCashback) {
+                await WalletService.creditCashback(
+                  payment.userId,
+                  cashbackAmount,
+                  payment.id,
+                  payment.course.title,
+                  tx // Pass the transaction client
+                );
+
+                // Update payment record with cashback earned amount
+                await tx.payment.update({
+                  where: { id: payment.id },
+                  data: { cashbackEarned: new Prisma.Decimal(cashbackAmount) }
+                });
+              }
+            }
+          }
+        } else if (payment.paymentType === 'SERVICE' && payment.serviceId) {
+          // Handle service-specific completion logic here if needed
+          // For now, we're just updating the payment status
+          // You can extend this to create service-specific records based on your business logic
+
+          // Log the service payment completion for analytics/tracking
+          console.log(`Service payment completed: User ${payment.userId} for service ${payment.serviceId}`);
         }
       } else {
         // Payment failed - check if cashback was previously credited and needs to be reversed
@@ -287,6 +349,13 @@ export class PayMobService {
           // Get the cashback amount to refund
           const cashbackAmount = Number(existingCashback.amount);
 
+          // Determine the title to use in the description based on payment type
+          const title = payment.paymentType === 'COURSE' && payment.course
+            ? payment.course.title
+            : payment.paymentType === 'SERVICE' && payment.service
+              ? payment.service.name
+              : 'Unknown Payment';
+
           // Create a reversal transaction by debiting the cashback amount
           await tx.walletTransaction.create({
             data: {
@@ -295,10 +364,11 @@ export class PayMobService {
               amount: new Prisma.Decimal(-cashbackAmount), // Negative amount to debit
               balanceBefore: existingCashback.balanceAfter,
               balanceAfter: new Prisma.Decimal(Number(existingCashback.balanceAfter) - cashbackAmount),
-              description: `Reversal of cashback for failed payment: ${payment.course.title}`,
+              description: `Reversal of cashback for failed payment: ${title}`,
               relatedPaymentId: payment.id,
               metadata: {
-                courseName: payment.course.title,
+                relatedEntity: payment.paymentType, // COURSE or SERVICE
+                relatedEntityName: title,
                 originalCashbackTransactionId: existingCashback.id,
                 reversedAt: new Date().toISOString(),
               },

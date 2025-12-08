@@ -159,6 +159,7 @@ model Payment {
     currency              String        @default("EGP")
     status                PaymentStatus @default(PENDING)
     paymentMethod         String?
+    paymentType           PaymentType   @default(COURSE) // Add this field
 
     // PayMob specific fields
     paymobOrderId         String?       @unique
@@ -176,8 +177,11 @@ model Payment {
     userId                String
     user                  User          @relation(fields: [userId], references: [id])
 
-    courseId              String
-    course                Course        @relation(fields: [courseId], references: [id])
+    courseId              String?       // Make this optional
+    course                Course?       @relation(fields: [courseId], references: [id])
+
+    serviceId             String?       // Add this field for service payments
+    service               Service?      @relation(fields: [serviceId], references: [id])
 
     enrollmentId          String?
     enrollment            Enrollment?   @relation(fields: [enrollmentId], references: [id])
@@ -194,6 +198,7 @@ model Payment {
 
     @@index([userId])
     @@index([courseId])
+    @@index([serviceId])  // Add index for serviceId
     @@index([status])
     @@index([paymobOrderId])
     @@index([paymobTransactionId])
@@ -274,6 +279,11 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum PaymentType {
+  COURSE
+  SERVICE
 }
 
 enum PaymentGateway {
@@ -688,6 +698,7 @@ model Service {
   updatedAt   DateTime    @updatedAt
 
   serviceTiers ServiceTier[]
+  payments     Payment[]  // Add this relation for payments
 }
 
 model ServiceTier {
