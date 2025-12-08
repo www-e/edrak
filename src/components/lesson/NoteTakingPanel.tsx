@@ -90,10 +90,11 @@ export function NoteTakingPanel({
         title: "Note added successfully",
         description: `Note added at ${formatTime(currentTimestamp)}`,
       });
-    } catch (error) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to add your note. Please try again.";
       toast({
         title: "Error adding note",
-        description: "Failed to add your note. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -121,10 +122,11 @@ export function NoteTakingPanel({
       toast({
         title: "Note updated successfully",
       });
-    } catch (error) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to update your note. Please try again.";
       toast({
         title: "Error updating note",
-        description: "Failed to update your note. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -141,10 +143,11 @@ export function NoteTakingPanel({
       toast({
         title: "Note deleted successfully",
       });
-    } catch (error) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to delete your note. Please try again.";
       toast({
         title: "Error deleting note",
-        description: "Failed to delete your note. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }

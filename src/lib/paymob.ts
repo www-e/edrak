@@ -1,6 +1,6 @@
 import { serverEnv } from "@/lib/env-server";
 import { db } from "@/server/db";
-import { Prisma, Course, User, EnrollmentStatus, TransactionType } from "@prisma/client";
+import { Prisma, Course, User, EnrollmentStatus } from "@prisma/client";
 import crypto from "crypto";
 import { WalletService } from "@/lib/wallet-service";
 
@@ -160,7 +160,7 @@ export class PayMobService {
 
   public static verifyHmac(hmac: string, data: PayMobWebhookData): boolean {
     try {
-      const { hmac: receivedHmac, ...dataWithoutHmac } = data;
+      const { hmac: _, ...dataWithoutHmac } = data;
 
       const orderedKeys = [
         "amount_cents", "created_at", "currency", "error_occured", "has_parent_transaction",

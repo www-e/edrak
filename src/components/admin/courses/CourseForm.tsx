@@ -16,6 +16,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Category } from "@prisma/client";
 import { FileUpload } from "@/components/admin/media/file-upload";
+import Image from "next/image";
 
 interface CourseFormProps {
   form: UseFormReturn<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -193,9 +194,11 @@ export function CourseForm({
                 <div className="mt-4 p-3 bg-muted rounded-md">
                   <p className="text-sm font-medium mb-2">Current Thumbnail:</p>
                   <div className="flex items-center gap-2">
-                    <img 
-                      src={form.watch('thumbnailUrl') || ''} 
-                      alt="Current thumbnail" 
+                    <Image
+                      src={form.watch('thumbnailUrl') || ''}
+                      alt="Current thumbnail"
+                      width={64}
+                      height={64}
                       className="w-16 h-16 object-cover rounded-md border"
                     />
                     <button 

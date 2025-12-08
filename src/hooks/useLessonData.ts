@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { api } from "@/trpc/react";
 
 // Define the same interface as in LessonViewer
 interface LessonData {
@@ -49,10 +48,6 @@ export function useLessonData({ courseId, lessonId }: UseLessonDataProps): UseLe
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const { data: quizData } = api.student.quiz.getByLesson.useQuery(
-    { lessonId, courseId },
-    { enabled: !!lessonId && !!courseId }
-  );
 
   // Fetch lesson data and progress from API
   useEffect(() => {

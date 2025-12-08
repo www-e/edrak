@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,6 @@ type PaymentStatus = 'success' | 'failed' | 'pending' | 'processing';
 
 function PaymentStatusContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [status, setStatus] = useState<PaymentStatus>('processing');
   const [isProcessing, setIsProcessing] = useState(true);
 
@@ -23,7 +22,8 @@ function PaymentStatusContent() {
         const paramsObj = Object.fromEntries(searchParams.entries());
         const result = await processPaymentReturnAction(paramsObj);
         setStatus(result.success && result.data?.status === 'COMPLETED' ? 'success' : 'failed');
-      } catch (error) {
+      } catch (err) {
+        console.error('Error processing payment return:', err);
         setStatus('failed');
       } finally {
         setIsProcessing(false);

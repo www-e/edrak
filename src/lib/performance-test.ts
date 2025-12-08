@@ -39,7 +39,7 @@ export class PerformanceTester {
       const startTime = performance.now();
 
       try {
-        const response = await fetch(url, { method });
+        await fetch(url, { method });
         const endTime = performance.now();
 
         metrics.push({

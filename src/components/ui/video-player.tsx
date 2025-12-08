@@ -204,7 +204,14 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
     const video = videoRef.current;
     if (!video) return;
 
-    video.muted = !isMuted;
+    if (isMuted) {
+      // Unmute: restore previous volume
+      video.muted = false;
+      video.volume = volume;
+    } else {
+      // Mute: set volume to 0 and remember current volume
+      video.muted = true;
+    }
     setIsMuted(!isMuted);
   };
 
@@ -231,7 +238,16 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(({
           className="w-full h-full object-contain bg-black"
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
-          onVolumeChange={(e) => setVolume(e.currentTarget.volume)}
+          onVolumeChange={(e) => {
+            const newVolume = e.currentTarget.volume;
+            setVolume(newVolume);
+            // Update muted state based on volume
+            if (newVolume === 0 && !isMuted) {
+              setIsMuted(true);
+            } else if (newVolume > 0 && isMuted) {
+              setIsMuted(false);
+            }
+          }}
           onMouseEnter={() => setShowControls(true)}
           onMouseLeave={() => setShowControls(false)}
           preload="metadata"

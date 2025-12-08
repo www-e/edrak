@@ -46,8 +46,9 @@ export function useCoupon(coursePrice: number) {
         setAppliedCoupon(null);
         return null;
       }
-    } catch (error) {
-      showSnackbar("Error validating coupon", "error");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Error validating coupon";
+      showSnackbar(errorMessage, "error");
       setAppliedCoupon(null);
       return null;
     } finally {

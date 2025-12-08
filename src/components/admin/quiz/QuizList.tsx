@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
 
 interface QuizListProps {
   courseId: string;
@@ -14,7 +13,6 @@ interface QuizListProps {
 }
 
 export function QuizList({ courseId, onCreateQuiz, onEditQuiz }: QuizListProps) {
-  const router = useRouter();
   const utils = api.useUtils();
 
   const { data: quizzes, isLoading } = api.admin.quiz.getByCourse.useQuery({ courseId });

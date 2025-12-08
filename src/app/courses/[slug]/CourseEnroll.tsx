@@ -300,7 +300,7 @@ export function CourseEnroll({ course }: CourseEnrollProps) {
                   What is Included
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {benefits.map((benefit, index) => (
+                  {benefits.map((benefit) => (
                     <div key={benefit} className="flex items-start gap-4 p-4 rounded-xl bg-muted/20 border border-border/30">
                       <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full flex-shrink-0">
                         <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />

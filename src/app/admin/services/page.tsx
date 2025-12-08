@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { PageHeader } from "@/components/admin/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -16,11 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Save, Trash2, Edit3 } from "lucide-react";
+import { Plus, Trash2, Edit3 } from "lucide-react";
 import { useSnackbar } from "@/components/shared/snackbar-context";
 
 export default function ServicesPage() {
-  const router = useRouter();
   const { showSnackbar } = useSnackbar();
   const [editingService, setEditingService] = useState<string | null>(null);
   const [editingTier, setEditingTier] = useState<string | null>(null);
@@ -211,31 +209,29 @@ export default function ServicesPage() {
                     value={service.name}
                     onChange={(e) => {
                       // Update the service name in the data - we need to create a new object to trigger re-render
-                      const updatedServices = servicesData.services.map(s => 
-                        s.id === service.id ? {...s, name: e.target.value} : s
-                      );
                       // This will be updated by the refetch after mutation
                     }}
                     placeholder="Service name"
-                    onBlur={() => {
+                    onBlur={(e) => {
                       updateService.mutate({
                         id: service.id,
-                        name: service.name,
+                        name: e.target.value,
                       });
                     }}
                   />
                   <Input
                     value={service.slug}
                     onChange={(e) => {
-                      const updatedServices = servicesData.services.map(s => 
+                      // Update the service slug optimistically
+                      const updatedServices = servicesData.services.map(s =>
                         s.id === service.id ? {...s, slug: e.target.value} : s
                       );
                     }}
                     placeholder="Service slug"
-                    onBlur={() => {
+                    onBlur={(e) => {
                       updateService.mutate({
                         id: service.id,
-                        slug: service.slug,
+                        slug: e.target.value,
                       });
                     }}
                   />
@@ -329,6 +325,7 @@ export default function ServicesPage() {
                           size="sm"
                           onClick={() => {
                             setEditingTier(tier.id);
+                            // Add functionality to handle editing tier
                           }}
                         >
                           <Edit3 className="h-4 w-4" />

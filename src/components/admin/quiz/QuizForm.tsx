@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, X } from "lucide-react";
 import { api } from "@/trpc/react";
-import type { Prisma } from "@prisma/client";
 
 interface QuizFormProps {
   courseId: string;
@@ -26,17 +25,6 @@ interface QuizQuestion {
   order: number;
 }
 
-// Define the type for existing quiz question data from the API
-interface ExistingQuizQuestion {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  quizId: string;
-  order: number;
-  question: string;
-  options: Prisma.JsonValue; // This is how Prisma stores JSON
-  correctAnswer: number;
-}
 
 export function QuizForm({ courseId, lessonId, quizId, onSuccess, onCancel }: QuizFormProps) {
   const utils = api.useUtils();

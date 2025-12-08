@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { QuizModal } from "@/components/quiz/QuizModal";
 import { QuizHistorySelector } from "@/components/quiz/QuizHistorySelector";
-import { api } from "@/trpc/react";
 import type { inferRouterOutputs } from "@trpc/server";
 import { AppRouter } from "@/server/api/root";
 
@@ -30,11 +28,6 @@ export function QuizIntegration({
   setSelectedAttemptId,
   handleQuizPassed
 }: QuizIntegrationProps) {
-  // Fetch quiz attempts for history view
-  const { data: quizAttempts } = api.student.quiz.getMyAttempts.useQuery(
-    { quizId: quizData?.id || '' },
-    { enabled: !!quizData?.id && showQuizHistory }
-  );
 
   return (
     <>

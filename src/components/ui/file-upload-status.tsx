@@ -24,7 +24,7 @@ export function FileUploadStatus({
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          Ready to upload to Bunny.net CDN
+          {fileName} • Ready to upload to Bunny.net CDN
         </span>
         <span className="font-medium">
           {formatFileSize(fileSize)}

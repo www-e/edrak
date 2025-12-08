@@ -177,7 +177,7 @@ export function AttachmentList({ attachments }: AttachmentListProps) {
               <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-blue-50/50 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Image className="w-5 h-5 text-blue-600" />
+                    <Image className="w-5 h-5 text-blue-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-medium">{attachment.name}</p>
@@ -192,7 +192,7 @@ export function AttachmentList({ attachments }: AttachmentListProps) {
                     size="sm"
                     onClick={() => window.open(attachment.bunnyCdnUrl, '_blank')}
                   >
-                    <Image className="w-4 h-4 mr-2" />
+                    <Image className="w-4 h-4 mr-2" aria-hidden="true" />
                     View
                   </Button>
                   <Button

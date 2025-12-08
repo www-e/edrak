@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface HeroProps {
   title: string;
@@ -50,7 +51,7 @@ export default function Hero({
   imageAlt
 }: HeroProps) {
   return (
-    <section className={`relative overflow-hidden pt-32 pb-24 ${className}`}>
+    <section className={`relative overflow-hidden pt-32 pb-24 bg-gradient-to-br ${backgroundGradient} ${className}`}>
       {/* Enhanced floating shapes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -205,9 +206,11 @@ export default function Hero({
               transition={{ duration: 0.6, delay: 0.7 }}
               className="flex justify-center"
             >
-              <img
+              <Image
                 src={imageUrl}
                 alt={imageAlt || 'Hero Image'}
+                width={600}
+                height={400}
                 className="w-full h-auto max-w-full rounded-2xl shadow-xl"
               />
             </motion.div>

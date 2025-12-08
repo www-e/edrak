@@ -9,8 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useSnackbar } from '@/components/shared/snackbar-context';
 
-// Define the types for form configuration
-type InputType = 'text' | 'number' | 'email' | 'tel' | 'textarea' | 'select' | 'file';
 
 interface FormFieldBase {
   name: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { QuizList } from "@/components/admin/quiz/QuizList";
 import { QuizForm } from "@/components/admin/quiz/QuizForm";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import Link from "next/link";
 
 export default function CourseQuizzesPage() {
   const params = useParams();
-  const router = useRouter();
   const courseId = params.id as string;
 
   const [showForm, setShowForm] = useState(false);

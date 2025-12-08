@@ -19,7 +19,8 @@ export async function processPaymentReturn(searchParams: { [key: string]: string
 
   try {
     return await PayMobService.processPaymentUpdate(paymobOrderId, success);
-  } catch (error) {
+  } catch (err) {
+    console.error('Error processing payment return:', err);
     return null;
   }
 }

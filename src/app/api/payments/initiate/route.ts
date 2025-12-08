@@ -9,7 +9,6 @@ import { authOptions } from "@/lib/auth";
 import { User } from "@prisma/client";
 
 interface AuthenticatedUser { id: string; role: string; email?: string; name?: string; }
-interface PaymentInitiationRequest { courseId: string; paymentMethod: 'card' | 'wallet'; walletNumber?: string; }
 
 const paymentInitiateSchema = z.object({
   courseId: z.string().min(1, "معرف الدورة مطلوب"),

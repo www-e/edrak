@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, AlertCircle, Trophy, RotateCcw, Loader2 } from "lucide-react";
 import { api } from "@/trpc/react";
-import type { Prisma } from "@prisma/client";
 
 interface QuizModalProps {
   open: boolean;
@@ -20,13 +19,6 @@ interface QuizModalProps {
   attemptId?: string; // For review mode, specify which attempt to review
 }
 
-interface QuizQuestion {
-  id: string;
-  question: string;
-  options: Prisma.JsonValue;
-  order: number;
-  correctAnswer?: number; // Optional for student view, available in admin view
-}
 
 export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPassed, reviewMode = false, attemptId }: QuizModalProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
@@ -51,7 +43,6 @@ export function QuizModal({ open, onClose, quizId, courseId, quizTitle, onQuizPa
   );
 
   const questions = reviewMode && reviewData ? reviewData.quiz.questions : quizData?.questions || [];
-  const passingScore = reviewMode && reviewData ? reviewData.quiz.passingScore : quizData?.passingScore || 70;
 
   // For review mode, get the specific attempt
   const reviewAttempt = reviewMode && reviewData ? reviewData.attempt : null;

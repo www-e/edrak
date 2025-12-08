@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 interface FileDropzoneProps {
   onFileDrop: (file: File) => void;
-  onError: (error: string) => void;
+  onError?: (error: string) => void;
   children: React.ReactNode;
   className?: string;
   accept?: string;

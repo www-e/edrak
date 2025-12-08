@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSnackbar } from "@/components/shared/snackbar-context";
-import { Download, Trash2, File, Video, FileText, Image, Play, Eye } from "lucide-react";
+import { Download, Trash2, File, Video, FileText, Play, Eye } from "lucide-react";
 import { Attachment } from "@/types/admin";
 import { getFileIcon, formatFileSize } from "@/lib/file-utils";
 
@@ -103,7 +103,7 @@ export function AttachmentList({
                   </div>
                 ) : attachmentType === 'IMAGE_GALLERY' ? (
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Image className="w-5 h-5 text-blue-600" />
+                    <File className="w-5 h-5 text-blue-600" />
                   </div>
                 ) : (
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">

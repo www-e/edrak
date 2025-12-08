@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { Role } from "@prisma/client";
 
 // Input validation schemas
 const createServiceInput = z.object({

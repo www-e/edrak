@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, CheckCircle } from 'lucide-react';
-import { getFileIcon, formatFileSize, createPreviewUrl, cleanupPreviewUrl } from '@/lib/file-utils';
+import { getFileIcon, formatFileSize, cleanupPreviewUrl } from '@/lib/file-utils';
 
 interface FilePreviewProps {
   file: File;

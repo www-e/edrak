@@ -1,5 +1,4 @@
 import { db } from "@/server/db";
-import { TRPCError } from "@trpc/server";
 
 export interface CouponValidationResult {
   isValid: boolean;

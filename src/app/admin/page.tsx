@@ -11,6 +11,7 @@ import {
 import { api } from "@/trpc/react";
 import { DashboardSkeleton, UsersSkeleton } from "@/components/admin/shared/dashboard-skeleton";
 import { Suspense } from "react";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
   const { data: metrics, isLoading: isLoadingMetrics } = api.admin.commerce.getDashboardMetrics.useQuery();
@@ -88,11 +89,11 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground mb-3">
               Generate discount codes for courses
             </p>
-            <a href="/admin/commerce/coupons/new" className="inline-block">
+            <Link href="/admin/commerce/coupons/new" className="inline-block">
               <Button size="sm">
                 Create Coupon
               </Button>
-            </a>
+            </Link>
           </CardContent>
         </Card>
 
@@ -105,11 +106,11 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground mb-3">
               Add assessments to your courses
             </p>
-            <a href="/admin/courses" className="inline-block">
+            <Link href="/admin/courses" className="inline-block">
               <Button size="sm">
                 Manage Quizzes
               </Button>
-            </a>
+            </Link>
           </CardContent>
         </Card>
 
@@ -122,11 +123,11 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground mb-3">
               View reports and insights
             </p>
-            <a href="/admin/commerce" className="inline-block">
+            <Link href="/admin/commerce" className="inline-block">
               <Button size="sm">
                 View Analytics
               </Button>
-            </a>
+            </Link>
           </CardContent>
         </Card>
 
@@ -139,11 +140,11 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground mb-3">
               Track student evaluations
             </p>
-            <a href="/admin/courses" className="inline-block">
+            <Link href="/admin/courses" className="inline-block">
               <Button size="sm">
                 Manage Exams
               </Button>
-            </a>
+            </Link>
           </CardContent>
         </Card>
       </div>

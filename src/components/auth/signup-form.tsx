@@ -114,6 +114,7 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
 
   const onSubmit = async (data: CredentialsFormValues) => {
     try {
+      setIsLoading(true);
       const completeData: SignupData = {
         ...formData,
         ...data,
@@ -133,6 +134,8 @@ export function SignupForm({ onSignupComplete }: SignupFormProps) {
       const errorMessage =
         error instanceof Error ? error.message : "An unexpected error occurred";
       showSnackbar(errorMessage, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 

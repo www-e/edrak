@@ -51,7 +51,7 @@ export default function FeatureGrid({
   const contentAlignment = centerContent ? 'text-center' : '';
 
   return (
-    <section className={`py-24 ${background}`}>
+    <section className={`py-24 ${background} ${className}`}>
       <div className="container max-w-[1400px] mx-auto px-6">
         {/* Section Header */}
         <motion.div

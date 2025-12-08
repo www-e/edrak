@@ -27,7 +27,7 @@ export function LessonViewer({ courseId, lessonId }: LessonViewerProps) {
   const [showQuizHistory, setShowQuizHistory] = useState(false);
   const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null);
 
-  const { lesson, loading, error, refetch } = useLessonData({ courseId, lessonId });
+  const { lesson, loading, error } = useLessonData({ courseId, lessonId });
 
   // Check if lesson has a quiz
   const { data: quizData } = api.student.quiz.getByLesson.useQuery(

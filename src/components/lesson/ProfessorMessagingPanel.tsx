@@ -109,10 +109,11 @@ export function ProfessorMessagingPanel({
         title: "Message sent successfully",
         description: "Your message has been sent to the professor",
       });
-    } catch (error) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to send your message. Please try again.";
       toast({
         title: "Error sending message",
-        description: "Failed to send your message. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
