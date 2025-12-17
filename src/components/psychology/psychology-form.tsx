@@ -46,7 +46,7 @@ const initialFormData: FormData = {
 };
 
 export default function PsychologyForm() {
-  const createPsychologyApplicationMutation = api.public.applications.createPsychologyApplication.useMutation();
+  const createPsychologyApplicationMutation = api.student.services.createPsychologyApplication.useMutation();
 
   const steps = [
     {
@@ -232,6 +232,7 @@ export default function PsychologyForm() {
       formId="psychology"
       successMessage="Psychology consultation request submitted successfully! We will contact you soon."
       sectionId="form"
+      isDashboardForm={true}
     />
   );
 }

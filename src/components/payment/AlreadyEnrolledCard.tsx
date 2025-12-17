@@ -64,8 +64,8 @@ export function AlreadyEnrolledCard({ enrollmentData, courseId }: AlreadyEnrolle
 
                 <p className="text-muted-foreground text-lg">
                   {completionPercentage === 100
-                    ? "🎓 Congratulations! You've completed this course. You can review the content anytime."
-                    : `📚 You've completed ${completionPercentage}% of this course. Keep up the great work!`
+                    ? "🎓 Congratulations! you have completed this course. You can review the content anytime."
+                    : `📚 you have completed ${completionPercentage}% of this course. Keep up the great work!`
                   }
                 </p>
               </div>

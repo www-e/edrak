@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
 import { Label } from '@/components/ui/label';
 import { api } from '@/trpc/react';
-import { useSession } from 'next-auth/react';
 import { Loader2, ShieldCheck, CreditCard, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 

@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Return user object without password
-        const { password, ...userWithoutPassword } = user;
+        const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
       },
     }),

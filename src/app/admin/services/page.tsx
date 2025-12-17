@@ -23,7 +23,7 @@ export default function ServicesPage() {
   const [editingService, setEditingService] = useState<string | null>(null);
   const [editingTier, setEditingTier] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string | null>(null);
-  
+
   // Form states
   const [newService, setNewService] = useState({ name: "", slug: "", description: "" });
   const [newTier, setNewTier] = useState({ serviceId: "", name: "", order: 1, isPopular: false });
@@ -81,6 +81,7 @@ export default function ServicesPage() {
       showSnackbar(`Error creating service tier: ${error.message}`, "error");
     }
   });
+
 
   const updateServiceTier = api.admin.services.updateServiceTier.useMutation({
     onSuccess: () => {
@@ -207,7 +208,7 @@ export default function ServicesPage() {
                 <div className="flex flex-col gap-2">
                   <Input
                     value={service.name}
-                    onChange={(e) => {
+                    onChange={() => {
                       // Update the service name in the data - we need to create a new object to trigger re-render
                       // This will be updated by the refetch after mutation
                     }}
@@ -223,9 +224,7 @@ export default function ServicesPage() {
                     value={service.slug}
                     onChange={(e) => {
                       // Update the service slug optimistically
-                      const updatedServices = servicesData.services.map(s =>
-                        s.id === service.id ? {...s, slug: e.target.value} : s
-                      );
+                      // The refetch in the mutation will update the UI
                     }}
                     placeholder="Service slug"
                     onBlur={(e) => {

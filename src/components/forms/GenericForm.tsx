@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { useSnackbar } from '@/components/shared/snackbar-context';
+import { useRouter } from 'next/navigation';
 
 
 interface FormFieldBase {
@@ -44,6 +45,7 @@ interface GenericFormProps<T = Record<string, unknown>> {
   formId: string;
   successMessage?: string;
   sectionId?: string;
+  isDashboardForm?: boolean; // New prop to indicate if this form is used in dashboard context
 }
 
 export default function GenericForm<T = Record<string, unknown>>({
@@ -54,7 +56,8 @@ export default function GenericForm<T = Record<string, unknown>>({
   submitMutation,
   formId,
   successMessage = 'Form submitted successfully! We will contact you soon.',
-  sectionId = 'form'
+  sectionId = 'form',
+  isDashboardForm = false // Default to false for backward compatibility
 }: GenericFormProps<T>) {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
@@ -62,6 +65,7 @@ export default function GenericForm<T = Record<string, unknown>>({
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const { showSnackbar } = useSnackbar();
+  const router = useRouter();
 
   // Function to handle form submission
   const handleSubmit = async () => {
@@ -74,9 +78,17 @@ export default function GenericForm<T = Record<string, unknown>>({
 
       showSnackbar(successMessage, 'success');
 
-      // Reset form after successful submission
-      setFormData(initialFormData);
-      setCurrentStep(0);
+      // If this is a dashboard form, redirect to services page after successful submission
+      if (isDashboardForm) {
+        // Wait a bit for the snackbar to show before redirecting
+        setTimeout(() => {
+          router.push('/student/services');
+        }, 1500);
+      } else {
+        // For non-dashboard forms, reset the form and go back to first step
+        setFormData(initialFormData);
+        setCurrentStep(0);
+      }
     } catch (error) {
       console.error('Error submitting application:', error);
       showSnackbar('Error submitting application. Please try again.', 'error');
@@ -99,7 +111,13 @@ export default function GenericForm<T = Record<string, unknown>>({
     try {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
-      formDataUpload.append('courseId', `${formId}-application`); // Temporary course ID for organization
+      formDataUpload.append('courseId', `${formId}-application`); // Course ID format for service applications
+
+      // Only add serviceApplication if this is a dashboard form
+      if (isDashboardForm) {
+        const serviceType = formId.toUpperCase(); // formId like 'training' becomes 'TRAINING'
+        formDataUpload.append('serviceApplication', serviceType);
+      }
 
       const response = await fetch('/api/upload', {
         method: 'POST',

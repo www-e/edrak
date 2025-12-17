@@ -204,7 +204,7 @@ export class PayMobService {
 
   public static verifyHmac(hmac: string, data: PayMobWebhookData): boolean {
     try {
-      const { hmac: _, ...dataWithoutHmac } = data;
+      const { hmac: _hmac, ...dataWithoutHmac } = data;
 
       const orderedKeys = [
         "amount_cents", "created_at", "currency", "error_occured", "has_parent_transaction",

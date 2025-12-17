@@ -19,6 +19,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
 };
 
 export const createTRPCContext = async (_opts: CreateNextContextOptions) => {
+  // _opts is intentionally unused but required for the tRPC Next.js adapter signature
   const session = await getServerSession(authOptions);
 
   return createInnerTRPCContext({

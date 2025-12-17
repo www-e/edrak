@@ -3,9 +3,11 @@ import { Header } from '@/features/landing/components/Header';
 import { Footer } from '@/features/landing/components/Footer';
 import PsychologyHero from '@/components/psychology/psychology-hero';
 import PsychologyPackages from '@/components/psychology/psychology-packages';
-import PsychologyForm from '@/components/psychology/psychology-form';
 import CallToActionSection from '@/components/shared/CallToAction';
 import GeneralFAQ from '@/components/shared/GeneralFAQ';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { CreditCard } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Sports Psychology Consultations | SportologyPlus',
@@ -20,7 +22,7 @@ export default function PsychologyPage() {
     },
     {
       question: "What happens after I submit the psychology consultation form?",
-      answer: "After submitting your application, our certified sports psychologists will review your information and assess your psychological needs. We'll contact you within 24-48 hours to discuss your assessment, recommend the most suitable package, and schedule your first session."
+      answer: "After submitting your application through your dashboard after purchase, our certified sports psychologists will review your information and assess your psychological needs. We'll contact you within 24-48 hours to discuss your assessment, recommend the most suitable package, and schedule your first session."
     },
     {
       question: "Are the psychology sessions conducted in person or online?",
@@ -64,9 +66,21 @@ export default function PsychologyPage() {
         <div id="packages">
           <PsychologyPackages />
         </div>
-        <div id="form">
-          <PsychologyForm />
-        </div>
+        {/* Removed form - now requires payment first */}
+        <section className="py-16 bg-muted/30">
+          <div className="container max-w-4xl mx-auto px-6 text-center">
+            <h2 className="text-3xl font-bold mb-4">Start Your Mental Performance Journey</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Purchase your psychology package to access the consultation form in your dashboard
+            </p>
+            <Link href="/pay/service/psychology">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-green-600 hover:from-primary hover:to-green-600 text-white px-8 py-6 text-lg">
+                <CreditCard className="mr-2 h-5 w-5" />
+                Purchase Psychology Package
+              </Button>
+            </Link>
+          </div>
+        </section>
         <GeneralFAQ items={psychologyFAQs} title="Sports Psychology FAQ" />
         <CallToActionSection
           title="Ready to Strengthen Your Mental Game?"

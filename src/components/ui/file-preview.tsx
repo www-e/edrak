@@ -51,6 +51,7 @@ export function FilePreview({ file, previewUrl, onRemove, className }: FilePrevi
 
       {previewUrl && (
         <div className="relative inline-block">
+          {/* For dynamic blob URLs like image previews, using regular img is appropriate */}
           <img
             src={previewUrl}
             className="max-h-32 rounded-md object-contain border"

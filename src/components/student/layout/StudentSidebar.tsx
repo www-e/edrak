@@ -27,6 +27,7 @@ const convertSessionUserToUser = (sessionUser: SessionUser) => ({
 const navigation = [
   { name: "Dashboard", href: "/student", icon: Home },
   { name: "My Courses", href: "/student/courses", icon: BookOpen },
+  { name: "My Services", href: "/student/services", icon: BookOpen },
   { name: "Profile", href: "/student/profile", icon: User },
   { name: "Payments", href: "/student/payments", icon: CreditCard },
 ];

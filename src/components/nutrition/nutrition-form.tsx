@@ -42,7 +42,7 @@ const initialFormData: FormData = {
 };
 
 export default function NutritionForm() {
-  const createNutritionApplicationMutation = api.public.applications.createNutritionApplication.useMutation();
+  const createNutritionApplicationMutation = api.student.services.createNutritionApplication.useMutation();
 
   const steps = [
     {
@@ -149,6 +149,7 @@ export default function NutritionForm() {
       formId="nutrition"
       successMessage="Nutrition program request submitted successfully! We will contact you soon."
       sectionId="form"
+      isDashboardForm={true}
     />
   );
 }

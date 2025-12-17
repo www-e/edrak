@@ -43,14 +43,14 @@ export default function UnifiedFAQ({
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
 
   // Filter items based on search and category
-  const filteredItems = items.filter((item, index) => {
-    const matchesSearch = !searchTerm || 
+  const filteredItems = items.filter((item) => {
+    const matchesSearch = !searchTerm ||
       item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.answer.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = activeCategory === 'all' || 
+
+    const matchesCategory = activeCategory === 'all' ||
       categories.find(cat => cat.id === activeCategory);
-    
+
     return matchesSearch && matchesCategory;
   });
 

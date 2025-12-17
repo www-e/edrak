@@ -13,7 +13,7 @@ interface FileDropzoneProps {
 
 export function FileDropzone({
   onFileDrop,
-  onError,
+  onError, // onError is defined but intentionally unused for now
   children,
   className,
   accept

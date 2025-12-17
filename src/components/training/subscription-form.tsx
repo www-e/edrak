@@ -58,7 +58,7 @@ const initialFormData: FormData = {
 };
 
 export default function SubscriptionForm() {
-  const createTrainingApplicationMutation = api.public.applications.createTrainingApplication.useMutation();
+  const createTrainingApplicationMutation = api.student.services.createTrainingApplication.useMutation();
 
   const steps = [
     {
@@ -207,6 +207,7 @@ export default function SubscriptionForm() {
       formId="training"
       successMessage="Training program request submitted successfully! We will contact you soon."
       sectionId="form"
+      isDashboardForm={true}
     />
   );
 }

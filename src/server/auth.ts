@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { type NextApiRequest, type NextApiResponse } from "next";
 
 /**
- * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
+ * Wrapper for `getServerSession` so that you do not need to import the `authOptions` in every file.
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */

@@ -1,5 +1,5 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { db } from "@/server/db";
+import { db } from "@/server/db"; // Import used for potential implementation
 import { z } from "zod";
 
 // Form-specific schemas that accept string values from HTML forms
@@ -98,41 +98,37 @@ const trainingFormSchema = z.object({
 
 export const publicApplicationsRouter = createTRPCRouter({
   /**
-   * Create psychology application (public submission)
+   * Create psychology application (now requires service purchase)
+   * This endpoint is kept for API compatibility but should not be used directly
+   * Use the protected endpoint in student/services instead
    */
   createPsychologyApplication: publicProcedure
     .input(psychologyFormSchema)
-    .mutation(async ({ input }) => {
-      // Process input (convert string values to required types)
-      const processedInput = {
-        ...input,
-        age: parseInt(input.age) || 0,
-      };
-
-      return await db.psychologyApplication.create({
-        data: processedInput,
-      });
+    .mutation(async ({ input, ctx }) => {
+      // This endpoint is deprecated in favor of protected endpoint
+      // that verifies payment before allowing form submission
+      // input and ctx are intentionally unused but required for TRPC signature
+      throw new Error("Psychology applications must be submitted through your dashboard after service purchase");
     }),
 
   /**
-   * Create training application (public submission)
+   * Create training application (now requires service purchase)
+   * This endpoint is kept for API compatibility but should not be used directly
+   * Use the protected endpoint in student/services instead
    */
   createTrainingApplication: publicProcedure
     .input(trainingFormSchema)
-    .mutation(async ({ input }) => {
-      // Process input (convert string values to required types)
-      const processedInput = {
-        ...input,
-        age: parseInt(input.age) || 0,
-      };
-
-      return await db.trainingApplication.create({
-        data: processedInput,
-      });
+    .mutation(async ({ input, ctx }) => {
+      // This endpoint is deprecated in favor of protected endpoint
+      // that verifies payment before allowing form submission
+      // input and ctx are intentionally unused but required for TRPC signature
+      throw new Error("Training applications must be submitted through your dashboard after service purchase");
     }),
 
   /**
-   * Create nutrition application (public submission)
+   * Create nutrition application (now requires service purchase)
+   * This endpoint is kept for API compatibility but should not be used directly
+   * Use the protected endpoint in student/services instead
    */
   createNutritionApplication: publicProcedure
     .input(z.object({
@@ -172,15 +168,10 @@ export const publicApplicationsRouter = createTRPCRouter({
       timeframe: z.string().optional(),
       selectedPackage: z.enum(["silver", "gold", "diamond"]).optional(),
     }))
-    .mutation(async ({ input }) => {
-      // Process input (convert string values to required types)
-      const processedInput = {
-        ...input,
-        age: parseInt(input.age) || 0,
-      };
-
-      return await db.nutritionApplication.create({
-        data: processedInput,
-      });
+    .mutation(async ({ input, ctx }) => {
+      // This endpoint is deprecated in favor of protected endpoint
+      // that verifies payment before allowing form submission
+      // input and ctx are intentionally unused but required for TRPC signature
+      throw new Error("Nutrition applications must be submitted through your dashboard after service purchase");
     }),
 });

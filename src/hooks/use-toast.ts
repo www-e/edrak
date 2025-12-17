@@ -23,7 +23,7 @@ const actionTypes = {
   UPDATE_TOAST: "UPDATE_TOAST",
   DISMISS_TOAST: "DISMISS_TOAST",
   REMOVE_TOAST: "REMOVE_TOAST",
-} as const
+} as const // Used only for typing, which is why ESLint sees it as unused
 
 type ActionType = typeof actionTypes
 
