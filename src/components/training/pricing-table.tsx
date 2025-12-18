@@ -6,7 +6,7 @@ import { api } from '@/trpc/react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PricingTable() {
-  const { data: serviceData, isLoading } = api.admin.services.getServicePricingBySlug.useQuery({
+  const { data: serviceData, isLoading } = api.public.services.getServiceBySlug.useQuery({
     slug: 'training'
   });
 

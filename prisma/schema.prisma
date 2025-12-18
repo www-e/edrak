@@ -9,39 +9,36 @@ datasource db {
 }
 
 model User {
-   id                 String       @id @default(uuid())
-   username           String       @unique
-   email              String       @unique
-   password           String
-   firstName          String
-   lastName           String
-   phoneNumber        String
-   secondPhoneNumber  String?
-   categoryPreference String?
-   referralSource     String?
-   role               Role         @default(STUDENT)
-   isActive           Boolean      @default(true)
-   walletBalance      Decimal      @default(0) @db.Decimal(10, 2)
-   lastLoginAt        DateTime?    @updatedAt
-   createdAt          DateTime     @default(now())
-   updatedAt          DateTime     @updatedAt
-   taughtCourses      Course[]     @relation("CourseProfessor")
-   enrollments        Enrollment[]
-   payments           Payment[]
-   progressMilestones ProgressMilestone[]
-   certificates       Certificate[]
-   studentProfile     StudentProfile?
-   walletTransactions WalletTransaction[]
-   notes              Note[]       // Add notes created by user
-   sentMessages       ProfessorMessage[]  @relation("SentMessages") // Messages sent by user
-   receivedMessages   ProfessorMessage[]  @relation("ReceivedMessages") // Messages received by user
-   quizAttempts       QuizAttempt[] // Quiz attempts by user
-
-   // Student plans where this user is a student
-   studentPlans       StudentPlan[] @relation("StudentPlanToStudent")
-   // Plans created by this user (as professor)
-   createdPlans       StudentPlan[] @relation("StudentPlanToProfessor")
- }
+  id                 String              @id @default(uuid())
+  username           String              @unique
+  email              String              @unique
+  password           String
+  firstName          String
+  lastName           String
+  phoneNumber        String
+  secondPhoneNumber  String?
+  categoryPreference String?
+  referralSource     String?
+  role               Role                @default(STUDENT)
+  isActive           Boolean             @default(true)
+  lastLoginAt        DateTime?           @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  walletBalance      Decimal             @default(0) @db.Decimal(10, 2)
+  certificates       Certificate[]
+  taughtCourses      Course[]            @relation("CourseProfessor")
+  enrollments        Enrollment[]
+  notes              Note[]
+  payments           Payment[]
+  receivedMessages   ProfessorMessage[]  @relation("ReceivedMessages")
+  sentMessages       ProfessorMessage[]  @relation("SentMessages")
+  progressMilestones ProgressMilestone[]
+  quizAttempts       QuizAttempt[]
+  createdPlans       StudentPlan[]       @relation("StudentPlanToProfessor")
+  studentPlans       StudentPlan[]       @relation("StudentPlanToStudent")
+  studentProfile     StudentProfile?
+  walletTransactions WalletTransaction[]
+}
 
 model Category {
   id          String   @id @default(uuid())
@@ -54,93 +51,91 @@ model Category {
 }
 
 model Course {
-   id             String           @id @default(uuid())
-   title          String
-   slug           String           @unique
-   description    String
-   price          Float            @default(0.0)
-   language       String
-   visibility     CourseVisibility @default(DRAFT)
-   categoryId     String?
-   professorId    String
-   thumbnailUrl   String?
-   cashbackType   CashbackType     @default(NONE)
-   cashbackValue  Decimal          @default(0) @db.Decimal(10, 2)
-   createdAt      DateTime         @default(now())
-   updatedAt      DateTime         @updatedAt
-   publishedAt    DateTime?
-   rating         Float            @default(0.0)
-   ratingCount    Int              @default(0)
-   enrollmentCount Int             @default(0)
-   totalDuration   Int?            // Total duration in minutes
-   category       Category?        @relation(fields: [categoryId], references: [id])
-   professor      User             @relation("CourseProfessor", fields: [professorId], references: [id])
-   enrollments    Enrollment[]
-   lessons        Lesson[]
-   payments       Payment[]
-   certificates   Certificate[]
-   progressMilestones ProgressMilestone[]
-   notes          Note[]           // Notes for this course
-   messages       ProfessorMessage[] // Messages for this course
-   quizzes        Quiz[]           // Quizzes for this course
+  id                 String              @id @default(uuid())
+  title              String
+  slug               String              @unique
+  description        String
+  price              Float               @default(0.0)
+  language           String
+  visibility         CourseVisibility    @default(DRAFT)
+  categoryId         String?
+  professorId        String
+  thumbnailUrl       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  publishedAt        DateTime?
+  rating             Float               @default(0.0)
+  ratingCount        Int                 @default(0)
+  enrollmentCount    Int                 @default(0)
+  totalDuration      Int?
+  cashbackType       CashbackType        @default(NONE)
+  cashbackValue      Decimal             @default(0) @db.Decimal(10, 2)
+  certificates       Certificate[]
+  category           Category?           @relation(fields: [categoryId], references: [id])
+  professor          User                @relation("CourseProfessor", fields: [professorId], references: [id])
+  enrollments        Enrollment[]
+  lessons            Lesson[]
+  notes              Note[]
+  payments           Payment[]
+  messages           ProfessorMessage[]
+  progressMilestones ProgressMilestone[]
+  quizzes            Quiz[]
 
-   @@index([professorId, visibility])
-   @@index([categoryId, visibility])
-   @@index([thumbnailUrl]) // Index for faster thumbnail lookup
- }
+  @@index([professorId, visibility])
+  @@index([categoryId, visibility])
+  @@index([thumbnailUrl])
+}
 
 model Lesson {
-    id                    String           @id @default(uuid())
-    courseId              String
-    title                 String
-    order                 Int
-    content               String
-    isVisible             Boolean          @default(true)
-    isDeleted             Boolean          @default(false)
-    createdAt             DateTime         @default(now())
-    updatedAt             DateTime         @updatedAt
-    deletedAt             DateTime?
-    attachments           Attachment[]
-    course                Course           @relation(fields: [courseId], references: [id])
-    lessonProgress        LessonProgress[]
-    duration              Int?             // Duration in minutes
-    youtubeUrl            String?          // YouTube video URL for free courses
-    notes                 Note[]           // Notes for this lesson
-    messages              ProfessorMessage[] // Messages for this lesson
-    quizzes               Quiz[]           // Quizzes for this lesson
-  }
+  id             String             @id @default(uuid())
+  courseId       String
+  title          String
+  order          Int
+  content        String
+  isVisible      Boolean            @default(true)
+  isDeleted      Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  deletedAt      DateTime?
+  duration       Int?
+  youtubeUrl     String?
+  attachments    Attachment[]
+  course         Course             @relation(fields: [courseId], references: [id])
+  lessonProgress LessonProgress[]
+  notes          Note[]
+  messages       ProfessorMessage[]
+  quizzes        Quiz[]
+}
 
 model Attachment {
-   id           String   @id @default(uuid())
-   lessonId     String
-   name         String
-   fileName     String
-   mimeType     String
-   fileSize     Int
-   bunnyCdnPath String
-   bunnyCdnUrl  String
-   createdAt    DateTime @default(now())
-   updatedAt    DateTime @updatedAt
-   lesson       Lesson   @relation(fields: [lessonId], references: [id])
- }
+  id           String   @id @default(uuid())
+  lessonId     String
+  name         String
+  fileName     String
+  mimeType     String
+  fileSize     Int
+  bunnyCdnPath String
+  bunnyCdnUrl  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lesson       Lesson   @relation(fields: [lessonId], references: [id])
+}
 
 model LessonProgress {
-   id                     String     @id @default(uuid())
-   enrollmentId           String
-   lessonId               String
-   isCompleted            Boolean    @default(false)
-   videoWatchedPercentage Int        @default(0)
-   completedAt            DateTime?
-   createdAt              DateTime   @default(now())
-   updatedAt              DateTime   @updatedAt
-   enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
-   lesson                 Lesson     @relation(fields: [lessonId], references: [id])
+  id                     String     @id @default(uuid())
+  enrollmentId           String
+  lessonId               String
+  isCompleted            Boolean    @default(false)
+  videoWatchedPercentage Int        @default(0)
+  completedAt            DateTime?
+  createdAt              DateTime   @default(now())
+  updatedAt              DateTime   @updatedAt
+  enrollment             Enrollment @relation(fields: [enrollmentId], references: [id])
+  lesson                 Lesson     @relation(fields: [lessonId], references: [id])
 
-   @@unique([enrollmentId, lessonId])
-   @@index([lessonId, isCompleted])
- }
-
-
+  @@unique([enrollmentId, lessonId])
+  @@index([lessonId, isCompleted])
+}
 
 model Coupon {
   id             String     @id @default(uuid())
@@ -159,106 +154,453 @@ model Coupon {
 }
 
 model Payment {
-    id                    String        @id @default(cuid())
-    amount                Decimal
-    currency              String        @default("EGP")
-    status                PaymentStatus @default(PENDING)
-    paymentMethod         String?
-    paymentType           PaymentType   @default(COURSE) // Add this field
+  id                  String              @id @default(cuid())
+  amount              Decimal
+  currency            String              @default("EGP")
+  status              PaymentStatus       @default(PENDING)
+  paymentMethod       String?
+  paymobOrderId       String?             @unique
+  paymobTransactionId BigInt?
+  paymobResponse      Json?
+  completedAt         DateTime?
+  failureReason       String?
+  userId              String
+  courseId            String?
+  enrollmentId        String?
+  couponId            String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  cashbackEarned      Decimal?            @default(0) @db.Decimal(10, 2)
+  walletAmountUsed    Decimal?            @default(0) @db.Decimal(10, 2)
+  paymentType         PaymentType         @default(COURSE)
+  serviceId           String?
+  coupon              Coupon?             @relation(fields: [couponId], references: [id])
+  course              Course?             @relation(fields: [courseId], references: [id])
+  enrollment          Enrollment?         @relation(fields: [enrollmentId], references: [id])
+  service             Service?            @relation(fields: [serviceId], references: [id])
+  user                User                @relation(fields: [userId], references: [id])
+  webhooks            PaymentWebhook[]
+  walletTransactions  WalletTransaction[]
 
-    // PayMob specific fields
-    paymobOrderId         String?       @unique
-    paymobTransactionId   BigInt?       // PayMob transaction ID from webhook
-    paymobResponse        Json?         // Store full PayMob response
-
-    // Payment completion tracking
-    completedAt           DateTime?     // When payment was completed
-    failureReason         String?       // Reason for payment failure
-
-    // Wallet and Cashback tracking
-    walletAmountUsed      Decimal?      @default(0) @db.Decimal(10, 2)
-    cashbackEarned        Decimal?      @default(0) @db.Decimal(10, 2)
-
-    userId                String
-    user                  User          @relation(fields: [userId], references: [id])
-
-    courseId              String?       // Make this optional
-    course                Course?       @relation(fields: [courseId], references: [id])
-
-    serviceId             String?       // Add this field for service payments
-    service               Service?      @relation(fields: [serviceId], references: [id])
-
-    enrollmentId          String?
-    enrollment            Enrollment?   @relation(fields: [enrollmentId], references: [id])
-
-    couponId              String?
-    coupon                Coupon?       @relation(fields: [couponId], references: [id])
-
-    // Relations
-    webhooks              PaymentWebhook[]
-    walletTransactions    WalletTransaction[]
-
-    createdAt             DateTime      @default(now())
-    updatedAt             DateTime      @updatedAt
-
-    @@index([userId])
-    @@index([courseId])
-    @@index([serviceId])  // Add index for serviceId
-    @@index([status])
-    @@index([paymobOrderId])
-    @@index([paymobTransactionId])
-  }
+  @@index([userId])
+  @@index([courseId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([paymobOrderId])
+  @@index([paymobTransactionId])
+}
 
 model PaymentWebhook {
-    id                    String    @id @default(cuid())
-    paymentId             String
-    paymobTransactionId   BigInt
-    webhookPayload        Json      // Full webhook payload from PayMob
-    processedAt           DateTime? // When webhook was successfully processed
-    processingAttempts    Int       @default(0)
-    lastError             String?   // Last error message if processing failed
+  id                  String    @id @default(cuid())
+  paymentId           String
+  paymobTransactionId BigInt
+  webhookPayload      Json
+  processedAt         DateTime?
+  processingAttempts  Int       @default(0)
+  lastError           String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  payment             Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-    payment               Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-
-    createdAt             DateTime  @default(now())
-    updatedAt             DateTime  @updatedAt
-
-    @@index([paymentId])
-    @@index([paymobTransactionId])
-    @@index([processedAt])
+  @@index([paymentId])
+  @@index([paymobTransactionId])
+  @@index([processedAt])
 }
 
 model StudentProfile {
-   id                 String   @id @default(uuid())
-   userId             String   @unique
-   bio                String?
-   avatar             String?
-   preferredLanguage  String?
-   timezone           String?
-   notifications      Json?    // Notification preferences
-   createdAt          DateTime @default(now())
-   updatedAt          DateTime @updatedAt
-   user               User     @relation(fields: [userId], references: [id])
- }
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  bio               String?
+  avatar            String?
+  preferredLanguage String?
+  timezone          String?
+  notifications     Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
+}
 
 model Enrollment {
-   id                   String           @id @default(uuid())
-   userId               String
-   courseId             String
-   enrolledAt           DateTime         @default(now())
-   status               EnrollmentStatus @default(ACTIVE)
-   completionPercentage Int              @default(0)
-   lastAccessedAt       DateTime?
-   completedAt          DateTime?
-   course               Course           @relation(fields: [courseId], references: [id])
-   user                 User             @relation(fields: [userId], references: [id])
-   lessonProgress       LessonProgress[]
-   payments             Payment[]
+  id                   String           @id @default(uuid())
+  userId               String
+  courseId             String
+  enrolledAt           DateTime         @default(now())
+  status               EnrollmentStatus @default(ACTIVE)
+  completionPercentage Int              @default(0)
+  lastAccessedAt       DateTime?
+  completedAt          DateTime?
+  course               Course           @relation(fields: [courseId], references: [id])
+  user                 User             @relation(fields: [userId], references: [id])
+  lessonProgress       LessonProgress[]
+  payments             Payment[]
 
-   @@unique([userId, courseId])
-   @@index([userId, status])
-   @@index([courseId, status])
- }
+  @@unique([userId, courseId])
+  @@index([userId, status])
+  @@index([courseId, status])
+}
+
+model Certificate {
+  id              String            @id @default(cuid())
+  certificateCode String            @unique
+  userId          String
+  courseId        String
+  status          CertificateStatus @default(ACTIVE)
+  issuedAt        DateTime          @default(now())
+  validUntil      DateTime?
+  isRevoked       Boolean           @default(false)
+  revokedAt       DateTime?
+  revokedReason   String?
+  studentName     String
+  courseName      String
+  professorName   String
+  completionDate  DateTime
+  grade           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([certificateCode])
+  @@index([status])
+}
+
+model ProgressMilestone {
+  id            String        @id @default(cuid())
+  userId        String
+  courseId      String
+  milestoneType MilestoneType
+  metadata      Json?
+  achievedAt    DateTime      @default(now())
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, milestoneType])
+  @@index([userId])
+  @@index([courseId])
+  @@index([milestoneType])
+}
+
+model PsychologyApplication {
+  id                      String            @id @default(uuid())
+  fullName                String
+  gender                  String
+  age                     Int
+  email                   String
+  phone                   String?
+  country                 String
+  city                    String
+  previousTrainer         String
+  previousPsychologist    String
+  medications             String
+  injuries                String
+  primarySport            String
+  trainingAge             String
+  weeklyDays              String
+  workoutDuration         String
+  preparingForCompetition String
+  competitionDate         String?
+  affectingPerformance    String
+  previousBreakdown       String
+  generalMentalState      String
+  sleepDifficulties       String
+  anxietyEpisodes         String
+  primaryGoal             String
+  sessionPreference       String
+  combineWithTraining     String?
+  status                  ApplicationStatus @default(PENDING)
+  notes                   String?
+  assignedPsychologist    String?
+  firstSessionDate        DateTime?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  selectedPackage         String?
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([primarySport])
+}
+
+model TrainingApplication {
+  id                 String            @id @default(uuid())
+  fullName           String
+  gender             String
+  age                Int
+  email              String
+  phone              String?
+  country            String
+  city               String
+  previousTrainer    String
+  injuries           String
+  trainingAge        String
+  weeklyDays         String
+  dailyExercises     String
+  workoutDuration    String
+  exerciseTypes      String
+  primarySport       String?
+  weight             String
+  height             String
+  chestCircumference String?
+  waistCircumference String?
+  hipCircumference   String?
+  armCircumference   String?
+  thighCircumference String?
+  squatTest          String?
+  pushupTest         String?
+  enduranceTest      String?
+  flexibilityTest    String?
+  frontPhoto         String?
+  sidePhoto          String?
+  backPhoto          String?
+  primaryGoal        String
+  timeframe          String?
+  nutritionPlan      String?
+  status             ApplicationStatus @default(PENDING)
+  notes              String?
+  assignedTrainer    String?
+  preferredProgram   String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  selectedPackage    String?
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([primaryGoal])
+  @@index([preferredProgram])
+}
+
+model NutritionApplication {
+  id                   String            @id @default(uuid())
+  fullName             String
+  gender               String
+  age                  Int
+  email                String
+  phone                String?
+  country              String
+  city                 String
+  injuries             String
+  medications          String?
+  allergies            String?
+  medicalConditions    String?
+  currentWeight        String
+  currentHeight        String
+  targetWeight         String?
+  dietaryRestrictions  String?
+  currentEatingHabits  String
+  mealsPerDay          String
+  waterIntake          String?
+  activityLevel        String
+  primaryGoal          String
+  timeframe            String?
+  selectedPackage      String?
+  status               ApplicationStatus @default(PENDING)
+  notes                String?
+  assignedNutritionist String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([status])
+  @@index([email])
+  @@index([createdAt])
+  @@index([primaryGoal])
+}
+
+model WalletTransaction {
+  id               String          @id @default(cuid())
+  userId           String
+  type             TransactionType
+  amount           Decimal         @db.Decimal(10, 2)
+  balanceBefore    Decimal         @db.Decimal(10, 2)
+  balanceAfter     Decimal         @db.Decimal(10, 2)
+  description      String
+  relatedPaymentId String?
+  adminId          String?
+  metadata         Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  relatedPayment   Payment?        @relation(fields: [relatedPaymentId], references: [id])
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([relatedPaymentId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  courseId  String
+  content   String
+  timestamp Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId])
+  @@index([courseId])
+  @@index([createdAt])
+}
+
+model ProfessorMessage {
+  id          String        @id @default(cuid())
+  senderId    String
+  recipientId String
+  courseId    String
+  lessonId    String?
+  title       String
+  content     String
+  status      MessageStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  repliedAt   DateTime?
+  reply       String?
+  course      Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson      Lesson?       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  recipient   User          @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender      User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, recipientId])
+  @@index([courseId])
+  @@index([status, createdAt])
+}
+
+model Quiz {
+  id           String         @id @default(cuid())
+  courseId     String?
+  lessonId     String?
+  title        String
+  description  String?
+  passingScore Int            @default(70)
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  course       Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson       Lesson?        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts     QuizAttempt[]
+  questions    QuizQuestion[]
+
+  @@index([courseId])
+  @@index([lessonId])
+}
+
+model QuizQuestion {
+  id            String   @id @default(cuid())
+  quizId        String
+  question      String
+  options       Json
+  correctAnswer Int
+  order         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  quizId      String
+  userId      String
+  answers     Json
+  score       Int
+  passed      Boolean
+  completedAt DateTime @default(now())
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([quizId, userId])
+  @@index([userId])
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  description  String
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  payments     Payment[]
+  serviceTiers ServiceTier[]
+}
+
+model ServiceTier {
+  id        String         @id @default(cuid())
+  serviceId String
+  name      String
+  order     Int
+  isPopular Boolean        @default(false)
+  price     ServicePrice[]
+  service   Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
+}
+
+model ServicePrice {
+  id       String      @id @default(cuid())
+  tierId   String
+  duration String
+  price    Float
+  tier     ServiceTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@unique([tierId, duration])
+  @@index([tierId])
+}
+
+model LibraryItem {
+  id          String          @id @default(cuid())
+  name        String
+  type        LibraryItemType
+  description String?
+  metadata    Json?
+  imageUrl    String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  planItems   PlanItem[]
+}
+
+model StudentPlan {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  studentId   String
+  professorId String
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  planItems   PlanItem[]
+  professor   User       @relation("StudentPlanToProfessor", fields: [professorId], references: [id])
+  student     User       @relation("StudentPlanToStudent", fields: [studentId], references: [id])
+}
+
+model PlanItem {
+  id            String      @id @default(cuid())
+  studentPlanId String
+  libraryItemId String
+  quantity      Int?
+  duration      Int?
+  repetitions   Int?
+  sets          Int?
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  libraryItem   LibraryItem @relation(fields: [libraryItemId], references: [id])
+  studentPlan   StudentPlan @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+
+  @@index([studentPlanId])
+  @@index([libraryItemId])
+}
 
 enum Role {
   ADMIN
@@ -273,11 +615,11 @@ enum CourseVisibility {
 }
 
 enum EnrollmentStatus {
-   PENDING
-   ACTIVE
-   COMPLETED
-   CANCELLED
- }
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
 
 enum PaymentStatus {
   PENDING
@@ -297,11 +639,10 @@ enum PaymentGateway {
 }
 
 enum CouponType {
-   PERCENTAGE
-   FIXED
+  PERCENTAGE
+  FIXED
 }
 
-// Certificate System Models
 enum CertificateStatus {
   ACTIVE
   REVOKED
@@ -314,227 +655,6 @@ enum MilestoneType {
   COURSE_COMPLETE
   QUIZ_PASS
   ASSIGNMENT_SUBMIT
-}
-
-model Certificate {
-  id              String            @id @default(cuid())
-  certificateCode String            @unique
-  userId          String
-  courseId        String
-  status          CertificateStatus @default(ACTIVE)
-  issuedAt        DateTime          @default(now())
-  validUntil      DateTime?
-  isRevoked       Boolean           @default(false)
-  revokedAt       DateTime?
-  revokedReason   String?
-
-  // Certificate metadata
-  studentName     String
-  courseName      String
-  professorName   String
-  completionDate  DateTime
-  grade           String?
-
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course          Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-
-  @@unique([userId, courseId])
-  @@index([userId])
-  @@index([courseId])
-  @@index([certificateCode])
-  @@index([status])
-}
-
-model ProgressMilestone {
-  id            String        @id @default(cuid())
-  userId        String
-  courseId      String
-  milestoneType MilestoneType
-  metadata      Json?         // Additional milestone-specific data
-  achievedAt    DateTime      @default(now())
-
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  @@unique([userId, courseId, milestoneType])
-  @@index([userId])
-  @@index([courseId])
-  @@index([milestoneType])
-}
-
-// Psychology Application System
-model PsychologyApplication {
-  id                    String                    @id @default(uuid())
-
-  // Personal Data
-  fullName              String
-  gender                String
-  age                   Int
-  email                 String
-  phone                 String?
-  country               String
-  city                  String
-  previousTrainer       String
-  previousPsychologist  String
-  medications           String
-  injuries              String
-
-  // Sports Data
-  primarySport          String
-  trainingAge           String
-  weeklyDays            String
-  workoutDuration       String
-  preparingForCompetition String
-  competitionDate       String?
-
-  // Current Mental State
-  affectingPerformance  String
-  previousBreakdown     String
-  generalMentalState    String
-  sleepDifficulties     String
-  anxietyEpisodes       String
-
-  // Goals
-  primaryGoal           String
-  sessionPreference     String
-  combineWithTraining   String?
-  selectedPackage       String? // silver, gold, diamond
-
-  // Application Management
-  status                ApplicationStatus        @default(PENDING)
-  notes                 String?
-  assignedPsychologist  String?
-  firstSessionDate      DateTime?
-
-  // Metadata
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-
-  @@index([status])
-  @@index([email])
-  @@index([createdAt])
-  @@index([primarySport])
-}
-
-// Training Application System
-model TrainingApplication {
-  id                    String                    @id @default(uuid())
-
-  // Personal Data
-  fullName              String
-  gender                String
-  age                   Int
-  email                 String
-  phone                 String?
-  country               String
-  city                  String
-  previousTrainer       String
-  injuries              String
-
-  // Training Data
-  trainingAge           String
-  weeklyDays            String
-  dailyExercises        String
-  workoutDuration       String
-  exerciseTypes         String
-  primarySport          String?
-
-  // Body Measurements
-  weight                String
-  height                String
-  chestCircumference    String?
-  waistCircumference    String?
-  hipCircumference      String?
-  armCircumference      String?
-  thighCircumference    String?
-
-  // Fitness Tests
-  squatTest             String?
-  pushupTest            String?
-  enduranceTest         String?
-  flexibilityTest       String?
-
-  // Body Photos (stored as JSON metadata)
-  frontPhoto            String? // file path/URL
-  sidePhoto             String? // file path/URL
-  backPhoto             String? // file path/URL
-
-  // Goals
-  primaryGoal           String
-  timeframe             String?
-  nutritionPlan         String?
-  selectedPackage       String? // silver, gold, diamond
-
-  // Application Management
-  status                ApplicationStatus        @default(PENDING)
-  notes                 String?
-  assignedTrainer       String?
-  preferredProgram      String? // Home, Gym, Sport-Specific
-
-  // Metadata
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-
-  @@index([status])
-  @@index([email])
-  @@index([createdAt])
-  @@index([primaryGoal])
-  @@index([preferredProgram])
-}
-
-// Nutrition Application System
-model NutritionApplication {
-  id                    String                    @id @default(uuid())
-
-  // Personal Data
-  fullName              String
-  gender                String
-  age                   Int
-  email                 String
-  phone                 String?
-  country               String
-  city                  String
-
-  // Health Data
-  injuries              String
-  medications           String?
-  allergies             String?
-  medicalConditions     String?
-
-  // Nutrition Data
-  currentWeight         String
-  currentHeight         String
-  targetWeight          String?
-  dietaryRestrictions   String?
-  currentEatingHabits   String
-  mealsPerDay           String
-  waterIntake           String?
-  activityLevel         String
-
-  // Goals
-  primaryGoal           String
-  timeframe             String?
-  selectedPackage       String? // silver, gold, diamond
-
-  // Application Management
-  status                ApplicationStatus        @default(PENDING)
-  notes                 String?
-  assignedNutritionist  String?
-
-  // Metadata
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
-
-  @@index([status])
-  @@index([email])
-  @@index([createdAt])
-  @@index([primaryGoal])
 }
 
 enum ApplicationStatus {
@@ -561,78 +681,6 @@ enum TransactionType {
   CASHBACK_REVERSAL
 }
 
-model WalletTransaction {
-  id              String          @id @default(cuid())
-  userId          String
-  type            TransactionType
-  amount          Decimal         @db.Decimal(10, 2)
-  balanceBefore   Decimal         @db.Decimal(10, 2)
-  balanceAfter    Decimal         @db.Decimal(10, 2)
-  description     String
-
-  // Optional references
-  relatedPaymentId String?
-  relatedPayment   Payment?       @relation(fields: [relatedPaymentId], references: [id])
-
-  adminId         String?         // If admin-initiated transaction
-
-  metadata        Json?           // Additional data (e.g., course name, admin notes)
-
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  @@index([userId])
-  @@index([type])
-  @@index([createdAt])
-  @@index([relatedPaymentId])
-}
-
-// Models for student notes and professor messaging
-model Note {
-  id          String   @id @default(cuid())
-  userId      String
-  lessonId    String
-  courseId    String
-  content     String
-  timestamp   Float    // Video timestamp in seconds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([userId, lessonId])
-  @@index([courseId])
-  @@index([createdAt])
-}
-
-model ProfessorMessage {
-  id          String   @id @default(cuid())
-  senderId    String   // Student ID
-  recipientId String   // Professor ID
-  courseId    String
-  lessonId    String?
-  title       String
-  content     String
-  status      MessageStatus @default(PENDING)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  repliedAt   DateTime?
-  reply       String?
-
-  sender      User    @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  recipient   User    @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
-  course      Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lesson      Lesson? @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-
-  @@index([senderId, recipientId])
-  @@index([courseId])
-  @@index([status, createdAt])
-}
-
 enum MessageStatus {
   PENDING
   READ
@@ -640,153 +688,8 @@ enum MessageStatus {
   ARCHIVED
 }
 
-// Quiz System Models
-model Quiz {
-  id              String         @id @default(cuid())
-  courseId        String?        // NULL = final course quiz
-  lessonId        String?        // NULL = final course quiz
-  title           String
-  description     String?
-  passingScore    Int            @default(70) // Percentage (0-100)
-  isActive        Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  course          Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lesson          Lesson?        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  questions       QuizQuestion[]
-  attempts        QuizAttempt[]
-
-  @@index([courseId])
-  @@index([lessonId])
-}
-
-model QuizQuestion {
-  id              String   @id @default(cuid())
-  quizId          String
-  question        String
-  options         Json     // Array of strings: ["Option A", "Option B", "Option C", "Option D"]
-  correctAnswer   Int      // Index of correct option (0-3)
-  order           Int      // Question order in quiz
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  @@index([quizId])
-}
-
-model QuizAttempt {
-  id              String   @id @default(cuid())
-  quizId          String
-  userId          String
-  answers         Json     // Array of selected answer indices: [0, 2, 1, 3]
-  score           Int      // Percentage score (0-100)
-  passed          Boolean  // true if score >= passingScore
-  completedAt     DateTime @default(now())
-
-  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([quizId, userId])
-  @@index([userId])
-}
-
-// Service Pricing System for Nutrition, Psychology, Training
-model Service {
-  id          String      @id @default(cuid())
-  name        String      // "Nutrition", "Psychology", "Training"
-  slug        String      @unique
-  description String
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  serviceTiers ServiceTier[]
-  payments     Payment[]  // Add this relation for payments
-}
-
-model ServiceTier {
-  id            String   @id @default(cuid())
-  serviceId     String
-  name          String   // "Silver", "Gold", "Diamond", "Home Training", etc.
-  order         Int      // Display order (1, 2, 3, etc.)
-  isPopular     Boolean  @default(false)
-  price         ServicePrice[]
-
-  service       Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-
-  @@index([serviceId])
-}
-
-model ServicePrice {
-  id        String   @id @default(cuid())
-  tierId    String
-  duration  String   // "monthly", "threeMonths", "sixMonths"
-  price     Float    // Price in EGP
-
-  tier      ServiceTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
-
-  @@index([tierId])
-  @@unique([tierId, duration])
-}
-
-// Library System for Admin-Managed Content
-model LibraryItem {
-  id          String         @id @default(cuid())
-  name        String         // Name of the item (e.g., "Grilled Chicken", "Bench Press")
-  type        LibraryItemType // FOOD, EXERCISE, NUTRITION_SET
-  description String?        // Detailed description
-  metadata    Json?          // Additional data (calories for food, reps/duration for exercises, etc.)
-  imageUrl    String?        // Optional image URL for food items
-  isActive    Boolean        @default(true)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  // Relations
-  planItems   PlanItem[]
-}
-
 enum LibraryItemType {
   FOOD
   EXERCISE
   NUTRITION_SET
-}
-
-// Student Plan System
-model StudentPlan {
-  id          String        @id @default(cuid())
-  name        String        // Plan name (e.g., "John's Training Plan")
-  description String?       // Optional description
-  studentId   String        // Student for whom the plan is created
-  professorId String        // Professor who created the plan
-  isActive    Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  // Relations
-  student     User          @relation("StudentPlanToStudent", fields: [studentId], references: [id])
-  professor   User          @relation("StudentPlanToProfessor", fields: [professorId], references: [id])
-  planItems   PlanItem[]
-}
-
-// Junction model linking StudentPlan to LibraryItem
-model PlanItem {
-  id           String        @id @default(cuid())
-  studentPlanId String
-  libraryItemId String
-  quantity      Int?          // Quantity for food items
-  duration      Int?          // Duration in minutes for exercises
-  repetitions   Int?          // Repetitions for exercises
-  sets          Int?          // Sets for exercises
-  notes         String?       // Additional notes for this specific item in the plan
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Relations
-  studentPlan   StudentPlan   @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
-  libraryItem   LibraryItem   @relation(fields: [libraryItemId], references: [id])
-
-  @@index([studentPlanId])
-  @@index([libraryItemId])
 }
