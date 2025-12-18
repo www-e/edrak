@@ -8,8 +8,7 @@ interface LessonHeaderProps {
   lessonContent?: string;
 }
 
-export function LessonHeader({ courseId, lessonOrder, lessonTitle, lessonContent }: LessonHeaderProps) {
-  // courseId is intentionally unused but kept for consistency with other components
+export function LessonHeader({ courseId: _courseId, lessonOrder, lessonTitle, lessonContent }: LessonHeaderProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">

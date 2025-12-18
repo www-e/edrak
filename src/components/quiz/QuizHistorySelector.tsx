@@ -9,8 +9,7 @@ interface QuizHistorySelectorProps {
   onHistoryClose: () => void;
 }
 
-export function QuizHistorySelector({ quizId, courseId, onHistorySelect, onHistoryClose }: QuizHistorySelectorProps) {
-  // courseId is intentionally unused but kept for consistency with other components
+export function QuizHistorySelector({ quizId, courseId: _courseId, onHistorySelect, onHistoryClose }: QuizHistorySelectorProps) {
   const [selectedAttemptId, setSelectedAttemptId] = useState<string | null>(null);
 
   // Fetch quiz attempts for history view

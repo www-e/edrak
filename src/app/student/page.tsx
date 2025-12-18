@@ -45,7 +45,7 @@ export default function StudentDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Continue Learning</CardTitle>
@@ -58,6 +58,22 @@ export default function StudentDashboardPage() {
               <Link href="/courses">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Browse My Courses
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>My Plans</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              View your personalized plans created by professors.
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/student/plans">
+                View Plans
               </Link>
             </Button>
           </CardContent>

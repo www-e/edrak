@@ -24,7 +24,7 @@ export function FileFormatInfo({ maxFileSize = 3072 }: FileFormatInfoProps) {
             Videos (MP4, WebM) - up to 3GB
           </span>
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 rounded text-xs">
-            <Image className="h-3 w-3" aria-hidden="true" />
+            <Image className="h-3 w-3" />
             Images (JPG, PNG)
           </span>
           <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded text-xs">

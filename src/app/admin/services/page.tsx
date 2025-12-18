@@ -45,8 +45,8 @@ export default function ServicesPage() {
       setNewService({ name: "", slug: "", description: "" });
       showSnackbar("Service created successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error creating service: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error creating service: ${err.message}`, "error");
     }
   });
 
@@ -56,8 +56,8 @@ export default function ServicesPage() {
       setEditingService(null);
       showSnackbar("Service updated successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error updating service: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error updating service: ${err.message}`, "error");
     }
   });
 
@@ -66,8 +66,8 @@ export default function ServicesPage() {
       refetch();
       showSnackbar("Service deleted successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error deleting service: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error deleting service: ${err.message}`, "error");
     }
   });
 
@@ -77,11 +77,10 @@ export default function ServicesPage() {
       setNewTier({ serviceId: "", name: "", order: 1, isPopular: false });
       showSnackbar("Service tier created successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error creating service tier: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error creating service tier: ${err.message}`, "error");
     }
   });
-
 
   const updateServiceTier = api.admin.services.updateServiceTier.useMutation({
     onSuccess: () => {
@@ -89,10 +88,11 @@ export default function ServicesPage() {
       setEditingTier(null);
       showSnackbar("Service tier updated successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error updating service tier: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error updating service tier: ${err.message}`, "error");
     }
   });
+
 
   const deleteServiceTier = api.admin.services.deleteServiceTier.useMutation({
     onSuccess: () => {
@@ -121,8 +121,8 @@ export default function ServicesPage() {
       setEditingPrice(null);
       showSnackbar("Price updated successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error updating price: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error updating price: ${err.message}`, "error");
     }
   });
 
@@ -131,8 +131,8 @@ export default function ServicesPage() {
       refetch();
       showSnackbar("Price deleted successfully", "success");
     },
-    onError: (error) => {
-      showSnackbar(`Error deleting price: ${error.message}`, "error");
+    onError: (err) => {
+      showSnackbar(`Error deleting price: ${err.message}`, "error");
     }
   });
 

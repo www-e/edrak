@@ -36,6 +36,11 @@ model User {
    sentMessages       ProfessorMessage[]  @relation("SentMessages") // Messages sent by user
    receivedMessages   ProfessorMessage[]  @relation("ReceivedMessages") // Messages received by user
    quizAttempts       QuizAttempt[] // Quiz attempts by user
+
+   // Student plans where this user is a student
+   studentPlans       StudentPlan[] @relation("StudentPlanToStudent")
+   // Plans created by this user (as professor)
+   createdPlans       StudentPlan[] @relation("StudentPlanToProfessor")
  }
 
 model Category {
@@ -724,4 +729,64 @@ model ServicePrice {
 
   @@index([tierId])
   @@unique([tierId, duration])
+}
+
+// Library System for Admin-Managed Content
+model LibraryItem {
+  id          String         @id @default(cuid())
+  name        String         // Name of the item (e.g., "Grilled Chicken", "Bench Press")
+  type        LibraryItemType // FOOD, EXERCISE, NUTRITION_SET
+  description String?        // Detailed description
+  metadata    Json?          // Additional data (calories for food, reps/duration for exercises, etc.)
+  imageUrl    String?        // Optional image URL for food items
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  planItems   PlanItem[]
+}
+
+enum LibraryItemType {
+  FOOD
+  EXERCISE
+  NUTRITION_SET
+}
+
+// Student Plan System
+model StudentPlan {
+  id          String        @id @default(cuid())
+  name        String        // Plan name (e.g., "John's Training Plan")
+  description String?       // Optional description
+  studentId   String        // Student for whom the plan is created
+  professorId String        // Professor who created the plan
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  student     User          @relation("StudentPlanToStudent", fields: [studentId], references: [id])
+  professor   User          @relation("StudentPlanToProfessor", fields: [professorId], references: [id])
+  planItems   PlanItem[]
+}
+
+// Junction model linking StudentPlan to LibraryItem
+model PlanItem {
+  id           String        @id @default(cuid())
+  studentPlanId String
+  libraryItemId String
+  quantity      Int?          // Quantity for food items
+  duration      Int?          // Duration in minutes for exercises
+  repetitions   Int?          // Repetitions for exercises
+  sets          Int?          // Sets for exercises
+  notes         String?       // Additional notes for this specific item in the plan
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  studentPlan   StudentPlan   @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+  libraryItem   LibraryItem   @relation(fields: [libraryItemId], references: [id])
+
+  @@index([studentPlanId])
+  @@index([libraryItemId])
 }
